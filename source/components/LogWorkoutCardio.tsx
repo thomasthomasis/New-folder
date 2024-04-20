@@ -120,8 +120,9 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 
     let previousLevel = userStatistics[0].lvl;
 
-    createItem(exercises, times, distances, extraNotes, totalTime, totalDistance, allExercises)
-    logWorkout("Cardio")
+    const id = new BSON.ObjectID();
+    createItem(id, exercises, times, distances, extraNotes, totalTime, totalDistance, allExercises)
+    logWorkout(id, "Cardio")
     updateUserStatistics(totalTime, totalDistance)
 
     let postLevel = userStatistics[0].lvl;
@@ -136,13 +137,13 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 
 
   const createItem = useCallback(
-    (exerciseDataJson:string[], timeDataJson:string[], distanceDataJson:string[], extraNotesJson:string[], totalTime:number, totalDistance:number, allExercises:string[]) => {
+    (id:BSON.ObjectId, exerciseDataJson:string[], timeDataJson:string[], distanceDataJson:string[], extraNotesJson:string[], totalTime:number, totalDistance:number, allExercises:string[]) => {
       // if the realm exists, create an Item
 
       realm.write(() => {
   
         return new CardioWorkout(realm, {
-          _id: new BSON.ObjectID,
+          _id: id,
           user_id: user?.id,
           dateCreated: new Date(),
           exercise: exerciseDataJson,
@@ -159,12 +160,13 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
   );
 
   const logWorkout = useCallback(
-    (workoutType:string) => {
+    (id:BSON.ObjectId ,workoutType:string) => {
       realm.write(() => {
         return new Workouts(realm, {
           _id: new BSON.ObjectID,
           userId: user?.id,
           dateCreated: new Date(),
+          workoutId: id,
           workoutType: workoutType
         })
       })

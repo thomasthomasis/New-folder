@@ -6,6 +6,7 @@ import { ResistanceWorkout } from "../../schemas/ResistanceWorkoutSchema"
 import { Groups } from "../../schemas/GroupsSchema"
 import { Users } from "../../schemas/UsersSchema"
 import { Workouts } from "../../schemas/WorkoutSchema"
+import { BSON } from "realm"
 
 type HistoryScreenProps = {
     group:string;
@@ -30,7 +31,8 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
 
     const userData = useQuery(Users).filtered("userId IN $0", stringIds)
 
-    //test comment
+    const cardioWorkouts = useQuery(CardioWorkout).filtered("user_id IN $0 AND dateCreated >= $1", stringIds, thirtyDaysAgo)
+    const resistanceWorkouts = useQuery(ResistanceWorkout).filtered("userId IN $0 AND dateCreated >= $1", stringIds, thirtyDaysAgo)
 
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
@@ -44,14 +46,47 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
         });
     }, [realm, user]);
 
+
+    type WorkoutDataProps = {
+        workoutId:BSON.ObjectId,
+        workoutType:string,
+    }
+
+    const WorkoutData = (props: WorkoutDataProps) => {
+        let cardioWorkout = cardioWorkouts.filtered("_id == $0", props.workoutId)
+        let resistanceWorkout = resistanceWorkouts.filtered("_id == $0", props.workoutId);
+
+        return (
+            <View>
+               {
+                cardioWorkout.length > 0 &&
+                <View>
+                    <Text>Total Time: {cardioWorkout[0].totalTime}</Text>
+                </View>
+               }
+               {
+                resistanceWorkout.length > 0 &&
+                <View>
+                    <Text>Total Volume: {resistanceWorkout[0].totalVolume}</Text>
+                </View>
+               }
+            </View>
+        )
+    }
+
     return (
         <View>
             {
                 workouts.map((item:any) => {
                     return (
-                        <View>
-                            <Text>{item.workoutType}</Text>
+                        <View key={new BSON.ObjectID().toString()}>
+                            {
+                                item.workoutId != null &&
+                                <WorkoutData key={new BSON.ObjectID().toString()} workoutId={item.workoutId} workoutType={item.workoutType}/>
+                            }
+                            
                         </View>
+                        
                     )
                 })
             }
