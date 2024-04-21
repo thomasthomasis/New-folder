@@ -83,6 +83,7 @@ export const GroupScreen = (props:GroupScreenProps) => {
             realm.write(() => {
                 selectedGroup[0].members.push(userId),
                 selectedGroup[0].memberRoles.push("player")
+                selectedGroup[0].membersDateJoined.push(new Date())
             })
         }
 
