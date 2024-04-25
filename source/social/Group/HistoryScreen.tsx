@@ -1,5 +1,5 @@
 import { useQuery, useRealm, useUser } from "@realm/react"
-import { useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { CardioWorkout } from "../../schemas/CardioWorkoutSchema"
 import { ResistanceWorkout } from "../../schemas/ResistanceWorkoutSchema"
@@ -9,9 +9,15 @@ import { Workouts } from "../../schemas/WorkoutSchema"
 import { BSON } from "realm"
 import { shadow } from "../../Shadow"
 import { colors } from "../../Colors"
+import { Modalize } from 'react-native-modalize'
+import { WorkoutDisplayScreen } from "./WorkoutDisplayScreen"
+import { useNavigation } from "@react-navigation/native"
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 
 type HistoryScreenProps = {
-    group:string;
+    group:string,
+    onPress:any,
+    loadData:any,
 }
 
 
@@ -28,7 +34,7 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(currentDate.getDate() - 30)
 
-    const workouts = useQuery(Workouts).filtered("userId IN $0 AND dateCreated >= $1", stringIds, thirtyDaysAgo)
+    const workouts = useQuery(Workouts).filtered("userId IN $0 AND dateCreated >= $1", stringIds, thirtyDaysAgo).sorted("dateCreated", true)
     console.log("Workouts: " + workouts)
 
     const userData = useQuery(Users).filtered("userId IN $0", stringIds)
@@ -48,8 +54,6 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
         });
     }, [realm, user]);
 
-
-    
 
     const getProfilePicture = (path:string) => {
         
@@ -120,6 +124,8 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
     type WorkoutDataProps = {
         workoutId:BSON.ObjectId,
         userId:string,
+        onPress:any,
+        loadData:any,
     }
 
     const CardioWorkoutComponent = (props:WorkoutDataProps) => {
@@ -148,7 +154,7 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
         }
 
         return (
-            <TouchableOpacity style={[styles.column, shadow.shadow, {backgroundColor: colors.red}]}>
+            <TouchableOpacity style={[styles.column, shadow.shadow, {backgroundColor: colors.red}]} onPress={() => {props.onPress(); props.loadData(cardioWorkout, "Cardio")}}>
             <View style={styles.row}>
                 <View style={{display: 'flex', flexDirection: 'row', width: '75%', alignItems: 'center'}}>
                     {
@@ -212,7 +218,7 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
         }
 
         return (
-            <TouchableOpacity style={[styles.column, shadow.shadow, {backgroundColor: colors.black}]}>
+            <TouchableOpacity style={[styles.column, shadow.shadow, {backgroundColor: colors.black}]} onPress={() => {props.onPress(); props.loadData(resistanceWorkout, "Resistance")}}>
             <View style={styles.row}>
                 <View style={{display: 'flex', flexDirection: 'row', width: '75%', alignItems: 'center'}}>
                     {
@@ -261,11 +267,11 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
                                 <>
                                     {
                                         item.workoutType == "Cardio" &&
-                                        <CardioWorkoutComponent workoutId={item.workoutId} userId={item.userId}/>
+                                        <CardioWorkoutComponent workoutId={item.workoutId} userId={item.userId} onPress={props.onPress} loadData={props.loadData}/>
                                     }
                                     {
                                         item.workoutType == "Resistance" &&
-                                        <ResistanceWorkoutComponent workoutId={item.workoutId} userId={item.userId}/>
+                                        <ResistanceWorkoutComponent workoutId={item.workoutId} userId={item.userId} onPress={props.onPress} loadData={props.loadData}/>
                                     }
                                 </>
                                 
@@ -322,5 +328,5 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
         marginLeft: 'auto',
         marginRight: 'auto',
-    }
+    },
 })

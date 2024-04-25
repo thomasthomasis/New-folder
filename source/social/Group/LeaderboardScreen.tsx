@@ -6,10 +6,12 @@ import { UserStatistics } from "../../schemas/UserStatisticsSchema";
 import SelectDropdown from "react-native-select-dropdown";
 import { colors } from "../../Colors";
 import { Users } from "../../schemas/UsersSchema";
+import { useFocusEffect } from "@react-navigation/native";
+import React from "react";
 
 
 type LeaderboardScreenProps = {
-    group:string;
+    group:string,
 }
 
 export const LeaderboardScreen = (props:LeaderboardScreenProps) => {
@@ -32,13 +34,8 @@ export const LeaderboardScreen = (props:LeaderboardScreenProps) => {
         });
     }, [realm, user]);
 
-    useEffect(() => {
-        console.log(userStats)
-    }, [userStats])
-
     const filters = ["Workouts", "Cardio Workouts", "Resistance Workouts"]
     const [selectedFilter, setSelectedFilter] = useState('Workouts')
-
     
 
     const chooseFilter = (filter:string) => {
