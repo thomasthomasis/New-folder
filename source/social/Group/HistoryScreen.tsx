@@ -9,10 +9,6 @@ import { Workouts } from "../../schemas/WorkoutSchema"
 import { BSON } from "realm"
 import { shadow } from "../../Shadow"
 import { colors } from "../../Colors"
-import { Modalize } from 'react-native-modalize'
-import { WorkoutDisplayScreen } from "./WorkoutDisplayScreen"
-import { useNavigation } from "@react-navigation/native"
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 
 type HistoryScreenProps = {
     group:string,
