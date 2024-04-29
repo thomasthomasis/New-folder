@@ -28,7 +28,7 @@ export const GroupScreen = (props:GroupScreenProps) => {
     const selectedGroup = useQuery(Groups).filtered("name == $0", props.group)
     const groupJoinRequests = useQuery(JoinGroupRequests).filtered('groupName == $0', props.group)
 
-    console.log(groupJoinRequests)
+    //console.log(groupJoinRequests)
 
     const navigation = useNavigation();
 
@@ -41,7 +41,7 @@ export const GroupScreen = (props:GroupScreenProps) => {
     const [workoutData, setWorkoutData] = useState<any>();
     const [workoutDataType, setWorkoutDataType] = useState<string>();
     const loadData = (data:any, dataType:string) => {
-        console.log(data)
+        //console.log(data)
         setWorkoutData(data)
         setWorkoutDataType(dataType)
     }

@@ -8,6 +8,7 @@ import { Subscription } from 'realm/dist/bundle';
 import { WaitForSync } from 'realm';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UserStatistics } from '../schemas/UserStatisticsSchema';
+import { AccountScreen } from './AccountScreen';
 
 
 
@@ -20,6 +21,12 @@ export const ProfileScreen = () => {
     const userStats = useQuery(UserStatistics).filtered("userId == $0", user.id);
 
     const [selectingProfilePicture, setSelectingProfilePicture] = useState<boolean>(false)
+    const [showAccount, setShowAccount] = useState<boolean>(false)
+    const [showStats, setShowStats] = useState<boolean>(false)
+
+    const closeAccountScreen = () => {
+      setShowAccount(false)
+    }
 
 
     const returnToMainMenu = () => {
@@ -87,7 +94,7 @@ export const ProfileScreen = () => {
     return (
       <View style={styles.container}>
         {
-          !selectingProfilePicture &&
+          !showStats && !showAccount &&
           <View style={styles.container}>
             <View style={styles.information}>
               {
@@ -98,40 +105,27 @@ export const ProfileScreen = () => {
               }
               {
                 userData[0].profilePicture != "" &&
-                <TouchableOpacity style={styles.profilePictureContainer} onPress={() => {setSelectingProfilePicture(true)}}>
+                <View style={styles.profilePictureContainer}>
                   <Image style={styles.profilePictureImage} source={imageSource} />
-                  <MaterialCommunityIcons name="circle-edit-outline" color={'black'} size={40} style={styles.editIcon}/>
-                </TouchableOpacity>
+                </View>
               }
             
             <Text style={styles.name}>{userData[0].firstName} {userData[0].lastName}</Text>
             <Text style={styles.username}>@{userData[0].username}</Text>
 
-            <View style={styles.profileInfo}>
-                <View style={styles.progressContainer}>
-                    <View style={styles.levelProgressContainer}>
-                        <View style={styles.circle}><Text style={styles.circleText}>{userStats[0].lvl}</Text></View>
-                        <View style={[styles.bar, {width: leveled, backgroundColor: colors.red}]}></View>
-                        <View style={[styles.bar, {width: unleveled, backgroundColor: '#c0bfbf'}]}></View>
-                        <View style={styles.circle}><Text style={styles.circleText}>{userStats[0].lvl + 1}</Text></View>
-                    </View>
-                    <Text style={{textAlign: 'center', color: colors.blue}}>{userStats[0].xp}xp / {userStats[0].xpTarget}xp</Text>
-                </View>
-            </View>
             <View style={styles.smallBorder}></View>
           </View>
 
           <View style={styles.buttons}>
-            <View style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={() => {setShowAccount(true)}}>
               <Text>Account</Text>
               <MaterialCommunityIcons name="arrow-right-thick" color={'black'} size={30} />
-              
-            </View>
-            <View style={styles.button}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => setShowStats(true)}>
               <Text>Statistics</Text>
               <MaterialCommunityIcons name="arrow-right-thick" color={'black'} size={30} />
               
-            </View>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={signOut}>
               <Text>Log Out</Text>
               <MaterialCommunityIcons name="arrow-right-thick" color={'black'} size={30} />
@@ -140,10 +134,25 @@ export const ProfileScreen = () => {
           </View>
           </View>
         }
-        
-        
 
         {
+          showAccount &&
+          <AccountScreen userData={userData[0]} onPress={closeAccountScreen}/>
+        }
+
+        {
+          showStats &&
+          <View>
+            <Text>User Stats</Text>
+            <TouchableOpacity onPress={() => setShowStats(false)}>
+              <Text>CLOSE SCREEN</Text>
+            </TouchableOpacity>
+          </View>
+        }
+        
+        
+        {
+          /*
           selectingProfilePicture &&
           <View style={styles.profilePictureOptions}>
             <TouchableOpacity style={styles.backButton} onPress={returnToMainMenu}>
@@ -164,6 +173,7 @@ export const ProfileScreen = () => {
               <Image style={styles.image} source={require("./assets/4.png")} />
             </TouchableOpacity>
           </View>
+          */
         }
         
         
