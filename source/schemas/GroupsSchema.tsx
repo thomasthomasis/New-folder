@@ -5,6 +5,7 @@ export class Groups extends Realm.Object<Groups> {
     dateCreated?: Date;
     memberRoles!: Realm.List<string>;
     members!: Realm.List<string>;
+    membersDateJoined!: Realm.List<Date>;
     name!: string;
     owner?: string;
 
@@ -15,6 +16,7 @@ export class Groups extends Realm.Object<Groups> {
         dateCreated: 'date?',
         memberRoles: 'string[]',
         members: 'string[]',
+        membersDateJoined: 'date[]',
         name: 'string?',
         owner: 'string?',
     },

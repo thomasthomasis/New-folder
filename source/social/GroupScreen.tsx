@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Alert, Button, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { colors } from "../Colors";
 import { useQuery, useRealm, useUser } from "@realm/react";
 import { Groups } from "../schemas/GroupsSchema";
 import { BSON } from "realm";
 import PagerView from "react-native-pager-view";
 import { HistoryScreen } from "./Group/HistoryScreen";
-import { MilestonesScreen } from "./Group/MilestonesScreen";
 import { LeaderboardScreen } from "./Group/LeaderboardScreen";
 import { useNavigation } from "@react-navigation/native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Modal from 'react-native-modal';
 import { JoinGroupRequests } from "../schemas/JoinGroupRequestsSchema";
 import { Users } from "../schemas/UsersSchema";
+import React from "react";
+import { WorkoutDisplayScreen } from "./Group/WorkoutDisplayScreen";
 
 type GroupScreenProps = {
     onPress:any;
@@ -27,16 +28,44 @@ export const GroupScreen = (props:GroupScreenProps) => {
     const selectedGroup = useQuery(Groups).filtered("name == $0", props.group)
     const groupJoinRequests = useQuery(JoinGroupRequests).filtered('groupName == $0', props.group)
 
-    console.log(groupJoinRequests)
+    //console.log(groupJoinRequests)
 
     const navigation = useNavigation();
+
+    const [viewingWorkout, setViewingWorkout] = useState<boolean>(false)
+
+    const handleHeaderState = () => {
+        setViewingWorkout(true)
+    }
+
+    const [workoutData, setWorkoutData] = useState<any>();
+    const [workoutDataType, setWorkoutDataType] = useState<string>();
+    const loadData = (data:any, dataType:string) => {
+        //console.log(data)
+        setWorkoutData(data)
+        setWorkoutDataType(dataType)
+    }
+
+
     useEffect(() => {
     // Define navigation options dynamically when the component mounts
     navigation.setOptions({
         headerLeft: () => (
-        <TouchableOpacity onPress={() => props.onPress("view")} style={styles.closeButton}>
-            <MaterialCommunityIcons name="close" size={40}/>
-        </TouchableOpacity>
+            <>
+            {
+                !viewingWorkout &&
+                <TouchableOpacity onPress={() => props.onPress("view")} style={styles.closeButton}>
+                    <MaterialCommunityIcons name="close" size={40}/>
+                </TouchableOpacity>
+            }
+            {
+                viewingWorkout &&
+                <TouchableOpacity onPress={() => setViewingWorkout(false)} style={styles.closeButton}>
+                    <MaterialCommunityIcons name="arrow-left" size={40}/>
+                </TouchableOpacity>
+            }
+            </>
+        
         ),
         headerRight: () => (
             <View>
@@ -55,10 +84,10 @@ export const GroupScreen = (props:GroupScreenProps) => {
             </View>
         ),
     });
-    }, []);
+    }, [viewingWorkout]);
 
     const History = () => (
-        <HistoryScreen group={props.group}/>
+        <HistoryScreen group={props.group} onPress={() => handleHeaderState()} loadData={loadData}/>
     )
 
     const Leaderboard = () => (
@@ -83,6 +112,7 @@ export const GroupScreen = (props:GroupScreenProps) => {
             realm.write(() => {
                 selectedGroup[0].members.push(userId),
                 selectedGroup[0].memberRoles.push("player")
+                selectedGroup[0].membersDateJoined.push(new Date())
             })
         }
 
@@ -107,8 +137,15 @@ export const GroupScreen = (props:GroupScreenProps) => {
         }
     }
       
+    
 
     const [selectedPage, setSelectedPage] = useState(0)
+    const pagerRef = React.useRef<PagerView>(null)
+
+    const handlePageChange = (pageNumber:any) => {
+        pagerRef.current?.setPage(pageNumber);
+        setSelectedPage(pageNumber)
+    }
 
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
@@ -125,15 +162,30 @@ export const GroupScreen = (props:GroupScreenProps) => {
         }, [realm, user]);
     
     return (
+        
         <View style={styles.container}>
-        <View style={styles.pageVisualiser}>
-          <View style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 0 && {color: 'white'}}>History</Text></View>
-          <View style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 1 && {color: 'white'}}>Leaderboard</Text></View>
-        </View>
-        <PagerView style={styles.pagerView} initialPage={0} onPageSelected={(event) => setSelectedPage(event.nativeEvent.position)}>
-          <History key="1"/>
-          <Leaderboard key="2"/>
-        </PagerView>
+        
+            { 
+                !viewingWorkout &&
+                <>
+                    <View style={styles.pageVisualiser}>
+                        <Pressable onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 0 && {color: 'white'}}>History</Text></Pressable>
+                        <Pressable onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 1 && {color: 'white'}}>Leaderboard</Text></Pressable>
+                    </View>
+                    <PagerView style={styles.pagerView} initialPage={selectedPage} onPageSelected={(event) => {setSelectedPage(event.nativeEvent.position)}} scrollEnabled={true} ref={pagerRef}>
+                        <History key="1"/>
+                        <Leaderboard key="2"/>
+                    </PagerView>
+                </>
+            }
+        
+        
+
+        {
+            viewingWorkout &&
+            <WorkoutDisplayScreen data={workoutData} dataType={workoutDataType}/>
+        }
+        
 
 
         <Modal
@@ -176,9 +228,6 @@ const styles = StyleSheet.create({
     container: {
         width: '100%',
         height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
     },
 
     closeButton: {

@@ -52,6 +52,7 @@ export const CreateGroupScreen = (props:CreateGroupScreenProps) => {
               dateCreated: new Date(),
               memberRoles: ["captain"],
               members: [user.id],
+              membersDateJoined: [new Date()],
               name: groupName,
               owner: user.id,
             });

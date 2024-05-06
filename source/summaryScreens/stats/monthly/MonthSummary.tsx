@@ -140,6 +140,7 @@ export const MonthSummary = (props: MonthSummaryProps) => {
             <Calendar onPress={selectDay} selectedMonth={props.selectedMonth}/>
 
             { showGeneralMonthlyStats &&
+            
                 <View>
                 { 
                     (cardioObjectsWithinCurrentMonth.length == 0 && resistanceObjectsWithinCurrentMonth.length == 0) &&

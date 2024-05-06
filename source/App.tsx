@@ -1,5 +1,6 @@
 import React from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {StyleSheet, Linking, Text, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 
@@ -39,6 +40,7 @@ export const App = () => {
     <>
       {/* All screens nested in RealmProvider have access
             to the configured realm's hooks. */}
+      <GestureHandlerRootView style={{flex: 1}}>
       <SafeAreaProvider>
         <NavigationContainer>
           <Tab.Navigator
@@ -62,7 +64,7 @@ export const App = () => {
               options={{
                 headerTitle: () => <Header title="Log Workout"/>,
                 headerStyle: {
-                  backgroundColor: '#E3E3E2',
+                  height: 0,
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="dumbbell" color={color} size={40} />
@@ -101,6 +103,7 @@ export const App = () => {
           </Tab.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
+      </GestureHandlerRootView>
     </>
   );
 };
