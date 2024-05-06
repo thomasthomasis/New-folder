@@ -9,6 +9,7 @@ import { WaitForSync } from 'realm';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { UserStatistics } from '../schemas/UserStatisticsSchema';
 import { AccountScreen } from './AccountScreen';
+import { shadow } from '../Shadow'
 
 
 
@@ -20,32 +21,38 @@ export const ProfileScreen = () => {
     const userData = useQuery(Users).sorted('_id').filtered("userId == $0", user.id);
     const userStats = useQuery(UserStatistics).filtered("userId == $0", user.id);
 
-    const [selectingProfilePicture, setSelectingProfilePicture] = useState<boolean>(false)
     const [showAccount, setShowAccount] = useState<boolean>(false)
-    const [showStats, setShowStats] = useState<boolean>(false)
+    const [imageSource, setImageSource] = useState(require('./assets/1.png'))
 
     const closeAccountScreen = () => {
       setShowAccount(false)
-    }
-
-
-    const returnToMainMenu = () => {
-      setSelectingProfilePicture(false)
-    }
-
-    const updateProfilePicture = (imageSource:string) => {
-      realm.write(() => {
-        userData[0].profilePicture = imageSource;
-      })
-
-      returnToMainMenu();
     }
 
     const signOut = useCallback(() => {
       user?.logOut();
     }, [user]);
 
-    const [imageSource, setImageSource] = useState(require('./assets/1.png'))
+    const handleConfirm = () => {
+      // Show confirmation popup
+      Alert.alert(
+        'Confirm Action',
+        'Are you sure you want to signout?',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => signOut(),
+          },
+        ],
+        { cancelable: false }
+      );
+    };
+
+    
 
     useEffect(() => {
       //console.log(userData)
@@ -94,87 +101,44 @@ export const ProfileScreen = () => {
     return (
       <View style={styles.container}>
         {
-          !showStats && !showAccount &&
-          <View style={styles.container}>
-            <View style={styles.information}>
-              {
-                userData[0].profilePicture == "" &&
-                <TouchableOpacity style={styles.profilePicture} onPress={() => {setSelectingProfilePicture(true)}}>
-                  <MaterialCommunityIcons name="camera-plus-outline" color={'black'} size={60} />
-                </TouchableOpacity>
-              }
-              {
-                userData[0].profilePicture != "" &&
-                <View style={styles.profilePictureContainer}>
-                  <Image style={styles.profilePictureImage} source={imageSource} />
+          !showAccount &&
+          <>
+          <View style={[styles.information, shadow.shadow]}>
+            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+              <TouchableOpacity onPress={() => setShowAccount(true)}>
+                <MaterialCommunityIcons name="cog" color={'lightgray'} size={40} style={{marginRight: 10,}}/>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleConfirm}>
+                <MaterialCommunityIcons name="logout" color={'lightgray'} size={40} style={{marginRight: 10,}}/>
+              </TouchableOpacity>
+              
+            </View>
+            <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <View style={styles.profilePictureContainer}>
+                  <Image source={imageSource} style={{width: 120, height: 120, borderRadius: 100,}}/>
                 </View>
-              }
+              
+              <View style={{display: 'flex', flexDirection: 'column'}}>
+                <Text style={styles.name}>{userData[0].firstName} {userData[0].lastName}</Text>
+                <Text style={styles.username}>{userData[0].username}</Text>
+                <Text style={styles.title}>Newbie</Text>
+              </View>
+            </View>
+              
             
-            <Text style={styles.name}>{userData[0].firstName} {userData[0].lastName}</Text>
-            <Text style={styles.username}>@{userData[0].username}</Text>
-
-            <View style={styles.smallBorder}></View>
           </View>
-
-          <View style={styles.buttons}>
-            <TouchableOpacity style={styles.button} onPress={() => {setShowAccount(true)}}>
-              <Text>Account</Text>
-              <MaterialCommunityIcons name="arrow-right-thick" color={'black'} size={30} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => setShowStats(true)}>
-              <Text>Statistics</Text>
-              <MaterialCommunityIcons name="arrow-right-thick" color={'black'} size={30} />
-              
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={signOut}>
-              <Text>Log Out</Text>
-              <MaterialCommunityIcons name="arrow-right-thick" color={'black'} size={30} />
-              
-            </TouchableOpacity>
+          <View>
+            <Text>Stats</Text>
           </View>
-          </View>
+          </>
         }
 
         {
           showAccount &&
-          <AccountScreen userData={userData[0]} onPress={closeAccountScreen}/>
-        }
-
-        {
-          showStats &&
-          <View>
-            <Text>User Stats</Text>
-            <TouchableOpacity onPress={() => setShowStats(false)}>
-              <Text>CLOSE SCREEN</Text>
-            </TouchableOpacity>
-          </View>
+          <AccountScreen onPress={closeAccountScreen}/>
         }
         
         
-        {
-          /*
-          selectingProfilePicture &&
-          <View style={styles.profilePictureOptions}>
-            <TouchableOpacity style={styles.backButton} onPress={returnToMainMenu}>
-              <MaterialCommunityIcons name="arrow-left-thick" color={'black'} size={30} />
-            </TouchableOpacity>
-            <Text style={styles.title}>Select Option</Text>
-            <View style={styles.smallBorder}></View>
-            <TouchableOpacity style={styles.imageContainer} onPress={() => updateProfilePicture("./assets/1.png")}>
-              <Image style={styles.image} source={require("./assets/1.png")} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.imageContainer} onPress={() => updateProfilePicture("./assets/2.png")}>
-              <Image style={styles.image} source={require("./assets/2.png")} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.imageContainer} onPress={() => updateProfilePicture("./assets/3.png")}>
-              <Image style={styles.image} source={require("./assets/3.png")} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.imageContainer} onPress={() => updateProfilePicture("./assets/4.png")}>
-              <Image style={styles.image} source={require("./assets/4.png")} />
-            </TouchableOpacity>
-          </View>
-          */
-        }
         
         
         
@@ -185,60 +149,33 @@ export const ProfileScreen = () => {
 const styles = StyleSheet.create({
 
   container: {
-    padding: 10,
     width: '100%',
     height: '100%',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: 'white',
   }, 
 
   information: {
     width: '100%',
+    height: 200,
+    backgroundColor: colors.blue,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  profilePicture: {
-    width: 170,
-    aspectRatio: 1,
-    borderRadius: 100,
-    backgroundColor: 'gray',
-    marginBottom: 10,
-    borderWidth: 2,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  editIcon: {
-    position: 'absolute', 
-    backgroundColor: 'white',
-    borderRadius: 40,
-    bottom: 5,
-    right: 10,
   },
 
   profilePictureContainer: {
-    width: 170,
+    width: 120,
     aspectRatio: 1,
     borderRadius: 100,
-    backgroundColor: colors.blue,
+    backgroundColor: 'black',
 
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
 
-  },
-
-  profilePictureImage: {
-    width: '100%',
-    height: 100,
-    resizeMode: 'contain',
-
+    marginRight: 10,
   },
 
   name: {
@@ -248,8 +185,14 @@ const styles = StyleSheet.create({
   },
 
   username: {
-    fontSize: 18,
     color: 'purple',
+    fontSize: 20,
+    fontWeight: '800',
+  },
+
+  title: {
+    fontSize: 18,
+    color: 'lightgray',
     marginBottom: 10,
   },
 
@@ -304,11 +247,6 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginBottom: 10,
 
-  },
-
-  title: {
-    fontSize: 20,
-    marginBottom: 10,
   },
 
   backButton: {

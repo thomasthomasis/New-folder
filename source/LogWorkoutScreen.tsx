@@ -72,20 +72,12 @@ export function LogWorkoutScreen() {
   
       
 
-      <ScrollView contentContainerStyle={styles.containerForm}>
-
-        { (!showGrid && !showResults) &&
-
-          <Pressable style={styles.button} onPress={() => clearWorkout()}>
-            <Text>Select a different workout</Text>
-          </Pressable>
-        }
-        
+      <ScrollView>
         { showSection == "Cardio" &&
-          <LogWorkoutCardio onPress={onSubmit}/>
+          <LogWorkoutCardio onPress={onSubmit} closeWorkout={clearWorkout}/>
         }
         { showSection == "Resistance" &&
-          <LogWorkoutResistance onPress={onSubmit}/>
+          <LogWorkoutResistance onPress={onSubmit} closeWorkout={clearWorkout}/>
         }
         
         
@@ -97,7 +89,7 @@ export function LogWorkoutScreen() {
 
 const styles = StyleSheet.create({
     viewWrapper: {
-      padding: 10
+      
     },
 
    
@@ -107,6 +99,7 @@ const styles = StyleSheet.create({
       borderRadius: 20,
       marginRight: 'auto',
       marginLeft: 'auto',
+      paddingTop: 10,
 
       display: 'flex',
       flexDirection: 'row',
@@ -146,14 +139,6 @@ const styles = StyleSheet.create({
       height: '70%',
       resizeMode: 'contain',
     },
-
-    containerForm: {
-      display: 'flex',
-      width: '100%',
-
-      alignItems: 'center',
-      justifyContent: 'center',
-    }, 
 
     cardioContainer: {
       width: '97%',

@@ -1,5 +1,5 @@
 import React, {useCallback, useState, useEffect, useRef} from 'react';
-import {Alert, FlatList, ScrollView, Pressable, StyleSheet, Button, Switch, Text, View, TouchableOpacity, TextInput, Dimensions} from 'react-native';
+import {Alert, FlatList, ScrollView, Pressable, StyleSheet, Button, Switch, Text, View, TouchableOpacity, TextInput, Dimensions, Keyboard, Modal, TouchableWithoutFeedback} from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown'
 import {colors} from '../Colors';
 import {BSON} from 'realm';
@@ -7,9 +7,13 @@ import {useUser, useRealm, useQuery} from '@realm/react';
 import {CardioWorkout} from '../schemas/CardioWorkoutSchema';
 import { Workouts } from '../schemas/WorkoutSchema';
 import { UserStatistics } from '../schemas/UserStatisticsSchema';
+import { ExtraExercises } from '../schemas/ExtraExercisesSchema';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { shadow } from '../Shadow';
 
 type LogWorkoutCardioProps = {
-  onPress:any
+  onPress:any,
+  closeWorkout:any,
 }
 
 
@@ -17,7 +21,13 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
   const realm = useRealm();
   const user = useUser();
 
+  const [selectingExercise, setSelectingExercise] = useState(false)
+
   const userStatistics = useQuery(UserStatistics).filtered("userId == $0", user.id);
+
+  let extraExercises = useQuery(ExtraExercises).filtered("userId == $0 && type == $1", user.id, "Cardio");
+  const normalExercises = ["Treadmill", "Elliptical", "Indoor Bike", "Jump Rope", "Outdoor Bike", "Swimming", "Rowing Machine", "Outdoor Run", "Outdoor Walk", "Stair Machine", "Sprints"];
+  
 
   useEffect(() => {
       realm.subscriptions.update(mutableSubs => {
@@ -32,18 +42,23 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
         mutableSubs.add(
           realm.objects(UserStatistics)
         )
+
+        mutableSubs.add(
+          realm.objects(ExtraExercises)
+        )
       });
   }, [realm, user]);
 
-  const [forms, setForms] = useState([{ id: 1, exercise: {id: 1, value: ''}, inputs: [{id: 1}], timeInputs: [{ id: 1, value: '' }], distanceInputs: [{ id: 1, value: ''}], extraNotes: {id: 1, value: ''} }]);
-  
-  const handleAddForm = () => {
-    const newForm = { id: forms.length + 1, exercise: {id: 1, value: ''}, inputs: [{id: 1}], timeInputs: [{ id: 1, value: '' }], distanceInputs: [{ id: 1, value: ''}], extraNotes: {id: 1, value: ''} };
+  const [forms, setForms] = useState<any>([]);
+
+
+  const handleAddForm = (exercise:string) => {
+    const newForm = { id: forms.length + 1, exercise: {id: 1, value: exercise}, inputs: [{id: 1}], timeInputs: [{ id: 1, value: '' }], distanceInputs: [{ id: 1, value: ''}], extraNotes: {id: 1, value: ''} };
     setForms([...forms, newForm]);
   };
 
   const handleRemoveForm = (formIndex:any) => {
-    const updatedForms = forms.filter((_, i) => i !== formIndex);
+    const updatedForms = forms.filter((_:any, i:any) => i !== formIndex);
     setForms(updatedForms);
   };
 
@@ -60,9 +75,9 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 
   const handleRemoveInput = (formIndex:any, inputIndex:any) => {
     const updatedForms = [...forms];
-    updatedForms[formIndex].inputs = updatedForms[formIndex].inputs.filter((_, i) => i !== inputIndex)
-    updatedForms[formIndex].timeInputs = updatedForms[formIndex].timeInputs.filter((_, i) => i !== inputIndex);
-    updatedForms[formIndex].distanceInputs = updatedForms[formIndex].distanceInputs.filter((_, i) => i !== inputIndex);
+    updatedForms[formIndex].inputs = updatedForms[formIndex].inputs.filter((_:any, i:any) => i !== inputIndex)
+    updatedForms[formIndex].timeInputs = updatedForms[formIndex].timeInputs.filter((_:any, i:any) => i !== inputIndex);
+    updatedForms[formIndex].distanceInputs = updatedForms[formIndex].distanceInputs.filter((_:any, i:any) => i !== inputIndex);
     setForms(updatedForms);
   };
 
@@ -78,12 +93,6 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
     setForms(updatedForms);
   };
 
-  const handleExerciseChange = (exercise:any, formIndex:any) => {
-    const updatedForms = [...forms];
-    updatedForms[formIndex].exercise.value = exercise;
-    setForms(updatedForms);
-  }
-
   const handleExtraNotesInputChange = (text:any, formIndex:any) => {
     const updatedForms = [...forms];
     updatedForms[formIndex].extraNotes.value = text;
@@ -92,8 +101,7 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 
 
   const submitData = () => {
-    
-
+  
     let distances: string[] = [];
     let times: string[] = [];
     let exercises: string[] = [];
@@ -110,8 +118,8 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
       exercises.push(JSON.stringify(forms[i].exercise))
       extraNotes.push(JSON.stringify(forms[i].extraNotes))
 
-      forms[i].timeInputs.forEach(item => totalTime += Number(item.value))
-      forms[i].distanceInputs.forEach(item => totalDistance += Number(item.value))
+      forms[i].timeInputs.forEach(({item}:any) => totalTime += Number(item.value))
+      forms[i].distanceInputs.forEach(({item}:any) => totalDistance += Number(item.value))
       if(!allExercises.includes(forms[i].exercise.value))
       {
         allExercises.push(forms[i].exercise.value)
@@ -239,23 +247,166 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 
     }
     
-  const exercises = ["Treadmill", "Elliptical", "Bike"]
-  const [selectedExercise, setSelectedExercise] = useState('')
+  
+
+  const handleConfirm = () => {
+    // Show confirmation popup
+    Alert.alert(
+      'Confirm Action',
+      'Are you sure you want to log your workout?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => submitData(),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const handleCancel = () => {
+    // Show confirmation popup
+    Alert.alert(
+      'Confirm Action',
+      'Are you sure you want to delete your workout?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => props.closeWorkout(),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const addedExercisesArray = extraExercises.map(item => item.name ?? "");
+  let totalExercises = addedExercisesArray.concat(normalExercises);
+
+  const [searchText, setSearchText] = useState<string>('')
+  const [filteredData, setFilteredData] = useState<string[]>(addedExercisesArray.concat(normalExercises));
+
+  const handleSearch = (text:string) => {
+    setSearchText(text);
+    if(text === '')
+    {
+      setFilteredData(filteredData)
+    }
+    else
+    {
+      const filtered = totalExercises.filter(item => item.toLowerCase().includes(text.toLowerCase()));
+      setFilteredData(filtered);
+    }
+  };
+
+  const [visible, setVisible] = useState<boolean>(false)
+  const [modalInput, setModalInput] = useState<string>('')
+  const [noNameAlert, setNoNameAlert] = useState<boolean>(false)
+
+  const onClose = () => {
+
+    setVisible(false);
+    setModalInput('')
+    setNoNameAlert(false)
+  }
+
+
+  const addExercise = useCallback(
+    (input:string) => {
+
+      if(!input.trim())
+      {
+        setNoNameAlert(true)
+        return;
+      }
+
+      realm.write(() => {
+        return new ExtraExercises(realm, {
+          _id: new BSON.ObjectID,
+          type: "Cardio",
+          name: input.trim(),
+          userId: user.id,
+        })
+      })
+
+      onClose()
+      updateExerciseList()
+    }, [realm, user])
+
+    const updateExerciseList = () => {
+
+      let newList = extraExercises.map(item => item.name ?? "");
+      console.log("Updated list: ", newList)
+
+      totalExercises = newList.concat(normalExercises)
+      console.log(totalExercises)
+
+      setFilteredData(totalExercises)
+    }
+    
 
   return (
     
-    <View>
-      {forms.map((form, formIndex) => (
+    <>
+    {
+      !selectingExercise && 
+      <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, backgroundColor: colors.red}}>
+        <TouchableOpacity onPress={handleCancel}>
+            <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleConfirm}>
+            <MaterialCommunityIcons name="check" color={'white'} size={40} style={{marginRight: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
+        </TouchableOpacity>
+      </View>
+    }
+    {
+      selectingExercise &&
+      <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, backgroundColor: colors.red}}>
+        <TouchableOpacity onPress={() => setSelectingExercise(false)}>
+            <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setVisible(true)}>
+            <MaterialCommunityIcons name="plus" color={'white'} size={40} style={{marginRight: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
+        </TouchableOpacity>
+      </View>
+    }
+    
+
+    {
+      selectingExercise &&
+      <View style={{width: '100%', backgroundColor: colors.red}} onTouchStart={Keyboard.dismiss}>
+        <TextInput
+        style={{ height: 40, width: '80%', marginRight: 'auto', marginLeft: 'auto', borderColor: 'black', backgroundColor: 'white', borderWidth: 1, borderRadius: 15, marginBottom: 20, padding: 10, }}
+        placeholder="Search..."
+        value={searchText}
+        onChangeText={handleSearch}
+        />
+        {
+          filteredData.map((item) => (
+            <TouchableOpacity key={new BSON.ObjectID().toString()} style={[{ backgroundColor: 'lightgray', borderRadius: 20, padding: 10, marginBottom: 10, width: '80%', marginRight: 'auto', marginLeft: 'auto'}, shadow.shadow]} onPress={() => {handleAddForm(item); setSelectingExercise(false)}}>
+              <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item}</Text>
+            </TouchableOpacity>
+            
+          ))
+        }
+      </View>
+    }
+    {
+      !selectingExercise &&
+    <View style={styles.container}>
+        
+      {forms.map((form:any, formIndex:any) => (
         <View key={form.id} style={styles.form}>
-      <SelectDropdown
-        data={exercises}
-        onSelect={(selectedItem, index) => {
-          handleExerciseChange(selectedItem, formIndex)
-        }}
-        buttonStyle={styles.dropdownButton}
-        search={true}
-        defaultButtonText='Select Exercise'
-      />
+          <Text style={styles.exercise}>{forms[formIndex].exercise.value}</Text>
       {form.inputs.map((input:any, inputIndex:any) => (
         <View key={input.id} style={styles.row}>
             <View style={styles.inputs}>
@@ -313,25 +464,48 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
         <Text>Add Interval</Text>
       </Pressable>
 
-      {
-        formIndex != 0 &&
-        <Pressable onPress={() => handleRemoveForm(formIndex)} style={styles.addButton}>
-          <Text>Remove Exercise</Text>
-        </Pressable>
-      }
+      <Pressable onPress={() => handleRemoveForm(formIndex)} style={styles.addButton}>
+        <Text>Remove Exercise</Text>
+      </Pressable>
       
       </View>
       ))}
 
-      <Pressable onPress={handleAddForm} style={styles.button}>
+      <Pressable onPress={() => setSelectingExercise(true)} style={styles.button}>
         <Text>Add Exercise</Text>
       </Pressable>
-
-      <TouchableOpacity onPress={submitData} style={styles.submitButton}>
-        <Text>Submit Workout</Text>
-      </TouchableOpacity>
       
     </View>
+    }
+
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <TouchableWithoutFeedback  onPress={onClose}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', }}>
+          <TouchableWithoutFeedback>
+            <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 , width: '80%',}}>
+              <Text style={{ fontSize: 18, marginBottom: 10 }}>Enter Exercise Name:</Text>
+              <TextInput
+                style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 20, padding: 10 }}
+                placeholder="Enter name..."
+                value={modalInput}
+                onChangeText={setModalInput}
+              />
+              <Button title="Submit" onPress={() => addExercise(modalInput)} />
+              {
+                noNameAlert &&
+                <Text style={{color: 'red', fontSize: 18, fontWeight: '800', textAlign: 'center'}}>A name is required!</Text>
+              }
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+    </>
   
 )};
 
@@ -340,14 +514,23 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '95%',
+    width: '100%',
   },
 
   form: {
     backgroundColor: colors.red,
-    borderRadius: 10,
     padding: 10,
     marginBottom: 10,
+    borderBottomWidth: 2, 
+    borderBottomColor: 'black',
+  },
+
+  exercise: {
+    textAlign: 'center',
+    fontSize: 30,
+    paddingTop: 10,
+    fontWeight: '700',
+    color: 'white',
   },
 
   dropdownButton: {

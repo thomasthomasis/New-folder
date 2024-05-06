@@ -64,7 +64,7 @@ export const App = () => {
               options={{
                 headerTitle: () => <Header title="Log Workout"/>,
                 headerStyle: {
-                  backgroundColor: '#E3E3E2',
+                  height: 0,
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="dumbbell" color={color} size={40} />

@@ -1,6 +1,6 @@
 import { useQuery, useRealm, useUser } from "@realm/react"
 import { useEffect, useRef, useState } from "react"
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Animated, Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { CardioWorkout } from "../../schemas/CardioWorkoutSchema"
 import { ResistanceWorkout } from "../../schemas/ResistanceWorkoutSchema"
 import { Groups } from "../../schemas/GroupsSchema"
@@ -37,6 +37,8 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
 
     const cardioWorkouts = useQuery(CardioWorkout).filtered("user_id IN $0 AND dateCreated >= $1", stringIds, thirtyDaysAgo)
     const resistanceWorkouts = useQuery(ResistanceWorkout).filtered("userId IN $0 AND dateCreated >= $1", stringIds, thirtyDaysAgo)
+
+    
 
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
@@ -253,7 +255,7 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
     }
 
     return (
-        <ScrollView>
+        <ScrollView >
             {
                 workouts.map((item:any) => {
                     return (
