@@ -49,9 +49,8 @@ export const App = () => {
               name='Statistics' 
               component={HomeScreen}
               options={{
-                headerTitle: () => <Header title="Statistics"/>,
                 headerStyle: {
-                  backgroundColor: '#E3E3E2',
+                  height: 0
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="chart-box" color={color} size={40} />
@@ -62,9 +61,8 @@ export const App = () => {
               name="Log Workout" 
               component={LogWorkoutScreen} 
               options={{
-                headerTitle: () => <Header title="Log Workout"/>,
                 headerStyle: {
-                  height: 0,
+                  height: 0
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="dumbbell" color={color} size={40} />
@@ -76,9 +74,8 @@ export const App = () => {
               name='Social' 
               component={SocialScreen}
               options={{
-                headerTitle: () => <Header title="Social"/>,
                 headerStyle: {
-                  backgroundColor: '#E3E3E2',
+                  height: 0,
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="account-group" color={color} size={40} />
@@ -92,7 +89,6 @@ export const App = () => {
               options={{
                 headerStyle: {
                   height: 0,
-                  backgroundColor: '#E3E3E2',
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="account" color={color} size={40} />

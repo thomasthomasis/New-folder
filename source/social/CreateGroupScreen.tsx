@@ -4,7 +4,6 @@ import { colors } from "../Colors";
 import { useQuery, useRealm, useUser } from "@realm/react";
 import { Groups } from "../schemas/GroupsSchema";
 import { BSON } from "realm";
-import { useNavigation } from "@react-navigation/native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 type CreateGroupScreenProps = {
@@ -61,18 +60,6 @@ export const CreateGroupScreen = (props:CreateGroupScreenProps) => {
         [realm, user],
       );
 
-    const navigation = useNavigation();
-    useEffect(() => {
-    // Define navigation options dynamically when the component mounts
-    navigation.setOptions({
-        headerLeft: () => (
-        <TouchableOpacity onPress={() => props.onPress("create")} style={styles.closeButton}>
-            <MaterialCommunityIcons name="close" size={40}/>
-        </TouchableOpacity>
-        ),
-    });
-    }, []);
-
     useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
         mutableSubs.add(
@@ -82,33 +69,35 @@ export const CreateGroupScreen = (props:CreateGroupScreenProps) => {
     }, [realm, user]);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Creating Group</Text>
-            <View style={styles.smallBorder}></View>
-            <View style={styles.containerForm}>
-            <TextInput
-                value={groupName}
-                onChangeText={text => setGroupName(text)}
-                placeholder="Enter group name"
-                style={styles.input}
-            />
-            <TouchableOpacity onPress={handleSubmit} style={styles.button}>
-                <Text style={styles.buttonText}>Create Group</Text>
-            </TouchableOpacity>
+        <>
+            <View style={{width: '100%', height: 60, backgroundColor: 'lightgray', display: 'flex', justifyContent: 'center'}}>
+                <TouchableOpacity onPress={() => props.onPress("create")} style={styles.closeButton}>
+                    <MaterialCommunityIcons name="close" size={40}/>
+                </TouchableOpacity> 
             </View>
-        </View>
+            <View>
+                <Text style={styles.title}>Creating Group</Text>
+                <View style={styles.smallBorder}></View>
+                <View style={styles.containerForm}>
+                <TextInput
+                    value={groupName}
+                    onChangeText={text => setGroupName(text)}
+                    placeholder="Enter group name"
+                    style={styles.input}
+                />
+                <TouchableOpacity onPress={handleSubmit} style={styles.button}>
+                    <Text style={styles.buttonText}>Create Group</Text>
+                </TouchableOpacity>
+                </View>
+            </View>
+            
+        </>
         
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+    
 
     title: {
         fontSize: 25,

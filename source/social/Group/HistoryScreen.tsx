@@ -31,7 +31,7 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
     thirtyDaysAgo.setDate(currentDate.getDate() - 30)
 
     const workouts = useQuery(Workouts).filtered("userId IN $0 AND dateCreated >= $1", stringIds, thirtyDaysAgo).sorted("dateCreated", true)
-    console.log("Workouts: " + workouts.length)
+    //console.log("Workouts: " + workouts.length)
 
     const userData = useQuery(Users).filtered("userId IN $0", stringIds)
 

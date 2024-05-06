@@ -4,7 +4,6 @@ import { colors } from "../Colors";
 import { useQuery, useRealm, useUser } from "@realm/react";
 import { Groups } from "../schemas/GroupsSchema";
 import { BSON } from "realm";
-import { useNavigation } from "@react-navigation/native";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Modal from 'react-native-modal';
 import { JoinGroupRequests } from "../schemas/JoinGroupRequestsSchema";
@@ -62,19 +61,6 @@ export const JoinGroupScreen = (props:JoinGroupScreenProps) => {
         [realm, user],
       );
 
-
-    const navigation = useNavigation();
-    useEffect(() => {
-    // Define navigation options dynamically when the component mounts
-    navigation.setOptions({
-        headerLeft: () => (
-        <TouchableOpacity onPress={() => props.onPress("join")} style={styles.closeButton}>
-            <MaterialCommunityIcons name="close" size={40}/>
-        </TouchableOpacity>
-        ),
-    });
-    }, []);
-
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
             mutableSubs.add(
@@ -91,6 +77,11 @@ export const JoinGroupScreen = (props:JoinGroupScreenProps) => {
     
     return (
         <>
+            <View style={{width: '100%', height: 60, backgroundColor: 'lightgray', display: 'flex', justifyContent: 'center'}}>
+                <TouchableOpacity onPress={() => props.onPress("join")} style={styles.closeButton}>
+                    <MaterialCommunityIcons name="close" size={40}/>
+                </TouchableOpacity> 
+            </View>
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
                 <View style={styles.input}>
                     <MaterialCommunityIcons name="search-web" color={'gray'} size={40} />

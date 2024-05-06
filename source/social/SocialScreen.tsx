@@ -6,12 +6,10 @@ import { useRealm, useQuery, useUser } from '@realm/react';
 import { App } from 'realm';
 import PagerView from 'react-native-pager-view';
 import { colors } from '../Colors';
-import { createStackNavigator } from '@react-navigation/stack';
 import { CreateGroupScreen } from './CreateGroupScreen';
 import { Groups } from '../schemas/GroupsSchema';
 import { JoinGroupScreen } from './JoinGroupScreen';
 import { GroupScreen } from './GroupScreen';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { shadow } from '../Shadow';
 
 
@@ -31,7 +29,6 @@ export function SocialScreen() {
     setJoiningGroup(true)
   }
 
-  const navigation = useNavigation();
   const closeScreen = (name:string) => {
     if(name == "join")
     {
@@ -45,11 +42,6 @@ export function SocialScreen() {
     {
       setViewingGroup(false)
     }
-
-    navigation.setOptions({
-      headerLeft: () => (<View style={{width: 30, marginLeft: 20}}></View>),
-      headerRight: () => (<View style={{width: 30, marginRight: 20}}></View>)
-    });
   }
 
   const [creatingGroup, setCreatingGroup] = useState<boolean>(false)

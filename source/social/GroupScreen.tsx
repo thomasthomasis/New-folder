@@ -7,13 +7,13 @@ import { BSON } from "realm";
 import PagerView from "react-native-pager-view";
 import { HistoryScreen } from "./Group/HistoryScreen";
 import { LeaderboardScreen } from "./Group/LeaderboardScreen";
-import { useNavigation } from "@react-navigation/native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Modal from 'react-native-modal';
 import { JoinGroupRequests } from "../schemas/JoinGroupRequestsSchema";
 import { Users } from "../schemas/UsersSchema";
 import React from "react";
 import { WorkoutDisplayScreen } from "./Group/WorkoutDisplayScreen";
+import { GroupSettingsScreen } from "./Group/GroupSettingsScreen";
 
 type GroupScreenProps = {
     onPress:any;
@@ -30,8 +30,6 @@ export const GroupScreen = (props:GroupScreenProps) => {
 
     //console.log(groupJoinRequests)
 
-    const navigation = useNavigation();
-
     const [viewingWorkout, setViewingWorkout] = useState<boolean>(false)
 
     const handleHeaderState = () => {
@@ -45,46 +43,6 @@ export const GroupScreen = (props:GroupScreenProps) => {
         setWorkoutData(data)
         setWorkoutDataType(dataType)
     }
-
-
-    useEffect(() => {
-    // Define navigation options dynamically when the component mounts
-    navigation.setOptions({
-        headerLeft: () => (
-            <>
-            {
-                !viewingWorkout &&
-                <TouchableOpacity onPress={() => props.onPress("view")} style={styles.closeButton}>
-                    <MaterialCommunityIcons name="close" size={40}/>
-                </TouchableOpacity>
-            }
-            {
-                viewingWorkout &&
-                <TouchableOpacity onPress={() => setViewingWorkout(false)} style={styles.closeButton}>
-                    <MaterialCommunityIcons name="arrow-left" size={40}/>
-                </TouchableOpacity>
-            }
-            </>
-        
-        ),
-        headerRight: () => (
-            <View>
-                {
-                    user.id == selectedGroup[0].owner &&
-                    <View style={{display: 'flex', flexDirection: 'row'}}>
-                        <TouchableOpacity style={{marginRight: 10,}} onPress={() => setModalPendingRequestsVisible(true)}>
-                            <MaterialCommunityIcons name="bell" size={40} style={[groupJoinRequests.length > 0 && {color: colors.orange}, groupJoinRequests.length == 0 && {color: 'lightgray'}]}/>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{marginRight: 10,}}>
-                            <MaterialCommunityIcons name="cog" size={40}/>
-                        </TouchableOpacity>
-                    </View>
-                    
-                }
-            </View>
-        ),
-    });
-    }, [viewingWorkout]);
 
     const History = () => (
         <HistoryScreen group={props.group} onPress={() => handleHeaderState()} loadData={loadData}/>
@@ -147,6 +105,15 @@ export const GroupScreen = (props:GroupScreenProps) => {
         setSelectedPage(pageNumber)
     }
 
+    const [editingGroup, setEditingGroup] = useState<boolean>(false)
+    const stopEditingGroup = () => {
+        setEditingGroup(false)
+    }
+
+    const stopViewingWorkout = () => {
+        setViewingWorkout(false)
+    }
+
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
             mutableSubs.add(
@@ -163,27 +130,52 @@ export const GroupScreen = (props:GroupScreenProps) => {
     
     return (
         
-        <View style={styles.container}>
-        
-            { 
-                !viewingWorkout &&
-                <>
-                    <View style={styles.pageVisualiser}>
-                        <Pressable onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 0 && {color: 'white'}}>History</Text></Pressable>
-                        <Pressable onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 1 && {color: 'white'}}>Leaderboard</Text></Pressable>
+        <>
+
+        {
+            (!viewingWorkout && !editingGroup) &&
+            <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                <TouchableOpacity onPress={() => props.onPress("view")} style={styles.closeButton}>
+                    <MaterialCommunityIcons name="close" size={40}/>
+                </TouchableOpacity>
+                {
+                    user.id == selectedGroup[0].owner &&
+                    <View style={{display: 'flex', flexDirection: 'row'}}>
+                        <TouchableOpacity style={{marginRight: 10,}} onPress={() => setModalPendingRequestsVisible(true)}>
+                            <MaterialCommunityIcons name="bell" size={40} style={[groupJoinRequests.length > 0 && {color: colors.orange}, groupJoinRequests.length == 0 && {color: 'lightgray'}]}/>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{marginRight: 10,}} onPress={() => setEditingGroup(true)}>
+                            <MaterialCommunityIcons name="cog" size={40}/>
+                        </TouchableOpacity>
                     </View>
-                    <PagerView style={styles.pagerView} initialPage={selectedPage} onPageSelected={(event) => {setSelectedPage(event.nativeEvent.position)}} scrollEnabled={true} ref={pagerRef}>
-                        <History key="1"/>
-                        <Leaderboard key="2"/>
-                    </PagerView>
-                </>
-            }
+                }
+            </View>
+        }
+        
+        { 
+            (!viewingWorkout && !editingGroup) &&
+            <>
+                <View style={styles.pageVisualiser}>
+                    <Pressable onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 0 && {color: 'white'}}>History</Text></Pressable>
+                    <Pressable onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 1 && {color: 'white'}}>Leaderboard</Text></Pressable>
+                </View>
+                <PagerView style={styles.pagerView} initialPage={selectedPage} onPageSelected={(event) => {setSelectedPage(event.nativeEvent.position)}} scrollEnabled={true} ref={pagerRef}>
+                    <History key="1"/>
+                    <Leaderboard key="2"/>
+                </PagerView>
+            </>
+        }
         
         
 
         {
             viewingWorkout &&
-            <WorkoutDisplayScreen data={workoutData} dataType={workoutDataType}/>
+            <WorkoutDisplayScreen data={workoutData} dataType={workoutDataType} onPress={stopViewingWorkout}/>
+        }
+
+        {
+            editingGroup &&
+            <GroupSettingsScreen onPress={stopEditingGroup} group={props.group}/>
         }
         
 
@@ -219,7 +211,7 @@ export const GroupScreen = (props:GroupScreenProps) => {
                     }
                 </View>
             </Modal>
-      </View>
+      </>
     )
 }
 
@@ -227,7 +219,7 @@ const styles = StyleSheet.create({
 
     container: {
         width: '100%',
-        height: '100%',
+
     },
 
     closeButton: {
