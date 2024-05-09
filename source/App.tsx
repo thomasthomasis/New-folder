@@ -15,6 +15,7 @@ import { ProfileScreen } from './profile/ProfileScreen';
 import { Header } from './components/Header';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SocialScreen } from './social/SocialScreen';
+import { useRealm, useUser } from '@realm/react';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -35,6 +36,9 @@ const headerLeft = () => {
 const Tab = createBottomTabNavigator();
 
 export const App = () => {
+
+  const realm = useRealm()
+  const user = useUser()
 
   return (
     <>
@@ -85,7 +89,6 @@ export const App = () => {
               
             <Tab.Screen 
               name="Profile"
-              component={ProfileScreen}
               options={{
                 headerStyle: {
                   height: 0,
@@ -94,8 +97,9 @@ export const App = () => {
                   <MaterialCommunityIcons name="account" color={color} size={40} />
                 ),
               }} 
-              
-            />
+            >
+              {() => <ProfileScreen restrictedView={false} user={user.id} closeProfile={''}></ProfileScreen>}
+            </Tab.Screen>
           </Tab.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

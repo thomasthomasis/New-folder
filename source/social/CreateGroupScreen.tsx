@@ -16,6 +16,7 @@ export const CreateGroupScreen = (props:CreateGroupScreenProps) => {
     const user = useUser()
 
     const [groupName, setGroupName] = useState('');
+    const [groupDescription, setGroupDescription] = useState('')
     const groups = useQuery(Groups);
 
     function handleSubmit() {
@@ -32,7 +33,7 @@ export const CreateGroupScreen = (props:CreateGroupScreenProps) => {
             return;
         }
         // Create the group (implement this logic as needed)
-        createGroup(groupName);
+        createGroup(groupName, groupDescription);
         
         // Show success message or navigate to another screen
         Alert.alert("Successfully created group");
@@ -40,7 +41,7 @@ export const CreateGroupScreen = (props:CreateGroupScreenProps) => {
     }
 
     const createGroup = useCallback(
-        (groupName:string) => {
+        (groupName:string, groupDescription:string) => {
             console.log(groupName)
           // if the realm exists, create an Item
     
@@ -49,6 +50,7 @@ export const CreateGroupScreen = (props:CreateGroupScreenProps) => {
             return new Groups(realm, {
               _id: new BSON.ObjectID,
               dateCreated: new Date(),
+              description: groupDescription,
               memberRoles: ["captain"],
               members: [user.id],
               membersDateJoined: [new Date()],
@@ -70,25 +72,32 @@ export const CreateGroupScreen = (props:CreateGroupScreenProps) => {
 
     return (
         <>
-            <View style={{width: '100%', height: 60, backgroundColor: 'lightgray', display: 'flex', justifyContent: 'center'}}>
+            <View style={{width: '100%', height: 60, backgroundColor: 'lightgray', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',}}>
                 <TouchableOpacity onPress={() => props.onPress("create")} style={styles.closeButton}>
                     <MaterialCommunityIcons name="close" size={40}/>
                 </TouchableOpacity> 
+                <TouchableOpacity onPress={handleSubmit} style={styles.check}>
+                    <MaterialCommunityIcons name="check" size={40}/>
+                </TouchableOpacity>
             </View>
-            <View>
+            <View style={styles.container}>
                 <Text style={styles.title}>Creating Group</Text>
                 <View style={styles.smallBorder}></View>
-                <View style={styles.containerForm}>
                 <TextInput
                     value={groupName}
                     onChangeText={text => setGroupName(text)}
                     placeholder="Enter group name"
                     style={styles.input}
                 />
-                <TouchableOpacity onPress={handleSubmit} style={styles.button}>
-                    <Text style={styles.buttonText}>Create Group</Text>
-                </TouchableOpacity>
-                </View>
+                <TextInput
+                    multiline
+                    numberOfLines={10}
+                    textAlignVertical="top"
+                    value={groupDescription}
+                    onChangeText={text => setGroupDescription(text)}
+                    placeholder="Enter group description"
+                    style={styles.textarea}
+                />
             </View>
             
         </>
@@ -98,7 +107,7 @@ export const CreateGroupScreen = (props:CreateGroupScreenProps) => {
 
 const styles = StyleSheet.create({
     
-
+    
     title: {
         fontSize: 25,
         fontWeight: '800',
@@ -111,15 +120,29 @@ const styles = StyleSheet.create({
         marginBottom: 30,
     },
 
-    containerForm: {
-        width: '75%',
+    container: {
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-
+    
     input: {
         borderWidth: 2,
         borderColor: 'gray',
         borderRadius: 5,
         marginBottom: 10,
+        padding: 10,
+        width: '80%',
+    },
+
+    textarea: {
+        borderWidth: 2,
+        borderColor: 'gray',
+        borderRadius: 5,
+        marginBottom: 10,
+        padding: 10,
+        width: '80%',
     },
 
     button: {
@@ -146,6 +169,17 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 40,
         marginLeft: 10,
+
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    check: {
+        width: 40,
+        height: 40,
+        borderRadius: 40,
+        marginRight: 10,
 
         display: 'flex',
         justifyContent: 'center',

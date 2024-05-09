@@ -98,7 +98,7 @@ export const JoinGroupScreen = (props:JoinGroupScreenProps) => {
             </View>
             
 
-            <View>
+            <View style={styles.groups}>
                 {
                     groups.map((group:any, index:any) => {
                         return (
@@ -208,6 +208,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center'
+    },
+
+    groups: {
+        display: 'flex',
+        alignItems: 'center',
     },
 
     group: {

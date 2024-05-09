@@ -1,6 +1,6 @@
 import { useQuery, useRealm, useUser } from "@realm/react"
 import { useEffect, useRef, useState } from "react"
-import { Animated, Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Animated, Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { CardioWorkout } from "../../schemas/CardioWorkoutSchema"
 import { ResistanceWorkout } from "../../schemas/ResistanceWorkoutSchema"
 import { Groups } from "../../schemas/GroupsSchema"
@@ -26,6 +26,7 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
     const stringIds = group[0].members.map(member => member)
     const datesJoined = group[0].membersDateJoined.map(date => date)
 
+
     const currentDate = new Date()
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(currentDate.getDate() - 30)
@@ -35,43 +36,24 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
 
     const userData = useQuery(Users).filtered("userId IN $0", stringIds)
 
-    const cardioWorkouts = useQuery(CardioWorkout).filtered("user_id IN $0 AND dateCreated >= $1", stringIds, thirtyDaysAgo)
-    const resistanceWorkouts = useQuery(ResistanceWorkout).filtered("userId IN $0 AND dateCreated >= $1", stringIds, thirtyDaysAgo)
-
     
-
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
+
             mutableSubs.add(
-            realm.objects(CardioWorkout)
+                realm.objects(Workouts)
             )
 
             mutableSubs.add(
-                realm.objects(ResistanceWorkout)
+                realm.objects(Users)
+            )
+
+            mutableSubs.add(
+                realm.objects(Groups)
             )
         });
     }, [realm, user]);
 
-
-    const getProfilePicture = (path:string) => {
-        
-        if(path.includes('1'))
-        {
-          return require('./assets/1.png')
-        }
-        else if(path.includes('2'))
-        {
-            return require('./assets/2.png')
-        }
-        else if(path.includes('3'))
-        {
-            return require('./assets/3.png')
-        }
-        else if(path.includes('4'))
-        {
-            return require('./assets/4.png')
-        }
-    }
 
     const calculateTime = (date:any) => {
         const currentDate:any = new Date()
@@ -119,169 +101,62 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
         }    
     }
 
-    type WorkoutDataProps = {
-        workoutId:BSON.ObjectId,
-        userId:string,
-        onPress:any,
-        loadData:any,
+    const findUserName = (userId:string) => {
+
+        const user = userData.filtered("userId == $0", userId)
+       
+        return user[0].username;
     }
 
-    const CardioWorkoutComponent = (props:WorkoutDataProps) => {
+    const afterJoiningDate = (userId:any, dateCreated:any) => {
 
-        let user = userData.filtered("userId == $0", props.userId)
+        const user = userData.filtered("userId == $0", userId)
 
-        let index = stringIds.indexOf(user[0].userId)
-        let dateJoined = datesJoined[index]
+        const index = stringIds.indexOf(user[0].userId)
+        
+        const dateJoined = datesJoined[index];
 
-        let cardioWorkout = cardioWorkouts.filtered("_id == $0 AND dateCreated >= $1", props.workoutId, dateJoined)
-
-        if(cardioWorkout.length == 0)
+        if(dateCreated > dateJoined)
         {
-            return (
-                <>
-                </>
-            )
+            return true;
         }
-
-        const profilePicture: string | undefined = user[0]?.profilePicture;
-
-        let path;
-        if(profilePicture)
+        else
         {
-            path = getProfilePicture(profilePicture)
+            return false;
         }
-
-        return (
-            <TouchableOpacity style={[styles.column, shadow.shadow, {backgroundColor: colors.red}]} onPress={() => {props.onPress(); props.loadData(cardioWorkout, "Cardio")}}>
-            <View style={styles.row}>
-                <View style={{display: 'flex', flexDirection: 'row', width: '75%', alignItems: 'center'}}>
-                    {
-                        profilePicture && 
-                        <Image source={path} style={{height: 70, width: 70, borderRadius: 70, marginRight: 10}}/>
-                    }
-                    <Text style={styles.text}>{user[0].username}</Text>
-                </View>
-                <View style={{display: 'flex', flexDirection: 'row', width: '25%', alignItems: 'center'}}>
-                    {
-                        cardioWorkout.length > 0 &&
-                        <>
-                        {
-                            cardioWorkout[0].dateCreated != null &&
-                            <Text style={styles.text}>{calculateTime(cardioWorkout[0].dateCreated)}</Text>
-                        }
-                        </>
-                    }
-                </View>
-                
-            </View>
-            <View style={styles.border}></View>
-            <View style={styles.row}>
-                {
-                    cardioWorkout.length > 0 &&
-                    <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                        <Text style={styles.text}>Cardio</Text>
-                        <Text style={styles.text}>{cardioWorkout[0].totalTime}min</Text>
-                        <Text style={styles.text}>{cardioWorkout[0].totalDistance}km</Text>
-                    </View>
-                }
-               
-            </View>
-            </TouchableOpacity>
-        )
-    }
-
-    const ResistanceWorkoutComponent = (props:WorkoutDataProps) => {
-
-        let user = userData.filtered("userId == $0", props.userId)
-
-        let index = stringIds.indexOf(user[0].userId)
-        let dateJoined = datesJoined[index]
-
-        let resistanceWorkout = resistanceWorkouts.filtered("_id == $0 AND dateCreated >= $1", props.workoutId, dateJoined)
-
-        if(resistanceWorkout.length == 0)
-        {
-            return (
-                <>
-                </>
-            )
-        }
-
-        const profilePicture: string | undefined = user[0]?.profilePicture;
-
-        let path;
-        if(profilePicture)
-        {
-            path = getProfilePicture(profilePicture)
-        }
-
-        return (
-            <TouchableOpacity style={[styles.column, shadow.shadow, {backgroundColor: colors.black}]} onPress={() => {props.onPress(); props.loadData(resistanceWorkout, "Resistance")}}>
-            <View style={styles.row}>
-                <View style={{display: 'flex', flexDirection: 'row', width: '75%', alignItems: 'center'}}>
-                    {
-                        profilePicture && 
-                        <Image source={path} style={{height: 70, width: 70, borderRadius: 70, marginRight: 10}}/>
-                    }
-                    <Text style={styles.text}>{user[0].username}</Text>
-                </View>
-                <View style={{display: 'flex', flexDirection: 'row', width: '25%', alignItems: 'center'}}>
-                    {
-                        resistanceWorkout.length > 0 &&
-                        <>
-                        {
-                            resistanceWorkout[0].dateCreated != null &&
-                            <Text style={styles.text}>{calculateTime(resistanceWorkout[0].dateCreated)}</Text>
-                        }
-                        </>
-                    }
-                </View>
-                
-            </View>
-            <View style={styles.border}></View>
-            <View style={styles.row}>
-                {
-                    resistanceWorkout.length > 0 &&
-                    <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                        <Text style={styles.text}>Resistance</Text>
-                        <Text style={styles.text}>{resistanceWorkout[0].totalVolume}kg</Text>
-                        <Text style={styles.text}>{resistanceWorkout[0].totalReps} reps</Text>
-                    </View>
-                }
-               
-            </View>
-            </TouchableOpacity>
-        )
     }
 
     return (
-        <ScrollView >
-            {
-                workouts.map((item:any) => {
-                    return (
-                        <View key={new BSON.ObjectID().toString()} style={styles.container}>
-                            {
-                                item.workoutId != null &&
-                                <>
-                                    {
-                                        item.workoutType == "Cardio" &&
-                                        <CardioWorkoutComponent workoutId={item.workoutId} userId={item.userId} onPress={props.onPress} loadData={props.loadData}/>
-                                    }
-                                    {
-                                        item.workoutType == "Resistance" &&
-                                        <ResistanceWorkoutComponent workoutId={item.workoutId} userId={item.userId} onPress={props.onPress} loadData={props.loadData}/>
-                                    }
-                                </>
-                                
-                            }
-                            
+        <>
+        <FlatList 
+            data = {workouts}
+            renderItem={({item, index}) => (
+                <>
+                {
+                    (item.workoutId != null && afterJoiningDate(item.userId, item.dateCreated)) &&
+                    <View style={styles.border}>
+                        <View style={styles.circle}>
+
                         </View>
-                        
-                    )
-                })
-            }
-        </ScrollView>
-        
+                    </View>
+                }
+                
+                <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.container} onPress={() => {props.onPress(); props.loadData(item.workoutId, item.workoutType)}}>
+                    {
+                        (item.workoutId != null && afterJoiningDate(item.userId, item.dateCreated)) &&
+                        <>
+                            <Text style={styles.text}>{findUserName(item.userId)} logged a {item.workoutType?.toLowerCase()} workout {calculateTime(item.dateCreated)}!</Text>
+                            <View style={(index != (workouts.length-1)) && styles.smallBorder}></View>
+                        </>
+                    }
+                    
+                </TouchableOpacity>
+                </>
+            )}
+            keyExtractor={(item) => item._id.toString()}
+        />
+    
+        </>
     )
 }
 
@@ -297,34 +172,37 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
 
-    column: {
-        display: 'flex',
-        flexDirection: 'column',
-        width: '90%',
-        backgroundColor: 'gray',
-        borderRadius: 10,
-        padding: 10,
-    },
-
-    row: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center'
-    },
-
+    
     text: {
-        color: 'white',
+        color: colors.blue,
+        width: '80%',
         fontSize: 20,
         fontWeight: '800',
     },
 
     border: {
-        marginTop: 10,
-        marginBottom: 10,
-        width: '90%',
-        height: 2,
-        backgroundColor: 'black',
-        marginLeft: 'auto',
-        marginRight: 'auto',
+        position: 'absolute',
+        left: 10,
+        top: 0,
+        width: 3,
+        height: '100%',
+        backgroundColor: 'gray',
     },
+
+    smallBorder: {
+        width: '80%',
+        height: 2,
+        backgroundColor: 'black'
+    },
+
+    circle: {
+        width: 20,
+        height: 20,
+        backgroundColor: 'gray',
+        borderRadius: 20,
+
+        left: -8,
+        top: '50%',
+        
+    }
 })

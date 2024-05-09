@@ -11,6 +11,10 @@ import { Groups } from '../schemas/GroupsSchema';
 import { JoinGroupScreen } from './JoinGroupScreen';
 import { GroupScreen } from './GroupScreen';
 import { shadow } from '../Shadow';
+import Modal from 'react-native-modal';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { GroupSettingsScreen } from './GroupSettingsScreen';
+import { GroupMembersSettingsScreen } from './GroupMembersSettingsScreen';
 
 
 export function SocialScreen() {
@@ -19,7 +23,7 @@ export function SocialScreen() {
   const user = useUser()
 
   const groups = useQuery(Groups).filtered('ANY members == $0', user.id);
-  //console.log(groups)
+  
 
   const createGroup = () => {
     setCreatingGroup(true)
@@ -48,8 +52,25 @@ export function SocialScreen() {
   const [joiningGroup, setJoiningGroup] = useState<boolean>(false)
   const [viewingGroup, setViewingGroup] = useState<boolean>(false)
 
+  const [editingGroup, setEditingGroup] = useState<boolean>(false)
+  const [editingGroupMembers, setEditingGroupMembers] = useState<boolean>(false)
+  const [selectedGroup, setSelectedGroup] = useState<string>('')
+
   const [group, setGroup] = useState<string>('')
+
+  const [showingModal, setShowingModal] = useState<boolean>(false)
+
+  const onClose = () => {
+    setShowingModal(false)
+  }
+
+  const stopEditingGroup = () => {
+    setEditingGroup(false)
+  }
   
+  const stopEditingGroupMembers = () => {
+    setEditingGroupMembers(false)
+  }
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
@@ -60,15 +81,22 @@ export function SocialScreen() {
     }, [realm, user]);
   
   return (
-    <View style={styles.container}> 
+    <> 
     {
-      (!creatingGroup && !joiningGroup && !viewingGroup) && 
+      (!creatingGroup && !joiningGroup && !viewingGroup && !editingGroup && !editingGroupMembers) && 
       <View style={styles.container}>
             <FlatList
             data={groups}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <TouchableOpacity style={[styles.groupButton, shadow.shadow, {marginTop: 20}]} onPress={() => {setGroup(item.name); setViewingGroup(true)}}>
                 <Text style={styles.buttonText}>{item.name}</Text>
+                {
+                  item.owner == user.id &&
+                  <TouchableOpacity onPress={() => {setShowingModal(true); setSelectedGroup(item.name)}}>
+                    <MaterialCommunityIcons name="dots-vertical" color={'white'} size={40} />
+                  </TouchableOpacity>
+                }
+                
               </TouchableOpacity>
             )}
           />
@@ -104,21 +132,51 @@ export function SocialScreen() {
       viewingGroup &&
       <GroupScreen onPress={closeScreen} group={group} />
     }
+
+    {
+      editingGroup &&
+      <GroupSettingsScreen onPress={stopEditingGroup} group={selectedGroup} />
+    }
+
+    {
+      editingGroupMembers &&
+      <GroupMembersSettingsScreen onPress={stopEditingGroupMembers} group={selectedGroup}/>
+    }
+
+    <Modal
+          isVisible={showingModal}
+          swipeDirection={['down']}
+          onSwipeComplete={onClose}
+          onBackdropPress={onClose}
+          style={styles.modalView}
+      >
+          <View style={styles.modalContent}>
+                <TouchableOpacity style={styles.button} onPress={() => {setEditingGroup(true); onClose()}}>
+                  <Text style={styles.buttonText}>Edit Group</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={() => {setEditingGroupMembers(true); onClose()}}>
+                  <Text style={styles.buttonText}>Edit Members</Text>
+                </TouchableOpacity>
+          </View>
+      </Modal>
     
-    </View>
+    </>
     );
 }
 
 const styles = StyleSheet.create({
 
   container: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
+
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
   },
   
   button: {
-    width: 150,
+    width: 170,
     height: 40,
     backgroundColor: colors.blue,
 
@@ -132,22 +190,38 @@ const styles = StyleSheet.create({
 
   groupButton: {
     width: 200,
-    height: 50,
     backgroundColor: colors.purple,
 
     display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
 
     marginTop: 20,
     borderRadius: 10,
+    padding: 10,
   },
 
   buttonText: {
     color: 'white',
     fontWeight: '800',
     fontSize: 25,
-  }
+  },
+
+  modalView: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    margin: 0,
+},
+
+  modalContent: {
+      backgroundColor: 'white',
+      padding: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 20,
+  },
    
     
   });

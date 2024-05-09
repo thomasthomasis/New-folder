@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Button, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Alert, Button, FlatList, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { colors } from "../Colors";
 import { useQuery, useRealm, useUser } from "@realm/react";
 import { Groups } from "../schemas/GroupsSchema";
@@ -13,7 +13,10 @@ import { JoinGroupRequests } from "../schemas/JoinGroupRequestsSchema";
 import { Users } from "../schemas/UsersSchema";
 import React from "react";
 import { WorkoutDisplayScreen } from "./Group/WorkoutDisplayScreen";
-import { GroupSettingsScreen } from "./Group/GroupSettingsScreen";
+import { GroupSettingsScreen } from "./GroupSettingsScreen";
+import { CardioWorkout } from "../schemas/CardioWorkoutSchema";
+import { ResistanceWorkout } from "../schemas/ResistanceWorkoutSchema";
+import { ProfileScreen } from "../profile/ProfileScreen";
 
 type GroupScreenProps = {
     onPress:any;
@@ -25,8 +28,10 @@ export const GroupScreen = (props:GroupScreenProps) => {
     const realm = useRealm()
     const user = useUser()
 
-    const selectedGroup = useQuery(Groups).filtered("name == $0", props.group)
+    let selectedGroup = useQuery(Groups).filtered("name == $0", props.group)
     const groupJoinRequests = useQuery(JoinGroupRequests).filtered('groupName == $0', props.group)
+
+    const stringIds = selectedGroup[0].members.map(member => member)
 
     //console.log(groupJoinRequests)
 
@@ -38,7 +43,17 @@ export const GroupScreen = (props:GroupScreenProps) => {
 
     const [workoutData, setWorkoutData] = useState<any>();
     const [workoutDataType, setWorkoutDataType] = useState<string>();
-    const loadData = (data:any, dataType:string) => {
+    const loadData = (workoutId:any, dataType:string) => {
+
+        let data:any = {}
+        if(dataType == "Cardio")
+        {
+            data = realm.objects(CardioWorkout).filtered("_id == $0", workoutId)
+        }
+        else if(dataType == "Resistance")
+        {
+            data = realm.objects(ResistanceWorkout).filtered("_id == $0", workoutId)
+        }
         //console.log(data)
         setWorkoutData(data)
         setWorkoutDataType(dataType)
@@ -58,10 +73,24 @@ export const GroupScreen = (props:GroupScreenProps) => {
         setModalPendingRequestsVisible(false)
     }
 
+    const [modalUsersVisible, setModalUsersVisible] = useState<boolean>(false)
+    const closeUsersModal = () => {
+        setModalUsersVisible(false)
+    }
+
     const getUserName = (userId:string) => {
         const user = realm.objects<Users>(Users).filtered('userId == $0', userId)[0]
 
         return user.username;
+    }
+
+    const getUserRole = (userId:string) => {
+
+        const index = stringIds.indexOf(userId)
+
+        const role = selectedGroup[0].memberRoles[index];
+
+        return role;
     }
 
     const acceptUser = (userId:string) => {
@@ -94,20 +123,20 @@ export const GroupScreen = (props:GroupScreenProps) => {
             });
         }
     }
-      
-    
 
+    const [selectedUser, setSelectedUser] = useState<string>("");
+    const [viewingProfile, setViewingProfile] = useState<boolean>(false)
+
+    const closeProfile = () => {
+        setViewingProfile(false)
+    }
+       
     const [selectedPage, setSelectedPage] = useState(0)
     const pagerRef = React.useRef<PagerView>(null)
 
     const handlePageChange = (pageNumber:any) => {
         pagerRef.current?.setPage(pageNumber);
         setSelectedPage(pageNumber)
-    }
-
-    const [editingGroup, setEditingGroup] = useState<boolean>(false)
-    const stopEditingGroup = () => {
-        setEditingGroup(false)
     }
 
     const stopViewingWorkout = () => {
@@ -125,6 +154,14 @@ export const GroupScreen = (props:GroupScreenProps) => {
             mutableSubs.add(
                 realm.objects(Users)
             )
+
+            mutableSubs.add(
+                realm.objects(CardioWorkout)
+            )
+    
+            mutableSubs.add(
+                realm.objects(ResistanceWorkout)
+            )
         });
         }, [realm, user]);
     
@@ -133,27 +170,29 @@ export const GroupScreen = (props:GroupScreenProps) => {
         <>
 
         {
-            (!viewingWorkout && !editingGroup) &&
+            (!viewingWorkout && !viewingProfile) &&
             <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                 <TouchableOpacity onPress={() => props.onPress("view")} style={styles.closeButton}>
                     <MaterialCommunityIcons name="close" size={40}/>
                 </TouchableOpacity>
+                
                 {
                     user.id == selectedGroup[0].owner &&
                     <View style={{display: 'flex', flexDirection: 'row'}}>
+                        <TouchableOpacity style={{marginRight: 10,}} onPress={() => setModalUsersVisible(true)}>
+                            <MaterialCommunityIcons name="account-group" size={40}/>
+                        </TouchableOpacity>
                         <TouchableOpacity style={{marginRight: 10,}} onPress={() => setModalPendingRequestsVisible(true)}>
                             <MaterialCommunityIcons name="bell" size={40} style={[groupJoinRequests.length > 0 && {color: colors.orange}, groupJoinRequests.length == 0 && {color: 'lightgray'}]}/>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{marginRight: 10,}} onPress={() => setEditingGroup(true)}>
-                            <MaterialCommunityIcons name="cog" size={40}/>
-                        </TouchableOpacity>
+                        
                     </View>
                 }
             </View>
         }
         
         { 
-            (!viewingWorkout && !editingGroup) &&
+            (!viewingWorkout && !viewingProfile) &&
             <>
                 <View style={styles.pageVisualiser}>
                     <Pressable onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 0 && {color: 'white'}}>History</Text></Pressable>
@@ -165,20 +204,16 @@ export const GroupScreen = (props:GroupScreenProps) => {
                 </PagerView>
             </>
         }
-        
-        
 
         {
-            viewingWorkout &&
+            (viewingWorkout && !viewingProfile) &&
             <WorkoutDisplayScreen data={workoutData} dataType={workoutDataType} onPress={stopViewingWorkout}/>
         }
 
         {
-            editingGroup &&
-            <GroupSettingsScreen onPress={stopEditingGroup} group={props.group}/>
+            viewingProfile &&
+            <ProfileScreen restrictedView={true} user={selectedUser} closeProfile={closeProfile}/>
         }
-        
-
 
         <Modal
                 isVisible={modalPendingRequestsVisible}
@@ -209,6 +244,42 @@ export const GroupScreen = (props:GroupScreenProps) => {
                             )
                         })
                     }
+                </View>
+            </Modal>
+
+            <Modal
+                isVisible={modalUsersVisible}
+                swipeDirection={['down']}
+                onSwipeComplete={closeUsersModal}
+                onBackdropPress={closeUsersModal}
+                style={styles.modalView}
+            >
+                <View style={styles.modalContent}>
+                    <Text style={styles.title}>{selectedGroup[0].members.length} Users</Text>
+                    <View style={[styles.smallBorder, {width: 250, marginBottom: 20}]}></View>
+                    <FlatList 
+                        data = {selectedGroup[0].members}
+                        renderItem={({item, index}) => (
+                            <>
+                            <View key={(new BSON.ObjectID()).toString()} style={styles.userInfoContainer}>
+                                <View style={styles.userData}>
+                                    <Image source={require('./Group/assets/1.png')} style={styles.image}/>
+                                    <View>
+                                        <Text style={styles.username}>{getUserName(item)}</Text>
+                                        <Text style={styles.role}>{getUserRole(item)}</Text>
+                                    </View>
+                                </View>
+                                <View>
+                                    <TouchableOpacity style={styles.button} onPress={() => {setModalUsersVisible(false); setSelectedUser(item); setViewingProfile(true)}}><Text style={styles.buttonText}>View Profile</Text></TouchableOpacity>
+                                </View>
+                            </View>
+                            <View style={styles.border}>
+                            </View>
+                            </>
+
+                        )}
+                        keyExtractor={(item) => item}
+                    />
                 </View>
             </Modal>
       </>
@@ -272,15 +343,14 @@ const styles = StyleSheet.create({
 
     modalContent: {
         backgroundColor: 'white',
-        padding: 22,
-        justifyContent: 'center',
-        alignItems: 'center',
+        padding: 10,
         borderRadius: 20,
     },
 
     title: {
         fontSize: 25,
         fontWeight: '800',
+        textAlign: 'center',
     },
 
     text: {
@@ -294,6 +364,18 @@ const styles = StyleSheet.create({
         height: 2,
         backgroundColor: 'lightgray',
         marginBottom: 10,
+        marginRight: 'auto',
+        marginLeft: 'auto',
+    },
+
+    border: {
+        width: '95%',
+        height: 2,
+        backgroundColor: 'lightgray',
+        marginTop: 5,
+        marginBottom: 20,
+        marginRight: 'auto',
+        marginLeft: 'auto',
     },
 
     group: {
@@ -307,5 +389,50 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginBottom: 10,
     },
+
+    userInfoContainer: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+
+    userData: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    image: {
+        width: 70,
+        height: 70,
+        borderRadius: 70,
+        marginRight: 10,
+    },
+
+    username: {
+        fontSize: 20,
+        fontWeight: '900',
+    },
+
+    role: {
+        fontSize: 15,
+        fontWeight: '500',
+        color: colors.purple,
+    },
+
+    button: {
+        backgroundColor: colors.blue,
+        padding: 10,
+        borderRadius: 10,
+    },
+
+    buttonText: {
+        color: 'white',
+        fontWeight: '800',
+        fontSize: 16,
+    }
 
 })
