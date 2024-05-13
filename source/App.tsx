@@ -107,22 +107,3 @@ export const App = () => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  footerText: {
-    fontSize: 12,
-    textAlign: 'center',
-    marginVertical: 4,
-  },
-  hyperlink: {
-    color: 'blue',
-  },
-  footer: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
-
-  header: {
-
-  }
-});

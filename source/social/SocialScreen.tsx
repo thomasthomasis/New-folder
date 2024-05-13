@@ -72,6 +72,147 @@ export function SocialScreen() {
     setEditingGroupMembers(false)
   }
 
+  const checkIfOwner = () => {
+
+    if(selectedGroup == "")
+    {
+      return false;
+    }
+
+    const group = groups.filtered("name == $0", selectedGroup)
+
+    if(user.id == group[0].owner)
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  const leaveGroup = (groupName:string) => {
+
+    console.log(groupName)
+
+    const group = groups.filtered("name == $0", groupName)
+    const stringIds = group[0].members.map(member => member)
+
+    const index = stringIds.indexOf(user.id)
+
+    if(group[0].members.length == 1)
+    {
+      deleteGroup(group)
+    }
+    else if(checkIfOwner())
+    {
+      setSelectedGroup("")
+      //console.log("is owner")
+
+      realm.write(() => {
+        group[0].membersDateJoined.splice(index, 1)
+        group[0].memberRoles.splice(index, 1)
+        group[0].members.splice(index, 1)
+      })
+
+      setNewOwner(groupName)
+    }
+    else
+    {
+      setSelectedGroup("")
+
+      realm.write(() => {
+        group[0].membersDateJoined.splice(index, 1)
+        group[0].memberRoles.splice(index, 1)
+        group[0].members.splice(index, 1)
+      })
+    }
+   
+  }
+
+  const setNewOwner = (groupName:string) => {
+    const group = realm.objects(Groups).filtered("name == $0", groupName)
+
+    console.log(group)
+
+    const newOwner = group[0].members[0]
+
+    realm.write(() => {
+      group[0].owner = newOwner;
+    })
+  }
+
+  const deleteGroup = (group:any) => {
+    setSelectedGroup("")
+
+    const groupToBeDeleted = groups.filtered("name == $0", group)
+
+    realm.write(() => {
+      realm.delete(groupToBeDeleted)
+    })
+    
+  }
+
+  const handleConfirmLeave = () => {
+    // Show confirmation popup
+    Alert.alert(
+        'Confirm Action',
+        'Are you sure you want to leave the group?',
+        [
+        {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+        },
+        {
+            text: 'OK',
+            onPress: () => {onClose(); leaveGroup(selectedGroup)},
+        },
+        ],
+        { cancelable: false }
+    );
+    };
+
+    const handleConfirmDelete = () => {
+      // Show confirmation popup
+      Alert.alert(
+          'Confirm Action',
+          'Are you sure you want to delete the group?',
+          [
+          {
+              text: 'Cancel',
+              onPress: () => console.log('Cancel Pressed'),
+              style: 'cancel',
+          },
+          {
+              text: 'OK',
+              onPress: () => {handleConfirmDeleteConfirm()},
+          },
+          ],
+          { cancelable: false }
+      );
+      };
+
+    const handleConfirmDeleteConfirm = () => {
+      // Show confirmation popup
+      Alert.alert(
+        'Confirm Action',
+        'Are you completely sure???',
+        [
+        {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+        },
+        {
+            text: 'OK',
+            onPress: () => {onClose(); deleteGroup(selectedGroup)},
+        },
+        ],
+        { cancelable: false }
+    );
+    }
+
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
         mutableSubs.add(
@@ -90,13 +231,9 @@ export function SocialScreen() {
             renderItem={({ item, index }) => (
               <TouchableOpacity style={[styles.groupButton, shadow.shadow, {marginTop: 20}]} onPress={() => {setGroup(item.name); setViewingGroup(true)}}>
                 <Text style={styles.buttonText}>{item.name}</Text>
-                {
-                  item.owner == user.id &&
-                  <TouchableOpacity onPress={() => {setShowingModal(true); setSelectedGroup(item.name)}}>
-                    <MaterialCommunityIcons name="dots-vertical" color={'white'} size={40} />
-                  </TouchableOpacity>
-                }
-                
+                <TouchableOpacity onPress={() => {setShowingModal(true); setSelectedGroup(item.name)}}>
+                  <MaterialCommunityIcons name="dots-vertical" color={'white'} size={40} />
+                </TouchableOpacity>
               </TouchableOpacity>
             )}
           />
@@ -151,12 +288,25 @@ export function SocialScreen() {
           style={styles.modalView}
       >
           <View style={styles.modalContent}>
+            {
+              checkIfOwner() && 
+              <>
                 <TouchableOpacity style={styles.button} onPress={() => {setEditingGroup(true); onClose()}}>
                   <Text style={styles.buttonText}>Edit Group</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => {setEditingGroupMembers(true); onClose()}}>
+                <TouchableOpacity style={[styles.button, {marginBottom: 50}]} onPress={() => {setEditingGroupMembers(true); onClose()}}>
                   <Text style={styles.buttonText}>Edit Members</Text>
                 </TouchableOpacity>
+              </>
+            }
+            <TouchableOpacity style={[styles.button, {backgroundColor: colors.red}]} onPress={() => {handleConfirmLeave()}}>
+              <Text style={styles.buttonText}>Leave Group</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button, {backgroundColor: colors.red}]} onPress={() => {handleConfirmDelete()}}>
+              <Text style={styles.buttonText}>Delete Group</Text>
+            </TouchableOpacity>
+                
+            
           </View>
       </Modal>
     
