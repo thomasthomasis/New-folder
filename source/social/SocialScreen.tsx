@@ -6,13 +6,15 @@ import { useRealm, useQuery, useUser } from '@realm/react';
 import { App } from 'realm';
 import PagerView from 'react-native-pager-view';
 import { colors } from '../Colors';
-import { createStackNavigator } from '@react-navigation/stack';
 import { CreateGroupScreen } from './CreateGroupScreen';
 import { Groups } from '../schemas/GroupsSchema';
 import { JoinGroupScreen } from './JoinGroupScreen';
 import { GroupScreen } from './GroupScreen';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { shadow } from '../Shadow';
+import Modal from 'react-native-modal';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { GroupSettingsScreen } from './GroupSettingsScreen';
+import { GroupMembersSettingsScreen } from './GroupMembersSettingsScreen';
 
 
 export function SocialScreen() {
@@ -21,7 +23,7 @@ export function SocialScreen() {
   const user = useUser()
 
   const groups = useQuery(Groups).filtered('ANY members == $0', user.id);
-  //console.log(groups)
+  
 
   const createGroup = () => {
     setCreatingGroup(true)
@@ -31,7 +33,6 @@ export function SocialScreen() {
     setJoiningGroup(true)
   }
 
-  const navigation = useNavigation();
   const closeScreen = (name:string) => {
     if(name == "join")
     {
@@ -45,19 +46,172 @@ export function SocialScreen() {
     {
       setViewingGroup(false)
     }
-
-    navigation.setOptions({
-      headerLeft: () => (<View style={{width: 30, marginLeft: 20}}></View>),
-      headerRight: () => (<View style={{width: 30, marginRight: 20}}></View>)
-    });
   }
 
   const [creatingGroup, setCreatingGroup] = useState<boolean>(false)
   const [joiningGroup, setJoiningGroup] = useState<boolean>(false)
   const [viewingGroup, setViewingGroup] = useState<boolean>(false)
 
+  const [editingGroup, setEditingGroup] = useState<boolean>(false)
+  const [editingGroupMembers, setEditingGroupMembers] = useState<boolean>(false)
+  const [selectedGroup, setSelectedGroup] = useState<string>('')
+
   const [group, setGroup] = useState<string>('')
+
+  const [showingModal, setShowingModal] = useState<boolean>(false)
+
+  const onClose = () => {
+    setShowingModal(false)
+  }
+
+  const stopEditingGroup = () => {
+    setEditingGroup(false)
+  }
   
+  const stopEditingGroupMembers = () => {
+    setEditingGroupMembers(false)
+  }
+
+  const checkIfOwner = () => {
+
+    if(selectedGroup == "")
+    {
+      return false;
+    }
+
+    const group = groups.filtered("name == $0", selectedGroup)
+
+    if(user.id == group[0].owner)
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  const leaveGroup = (groupName:string) => {
+
+    console.log(groupName)
+
+    const group = groups.filtered("name == $0", groupName)
+    const stringIds = group[0].members.map(member => member)
+
+    const index = stringIds.indexOf(user.id)
+
+    if(group[0].members.length == 1)
+    {
+      deleteGroup(group)
+    }
+    else if(checkIfOwner())
+    {
+      setSelectedGroup("")
+      //console.log("is owner")
+
+      realm.write(() => {
+        group[0].membersDateJoined.splice(index, 1)
+        group[0].memberRoles.splice(index, 1)
+        group[0].members.splice(index, 1)
+      })
+
+      setNewOwner(groupName)
+    }
+    else
+    {
+      setSelectedGroup("")
+
+      realm.write(() => {
+        group[0].membersDateJoined.splice(index, 1)
+        group[0].memberRoles.splice(index, 1)
+        group[0].members.splice(index, 1)
+      })
+    }
+   
+  }
+
+  const setNewOwner = (groupName:string) => {
+    const group = realm.objects(Groups).filtered("name == $0", groupName)
+
+    console.log(group)
+
+    const newOwner = group[0].members[0]
+
+    realm.write(() => {
+      group[0].owner = newOwner;
+    })
+  }
+
+  const deleteGroup = (group:any) => {
+    setSelectedGroup("")
+
+    const groupToBeDeleted = groups.filtered("name == $0", group)
+
+    realm.write(() => {
+      realm.delete(groupToBeDeleted)
+    })
+    
+  }
+
+  const handleConfirmLeave = () => {
+    // Show confirmation popup
+    Alert.alert(
+        'Confirm Action',
+        'Are you sure you want to leave the group?',
+        [
+        {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+        },
+        {
+            text: 'OK',
+            onPress: () => {onClose(); leaveGroup(selectedGroup)},
+        },
+        ],
+        { cancelable: false }
+    );
+    };
+
+    const handleConfirmDelete = () => {
+      // Show confirmation popup
+      Alert.alert(
+          'Confirm Action',
+          'Are you sure you want to delete the group?',
+          [
+          {
+              text: 'Cancel',
+              onPress: () => console.log('Cancel Pressed'),
+              style: 'cancel',
+          },
+          {
+              text: 'OK',
+              onPress: () => {handleConfirmDeleteConfirm()},
+          },
+          ],
+          { cancelable: false }
+      );
+      };
+
+    const handleConfirmDeleteConfirm = () => {
+      // Show confirmation popup
+      Alert.alert(
+        'Confirm Action',
+        'Are you completely sure???',
+        [
+        {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+        },
+        {
+            text: 'OK',
+            onPress: () => {onClose(); deleteGroup(selectedGroup)},
+        },
+        ],
+        { cancelable: false }
+    );
+    }
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
@@ -68,15 +222,18 @@ export function SocialScreen() {
     }, [realm, user]);
   
   return (
-    <View style={styles.container}> 
+    <> 
     {
-      (!creatingGroup && !joiningGroup && !viewingGroup) && 
+      (!creatingGroup && !joiningGroup && !viewingGroup && !editingGroup && !editingGroupMembers) && 
       <View style={styles.container}>
             <FlatList
             data={groups}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <TouchableOpacity style={[styles.groupButton, shadow.shadow, {marginTop: 20}]} onPress={() => {setGroup(item.name); setViewingGroup(true)}}>
                 <Text style={styles.buttonText}>{item.name}</Text>
+                <TouchableOpacity onPress={() => {setShowingModal(true); setSelectedGroup(item.name)}}>
+                  <MaterialCommunityIcons name="dots-vertical" color={'white'} size={40} />
+                </TouchableOpacity>
               </TouchableOpacity>
             )}
           />
@@ -112,21 +269,64 @@ export function SocialScreen() {
       viewingGroup &&
       <GroupScreen onPress={closeScreen} group={group} />
     }
+
+    {
+      editingGroup &&
+      <GroupSettingsScreen onPress={stopEditingGroup} group={selectedGroup} />
+    }
+
+    {
+      editingGroupMembers &&
+      <GroupMembersSettingsScreen onPress={stopEditingGroupMembers} group={selectedGroup}/>
+    }
+
+    <Modal
+          isVisible={showingModal}
+          swipeDirection={['down']}
+          onSwipeComplete={onClose}
+          onBackdropPress={onClose}
+          style={styles.modalView}
+      >
+          <View style={styles.modalContent}>
+            {
+              checkIfOwner() && 
+              <>
+                <TouchableOpacity style={styles.button} onPress={() => {setEditingGroup(true); onClose()}}>
+                  <Text style={styles.buttonText}>Edit Group</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, {marginBottom: 50}]} onPress={() => {setEditingGroupMembers(true); onClose()}}>
+                  <Text style={styles.buttonText}>Edit Members</Text>
+                </TouchableOpacity>
+              </>
+            }
+            <TouchableOpacity style={[styles.button, {backgroundColor: colors.red}]} onPress={() => {handleConfirmLeave()}}>
+              <Text style={styles.buttonText}>Leave Group</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button, {backgroundColor: colors.red}]} onPress={() => {handleConfirmDelete()}}>
+              <Text style={styles.buttonText}>Delete Group</Text>
+            </TouchableOpacity>
+                
+            
+          </View>
+      </Modal>
     
-    </View>
+    </>
     );
 }
 
 const styles = StyleSheet.create({
 
   container: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
+
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
   },
   
   button: {
-    width: 150,
+    width: 170,
     height: 40,
     backgroundColor: colors.blue,
 
@@ -140,22 +340,38 @@ const styles = StyleSheet.create({
 
   groupButton: {
     width: 200,
-    height: 50,
     backgroundColor: colors.purple,
 
     display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
 
     marginTop: 20,
     borderRadius: 10,
+    padding: 10,
   },
 
   buttonText: {
     color: 'white',
     fontWeight: '800',
     fontSize: 25,
-  }
+  },
+
+  modalView: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    margin: 0,
+},
+
+  modalContent: {
+      backgroundColor: 'white',
+      padding: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 20,
+  },
    
     
   });

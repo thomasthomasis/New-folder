@@ -6,7 +6,6 @@ import { UserStatistics } from "../../schemas/UserStatisticsSchema";
 import SelectDropdown from "react-native-select-dropdown";
 import { colors } from "../../Colors";
 import { Users } from "../../schemas/UsersSchema";
-import { useFocusEffect } from "@react-navigation/native";
 import React from "react";
 
 

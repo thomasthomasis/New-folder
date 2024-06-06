@@ -52,7 +52,7 @@ export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProp
                             {
                                 JSON.parse(time[index]).map((item:any, innerIndex:any) => {
                                     return (
-                                        <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', width: 200}}>
+                                        <View key={new BSON.ObjectID().toString()} style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', width: 200}}>
                                             <Text>{innerIndex + 1}</Text>
                                             <View style={{height: 20, width: 2, backgroundColor: 'gray'}}></View>
                                             <Text style={{fontSize: 18, fontWeight: '600'}}>{item.value} min</Text>
@@ -64,10 +64,10 @@ export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProp
                         
                         {
                             ((JSON.parse(extraNotes[index]).value).length > 0) &&
-                            <Text style={{fontSize: 20, fontWeight: '700', color: colors.green, marginTop: 10,}}>"{JSON.parse(extraNotes[index]).value}"</Text>
+                            <Text key={new BSON.ObjectID().toString()} style={{fontSize: 20, fontWeight: '700', color: colors.green, marginTop: 10,}}>"{JSON.parse(extraNotes[index]).value}"</Text>
                         }
                         
-                        <View style={[styles.smallBorder, {backgroundColor: 'lightgray'}]}></View>
+                        <View key={new BSON.ObjectID().toString()} style={[styles.smallBorder, {backgroundColor: 'lightgray'}]}></View>
                         </>
                     )
                 })
@@ -77,34 +77,6 @@ export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProp
         
         
       </ScrollView>  
-    )
-}
-
-type WorkoutLayoutProps = {
-    time:any,
-    distance:any,   
-}
-
-const WorkoutLayout = (props: WorkoutLayoutProps) => {
-
-    console.log(props.time[1].value)
-
-    console.log(props.distance)
-
-    const emptyArray = [];
-    for(let i = 0; i < props.time.length; i++)
-    {
-        emptyArray.push("")
-    }
-
-    return (
-        <View>
-        {
-            props.distance.map((item:any, index:any) => {
-                <Text>{item}</Text>
-            })
-        }
-        </View>
     )
 }
 

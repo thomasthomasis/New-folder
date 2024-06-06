@@ -11,15 +11,19 @@ import { UserStatistics } from '../schemas/UserStatisticsSchema';
 import { AccountScreen } from './AccountScreen';
 import { shadow } from '../Shadow'
 
+type ProfileScreenProps = {
+  restrictedView:boolean,
+  user:any,
+  closeProfile:any,
+}
 
-
-export const ProfileScreen = () => {
+export const ProfileScreen = (props:ProfileScreenProps) => {
 
     const realm = useRealm();
     const user = useUser();
   
-    const userData = useQuery(Users).sorted('_id').filtered("userId == $0", user.id);
-    const userStats = useQuery(UserStatistics).filtered("userId == $0", user.id);
+    const userData = useQuery(Users).sorted('_id').filtered("userId == $0", props.user);
+    const userStats = useQuery(UserStatistics).filtered("userId == $0", props.user);
 
     const [showAccount, setShowAccount] = useState<boolean>(false)
     const [imageSource, setImageSource] = useState(require('./assets/1.png'))
@@ -104,15 +108,26 @@ export const ProfileScreen = () => {
           !showAccount &&
           <>
           <View style={[styles.information, shadow.shadow]}>
-            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-              <TouchableOpacity onPress={() => setShowAccount(true)}>
-                <MaterialCommunityIcons name="cog" color={'lightgray'} size={40} style={{marginRight: 10,}}/>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleConfirm}>
-                <MaterialCommunityIcons name="logout" color={'lightgray'} size={40} style={{marginRight: 10,}}/>
-              </TouchableOpacity>
-              
-            </View>
+            {
+              props.restrictedView &&
+              <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
+                  <TouchableOpacity onPress={props.closeProfile}>
+                    <MaterialCommunityIcons name="arrow-left" color={'lightgray'} size={40} style={{marginLeft: 10,}}/>
+                  </TouchableOpacity>
+              </View>
+            }
+            {
+              !props.restrictedView &&
+              <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
+                <TouchableOpacity onPress={() => setShowAccount(true)}>
+                  <MaterialCommunityIcons name="cog" color={'lightgray'} size={40} style={{marginRight: 10,}}/>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleConfirm}>
+                  <MaterialCommunityIcons name="logout" color={'lightgray'} size={40} style={{marginRight: 10,}}/>
+                </TouchableOpacity>
+              </View>
+            }
+            
             <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
               <View style={styles.profilePictureContainer}>
                   <Image source={imageSource} style={{width: 120, height: 120, borderRadius: 100,}}/>

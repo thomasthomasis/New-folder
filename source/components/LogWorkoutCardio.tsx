@@ -10,10 +10,13 @@ import { UserStatistics } from '../schemas/UserStatisticsSchema';
 import { ExtraExercises } from '../schemas/ExtraExercisesSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { shadow } from '../Shadow';
+import Storage from 'react-native-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type LogWorkoutCardioProps = {
   onPress:any,
   closeWorkout:any,
+  continuingWorkout:boolean,
 }
 
 
@@ -49,17 +52,21 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
       });
   }, [realm, user]);
 
+  
   const [forms, setForms] = useState<any>([]);
-
 
   const handleAddForm = (exercise:string) => {
     const newForm = { id: forms.length + 1, exercise: {id: 1, value: exercise}, inputs: [{id: 1}], timeInputs: [{ id: 1, value: '' }], distanceInputs: [{ id: 1, value: ''}], extraNotes: {id: 1, value: ''} };
     setForms([...forms, newForm]);
+
+    saveCurrentWorkout();
   };
 
   const handleRemoveForm = (formIndex:any) => {
     const updatedForms = forms.filter((_:any, i:any) => i !== formIndex);
     setForms(updatedForms);
+
+    saveCurrentWorkout();
   };
 
   const handleAddInput = (formIndex:any) => {
@@ -71,6 +78,8 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
     updatedForms[formIndex].distanceInputs.push(newDistanceInput);
     updatedForms[formIndex].inputs.push(newInput)
     setForms(updatedForms);
+
+    saveCurrentWorkout();
   };
 
   const handleRemoveInput = (formIndex:any, inputIndex:any) => {
@@ -79,26 +88,73 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
     updatedForms[formIndex].timeInputs = updatedForms[formIndex].timeInputs.filter((_:any, i:any) => i !== inputIndex);
     updatedForms[formIndex].distanceInputs = updatedForms[formIndex].distanceInputs.filter((_:any, i:any) => i !== inputIndex);
     setForms(updatedForms);
+
+    saveCurrentWorkout();
   };
 
   const handleTimeInputChange = (text:any, formIndex:any, inputIndex:any) => {
     const updatedForms = [...forms];
     updatedForms[formIndex].timeInputs[inputIndex].value = text;
     setForms(updatedForms);
+
+    saveCurrentWorkout();
   };
 
   const handleDistanceInputChange = (text:any, formIndex:any, inputIndex:any) => {
     const updatedForms = [...forms];
     updatedForms[formIndex].distanceInputs[inputIndex].value = text;
     setForms(updatedForms);
+
+    saveCurrentWorkout();
   };
 
   const handleExtraNotesInputChange = (text:any, formIndex:any) => {
     const updatedForms = [...forms];
     updatedForms[formIndex].extraNotes.value = text;
     setForms(updatedForms);
+
+    saveCurrentWorkout();
   }
 
+  const storage = new Storage({
+    size: 1000,
+    storageBackend: AsyncStorage,
+  })
+
+  const saveCurrentWorkout = () => {
+    storage.save({
+      key: 'currentWorkout',
+      data: {
+        forms,
+      }
+    })
+
+    storage.save({
+      key: 'workoutType',
+      data: {
+        workoutType: "Cardio",
+      }
+    })
+
+    console.log("saved workout, forms: ", forms)
+  }
+
+  const loadCurrentWorkout = () => {
+    storage.load({
+      key: 'currentWorkout'
+    })
+    .then(ret => {setForms(ret.forms); console.log(ret.forms);})
+    .catch(err => {
+      console.warn(err.message);
+    })
+  }
+
+  useEffect(() => {
+    if(props.continuingWorkout)
+      {
+        loadCurrentWorkout()
+      }
+  }, [])
 
   const submitData = () => {
   
@@ -251,6 +307,20 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 
   const handleConfirm = () => {
     // Show confirmation popup
+    if(forms.length == 0)
+      {
+        Alert.alert(
+          "No Exercises", // Title of the alert
+          "You must enter workout data before submitting", // Alert message
+          [
+            { text: "Close", onPress: () => console.log("Close Pressed") }
+          ],
+          { cancelable: true } // If false, the user cannot dismiss the alert by tapping outside
+        );
+
+        return 
+      }
+
     Alert.alert(
       'Confirm Action',
       'Are you sure you want to log your workout?',
@@ -417,7 +487,7 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
                 }
                 <TextInput
                   placeholder=""
-                  value={input.value}
+                  value={form.timeInputs[inputIndex].value}
                   onChangeText={(text) => handleTimeInputChange(text, formIndex, inputIndex)}
                   style={styles.input}
                   keyboardType="numeric"
@@ -431,7 +501,7 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
                 }
                 <TextInput
                   placeholder=""
-                  value={input.value}
+                  value={form.distanceInputs[inputIndex].value}
                   onChangeText={(text) => handleDistanceInputChange(text, formIndex, inputIndex)}
                   style={styles.input}
                   keyboardType="numeric"

@@ -15,6 +15,7 @@ import { ProfileScreen } from './profile/ProfileScreen';
 import { Header } from './components/Header';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SocialScreen } from './social/SocialScreen';
+import { useRealm, useUser } from '@realm/react';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -36,6 +37,9 @@ const Tab = createBottomTabNavigator();
 
 export const App = () => {
 
+  const realm = useRealm()
+  const user = useUser()
+
   return (
     <>
       {/* All screens nested in RealmProvider have access
@@ -49,9 +53,8 @@ export const App = () => {
               name='Statistics' 
               component={HomeScreen}
               options={{
-                headerTitle: () => <Header title="Statistics"/>,
                 headerStyle: {
-                  backgroundColor: '#E3E3E2',
+                  height: 0
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="chart-box" color={color} size={40} />
@@ -62,9 +65,8 @@ export const App = () => {
               name="Log Workout" 
               component={LogWorkoutScreen} 
               options={{
-                headerTitle: () => <Header title="Log Workout"/>,
                 headerStyle: {
-                  height: 0,
+                  height: 0
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="dumbbell" color={color} size={40} />
@@ -76,9 +78,8 @@ export const App = () => {
               name='Social' 
               component={SocialScreen}
               options={{
-                headerTitle: () => <Header title="Social"/>,
                 headerStyle: {
-                  backgroundColor: '#E3E3E2',
+                  height: 0,
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="account-group" color={color} size={40} />
@@ -88,18 +89,17 @@ export const App = () => {
               
             <Tab.Screen 
               name="Profile"
-              component={ProfileScreen}
               options={{
                 headerStyle: {
                   height: 0,
-                  backgroundColor: '#E3E3E2',
                 },
                 tabBarIcon: ({ color }) => (
                   <MaterialCommunityIcons name="account" color={color} size={40} />
                 ),
               }} 
-              
-            />
+            >
+              {() => <ProfileScreen restrictedView={false} user={user.id} closeProfile={''}></ProfileScreen>}
+            </Tab.Screen>
           </Tab.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>
@@ -107,22 +107,3 @@ export const App = () => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  footerText: {
-    fontSize: 12,
-    textAlign: 'center',
-    marginVertical: 4,
-  },
-  hyperlink: {
-    color: 'blue',
-  },
-  footer: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
-
-  header: {
-
-  }
-});

@@ -46,7 +46,7 @@ export const ResistanceWorkoutDisplayScreen = (props: ResistanceWorkoutDisplayPr
                             {
                                 JSON.parse(weights[index]).map((item:any, innerIndex:any) => {
                                     return (
-                                        <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', width: 200}}>
+                                        <View key={new BSON.ObjectID().toString()} style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', width: 200}}>
                                             <Text>{innerIndex + 1}</Text>
                                             <View style={{height: 20, width: 2, backgroundColor: 'gray'}}></View>
                                             <Text style={{fontSize: 18, fontWeight: '600'}}>{item.value} kg</Text>
@@ -56,7 +56,7 @@ export const ResistanceWorkoutDisplayScreen = (props: ResistanceWorkoutDisplayPr
                                 })
                             }
                         
-                        <View style={[styles.smallBorder, {backgroundColor: 'lightgray'}]}></View>
+                        <View key={new BSON.ObjectID().toString()} style={[styles.smallBorder, {backgroundColor: 'lightgray'}]}></View>
                         </>
                     )
                 })
