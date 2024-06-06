@@ -1,11 +1,13 @@
-import React, {useState} from 'react';
-import {Pressable, StyleSheet, Text, View, TouchableOpacity, ScrollView, Image} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Pressable, StyleSheet, Text, View, TouchableOpacity, ScrollView, Image, Dimensions, Alert} from 'react-native';
 import {colors} from './Colors';
 import { LogWorkoutCardio } from './components/LogWorkoutCardio'; 
 import { LogWorkoutResistance } from './components/LogWorkoutResistance';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SubmitCompletion } from './SubmitCompletion';
 import { shadow } from './Shadow';
+import Storage from 'react-native-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export function LogWorkoutScreen() {
@@ -13,9 +15,25 @@ export function LogWorkoutScreen() {
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [showSection, setShowSection] = useState<string>('');
 
-  const calcShowSection = (workoutType: string) => {
-    setShowSection(workoutType)
-    setShowGrid(false)
+  const calcShowSection = (workoutType:string) => {
+
+    if(currentWorkout.length == 0)
+    {
+      setShowSection(workoutType)
+      setShowGrid(false)
+    }
+
+    else
+    {
+      handleConfirm(workoutType)
+    }
+  }
+
+  const continueWorkout = (workoutType:string) => {
+    setCurrentWorkout([]); 
+    setShowSection(workoutType); 
+    setShowGrid(false); 
+    setContinuingWorkout(true)
   }
 
 
@@ -43,6 +61,59 @@ export function LogWorkoutScreen() {
   const [showResults, setShowResults] = useState<boolean>(false)
   const [gainedXp, setGainedXp] = useState<number>(0)
   const [levelUp, setLevelUp] = useState<boolean>(false)
+
+  const [currentWorkout, setCurrentWorkout] = useState<any>([]);
+  const [currentWorkoutType, setCurrentWorkoutType] = useState<string>('')
+  const [continuingWorkout, setContinuingWorkout] = useState<boolean>(false)
+
+  const storage = new Storage({
+    size: 1000,
+    storageBackend: AsyncStorage,
+  })
+
+  const loadCurrentWorkout = () => {
+    storage.load({
+      key: 'currentWorkout'
+    })
+    .then(ret => {setCurrentWorkout(ret.forms); console.log(ret.forms.length)})
+    .catch(err => {
+      console.warn(err.message);
+    })
+
+    storage.load({
+      key: 'workoutType'
+    })
+    .then(ret => {setCurrentWorkoutType(ret.workoutType)})
+    .catch(err => {
+      console.warn(err.message);
+    })
+  }
+
+  useEffect(() => {
+    loadCurrentWorkout()
+  }, [])
+
+  const screenHeight = Dimensions.get('window').height;
+
+  const handleConfirm = (workoutType:string) => {
+    // Show confirmation popup
+    Alert.alert(
+      'Confirm Action',
+      'Are you sure you want to delete your previous workout?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {setCurrentWorkout([]); setShowSection(workoutType); setShowGrid(false); setContinuingWorkout(false)},
+        },
+      ],
+      { cancelable: false }
+    );
+  };
   
 
   return (
@@ -53,7 +124,7 @@ export function LogWorkoutScreen() {
       }
 
       { showGrid &&
-        <View style={styles.container}>  
+        <View style={[styles.container, {height: screenHeight - 110}]}>  
           <TouchableOpacity style={[styles.gridOption, {backgroundColor: '#ED97A5'}, shadow.shadow]} onPress={() => calcShowSection("Cardio")}>
             <View style={[styles.circle, {backgroundColor: colors.red}]}>
               <Image style={styles.image} source={require('./resources/Heart.png')} />
@@ -69,15 +140,22 @@ export function LogWorkoutScreen() {
         </View>
       }
 
+      {
+        currentWorkout.length > 0 &&
+        <TouchableOpacity style={styles.continueButton} onPress={() => continueWorkout(currentWorkoutType)}>
+          <Text style={styles.buttonText}>Continue Workout</Text>
+        </TouchableOpacity>
+      }
+
   
       
 
       <ScrollView>
         { showSection == "Cardio" &&
-          <LogWorkoutCardio onPress={onSubmit} closeWorkout={clearWorkout}/>
+          <LogWorkoutCardio onPress={onSubmit} closeWorkout={clearWorkout} continuingWorkout={continuingWorkout}/>
         }
         { showSection == "Resistance" &&
-          <LogWorkoutResistance onPress={onSubmit} closeWorkout={clearWorkout}/>
+          <LogWorkoutResistance onPress={onSubmit} closeWorkout={clearWorkout} continuingWorkout={continuingWorkout}/>
         }
         
         
@@ -95,7 +173,7 @@ const styles = StyleSheet.create({
    
     container: {
       width: '97.5%',
-      aspectRatio: 1/1,
+      
       borderRadius: 20,
       marginRight: 'auto',
       marginLeft: 'auto',
@@ -158,6 +236,25 @@ const styles = StyleSheet.create({
       padding: 10,
       borderRadius: 5,
       marginBottom: 10,
+    },
+
+    continueButton: {
+      width: 190,
+      backgroundColor: colors.blue,
+      padding: 10,
+      borderRadius: 5,
+      marginBottom: 10,
+      marginRight: 'auto',
+      marginLeft: 'auto',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    buttonText: {
+      fontWeight: '800',
+      color: 'white',
+      fontSize: 20,
     },
 
     
