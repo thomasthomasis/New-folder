@@ -1,5 +1,5 @@
 import React, {useCallback, useState, useEffect, useRef} from 'react';
-import {Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator} from 'react-native';
+import {Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, Modal, TouchableWithoutFeedback} from 'react-native';
 import {Input, Button} from '@rneui/base';
 import { useQuery, useRealm, useUser } from '@realm/react';
 import { Users } from '../schemas/UsersSchema';
@@ -30,6 +30,11 @@ export const AccountScreen = (props: AccountScreenProps) => {
     const [firstName, setFirstName] = useState<string | undefined>(userData[0].firstName)
     const [surname, setSurname] = useState<string | undefined>(userData[0].lastName)
     const [username, setUsername] = useState<string | undefined>(userData[0].username)
+    const [title, setTitle] = useState<string | undefined>(userData[0].selectedTitle)
+    const [showModal, setShowModal] = useState<boolean>(false)
+    const [newProfilePictureBool, setNewProfilePictureBool] = useState<boolean>(false)
+
+    const titles = userData[0].titles
 
     const [isLoading, setIsLoading] = useState(true)
 
@@ -43,6 +48,10 @@ export const AccountScreen = (props: AccountScreenProps) => {
 
     const handleSurnameChange = (inputText:string) => {
         setSurname(inputText)
+    }
+
+    const handleTitleChange = (inputText:string) => {
+        setTitle(inputText)
     }
 
 
@@ -72,16 +81,36 @@ export const AccountScreen = (props: AccountScreenProps) => {
             setImageSourceText('./assets/4.png')
         }
 
+        setNewProfilePictureBool(true)
+
+        console.log(source)
+
         returnToMainMenu();
     }
 
-    const updateUserInformation = () => {
-        realm.write(() => {
-            userData[0].firstName = firstName;
-            userData[0].lastName = surname;
-            userData[0].profilePicture = imageSourceText;
-            userData[0].username = username;
-        })
+    const updateUserInformation = (newProfilePicture:boolean) => {
+
+        if(newProfilePicture)
+        {
+            realm.write(() => {
+                userData[0].firstName = firstName;
+                userData[0].lastName = surname;
+                userData[0].profilePicture = imageSourceText;
+                userData[0].username = username;
+                userData[0].selectedTitle = title;
+            })
+        }
+        else
+        {
+            realm.write(() => {
+                userData[0].firstName = firstName;
+                userData[0].lastName = surname;
+                userData[0].username = username;
+                userData[0].selectedTitle = title;
+            }) 
+        }
+
+        
 
         props.onPress()
     }
@@ -99,7 +128,7 @@ export const AccountScreen = (props: AccountScreenProps) => {
             },
             {
               text: 'OK',
-              onPress: () => updateUserInformation(),
+              onPress: () => updateUserInformation(newProfilePictureBool)
             },
           ],
           { cancelable: false }
@@ -108,7 +137,7 @@ export const AccountScreen = (props: AccountScreenProps) => {
 
     useEffect(() => {
 
-        //console.log(userData)
+        console.log(userData)
         if(userData[0].profilePicture?.includes('1'))
         {
           setImageSource(require('./assets/1.png'))
@@ -201,10 +230,42 @@ export const AccountScreen = (props: AccountScreenProps) => {
                     />
                 </View>
                 <View style={styles.row}>
+                    <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Title</Text>
+                    <TouchableOpacity style={{borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}} onPress={() => setShowModal(true)}>
+                    <Text style={{fontSize: 18, fontWeight: '600', }}>{title}</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.row}>
                     <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Joined</Text>
                     <Text style={{fontSize: 18, fontWeight: '600'}}>{userData[0].dateCreated?.toLocaleString()}</Text>
                 </View>
             </View>
+
+            <Modal
+            animationType="fade"
+            transparent={true}
+            visible={showModal}
+            onRequestClose={() => setShowModal(!showModal)}
+            >
+                <TouchableWithoutFeedback onPress={() => setShowModal(!showModal)}>
+                    <View style={styles.modalContainer}>
+                        <TouchableWithoutFeedback>
+                        
+                            <View style={styles.modalContent}>
+                                {
+                                    titles.map((item, index) => (
+                                        <TouchableOpacity key={index} onPress={() => {setShowModal(!showModal); setTitle(item)}} style={[styles.titleButton, {marginTop: 5, marginBottom: 5}]}>
+                                            <Text style={styles.titleButtonText}>{item}</Text>
+                                        </TouchableOpacity>
+                                    ))
+                                }
+                            </View>
+                        
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+                
+            </Modal>
             </>
                 )
                 
@@ -277,6 +338,41 @@ const styles = StyleSheet.create({
     image: {
         width: 150,
         height: 100,
-    }
+    },
+
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      },
+      modalContent: {
+        width: 300,
+        padding: 20,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        alignItems: 'center',
+      },
+      modalText: {
+        marginBottom: 20,
+        fontSize: 18,
+      },
+    
+      titleButton: {
+        width: 150,
+        height: 40,
+        backgroundColor: colors.blue, 
+        borderRadius: 10,
+
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+
+      titleButtonText: {
+        fontWeight: '800',
+        fontSize: 20,
+        color: 'white',
+      }
     
 })

@@ -93,6 +93,43 @@ export const GroupScreen = (props:GroupScreenProps) => {
         return role;
     }
 
+    const getProfilePicture = (userId:string) => {
+
+        const user:any = realm.objects("Users").filtered('userId == $0', userId)[0]
+
+        console.log(user)
+        
+
+        if(user.profilePicture)
+        {
+            const path = user.profilePicture ?? ""
+
+            if(path.includes('1'))
+            {
+                return require('./Group/assets/1.png')
+            }
+            else if(path.includes('2'))
+            {
+                return require('./Group/assets/2.png')
+            }
+            else if(path.includes('3'))
+            {
+                return require('./Group/assets/3.png')
+            }
+            else if(path.includes('4'))
+            {
+                return require('./Group/assets/4.png')
+            }
+        }
+
+        else
+        {
+            return ""
+        }
+        
+        
+      }
+
     const acceptUser = (userId:string) => {
         if(selectedGroup != null)
         {
@@ -142,6 +179,8 @@ export const GroupScreen = (props:GroupScreenProps) => {
     const stopViewingWorkout = () => {
         setViewingWorkout(false)
     }
+
+    
 
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
@@ -195,8 +234,8 @@ export const GroupScreen = (props:GroupScreenProps) => {
             (!viewingWorkout && !viewingProfile) &&
             <>
                 <View style={styles.pageVisualiser}>
-                    <Pressable onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 0 && {color: 'white'}}>History</Text></Pressable>
-                    <Pressable onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 1 && {color: 'white'}}>Leaderboard</Text></Pressable>
+                    <TouchableOpacity onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 0 && {color: 'white', fontWeight: '800'}}>History</Text></TouchableOpacity>
+                    <TouchableOpacity onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 1 && {color: 'white', fontWeight: '800'}}>Leaderboard</Text></TouchableOpacity>
                 </View>
                 <PagerView style={styles.pagerView} initialPage={selectedPage} onPageSelected={(event) => {setSelectedPage(event.nativeEvent.position)}} scrollEnabled={true} ref={pagerRef}>
                     <History key="1"/>
@@ -263,7 +302,7 @@ export const GroupScreen = (props:GroupScreenProps) => {
                             <>
                             <View key={(new BSON.ObjectID()).toString()} style={styles.userInfoContainer}>
                                 <View style={styles.userData}>
-                                    <Image source={require('./Group/assets/1.png')} style={styles.image}/>
+                                    <Image source={getProfilePicture(item)} style={styles.image}/>
                                     <View>
                                         <Text style={styles.username}>{getUserName(item)}</Text>
                                         <Text style={styles.role}>{getUserRole(item)}</Text>
@@ -316,23 +355,30 @@ const styles = StyleSheet.create({
         width: '100%', // Adjust width as needed
       },
     
-    pageVisualiser: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    },
-
-    bar: {
-    width: '50%',
-    backgroundColor: 'white',
-    height: 40,
-
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    },
+      pageVisualiser: {
+        width: '95%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderRadius: 40,
+        padding: 5,
+        marginTop: 0,
+        marginRight: 'auto',
+        marginLeft: 'auto',
+      },
+    
+      bar: {
+        width: '50%',
+        backgroundColor: 'white',
+        height: 40,
+        borderRadius: 40,
+    
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    
+      },
 
     modalView: {
         width: '100%',

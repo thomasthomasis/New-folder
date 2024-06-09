@@ -13,6 +13,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Storage from 'react-native-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Collapsible from 'react-native-collapsible';
+import { AddExercise } from './AddExercise';
 
 type LogWorkoutResistanceProps = {
   onPress:any,
@@ -26,7 +27,8 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
 
   const [selectingExercise, setSelectingExercise] = useState(false)
 
-  const userStatistics = useQuery(UserStatistics).filtered("userId == $0", user.id);
+  const userStatistics = realm.objects("UserStatistics").filtered("userId == $0", user.id);
+  const userData = realm.objects("Users").filtered("userId == $0", user.id);
 
   let extraExercises = useQuery(ExtraExercises).filtered("userId == $0 && type == $1", user.id, "Resistance");
 
@@ -180,22 +182,35 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
       reps.push(JSON.stringify(forms[i].repInputs))
       exercises.push(JSON.stringify(forms[i].exercise))
 
-      forms[i].repInputs.forEach(({item}:any) => totalReps += Number(item.value))
-      forms[i].weightInputs.forEach(({item}:any) => totalVolume += Number(item.value))
+      forms[i].repInputs.forEach(({item}:any) => {
+        if(item && item.value != null)
+          {
+            totalReps += Number(item.value)
+          }
+      })
+
+      forms[i].weightInputs.forEach(({item}:any) => {
+        if(item && item.value != null)
+          {
+            totalVolume += Number(item.value)
+          }
+      })
+
       if(!allExercises.includes(forms[i].exercise.value))
       {
         allExercises.push(forms[i].exercise.value)
       }
     }
-
-    let previousLevel = userStatistics[0].lvl;
+  
+    let previousLevel = userStatistics[0].lvl as number;
 
     const id = new BSON.ObjectID();
     createItem(id, exercises, reps, weights, totalReps, totalVolume, allExercises)
     logWorkout(id, "Resistance")
     updateUserStatistics(totalVolume, totalReps)
+    updateUserTitles(userStatistics[0].lvl as number)
 
-    let postLevel = userStatistics[0].lvl;
+    let postLevel = userStatistics[0].lvl as number;
     let levelUp = false;
 
     if(postLevel > previousLevel)
@@ -245,8 +260,8 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
     const updateUserStatistics = useCallback(
       (totalVolume:number, totalReps:number) => {
   
-        let lvl = userStatistics[0].lvl;
-        let xp = userStatistics[0].xp;
+        let lvl = userStatistics[0].lvl as number;
+        let xp = userStatistics[0].xp as number;
   
         let xpGained:number = totalVolume + totalReps + 100;
   
@@ -255,22 +270,159 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
         let newLvl = userStatistics[0].lvl;
         let newXp = userStatistics[0].xp;
         let newXpTarget = userStatistics[0].xpTarget;
-  
+
         if(object != null)
         {
           newLvl = object?.newLvl;
           newXp = object?.newXp;
           newXpTarget = object?.newXpTarget;
         }
+
+        let numWorkouts = userStatistics[0].numWorkouts as number;
+        let numResistanceWorkouts = userStatistics[0].numResistanceWorkouts as number;
   
   
         realm.write(() => {
           userStatistics[0].lvl = newLvl,
           userStatistics[0].xp = newXp,
-          userStatistics[0].numWorkouts++,
-          userStatistics[0].numResistanceWorkouts++,
+          userStatistics[0].numWorkouts = numWorkouts + 1,
+          userStatistics[0].numResistanceWorkouts = numResistanceWorkouts + 1,
           userStatistics[0].xpTarget = newXpTarget
         })
+      }, [realm, user])
+
+    const updateUserTitles = useCallback(
+      (level:any) => {
+        let newUnlockedTitles:string[] = [];
+
+        const titles = ["Newbie", "Starter", "Rookie", "Novice", "Fitness Enthusiast", "Active Achiever", "Workout Warrior", "Movement Monk", "Determined Disciple", "Fitness Pro", "Exercise Expert", "Strength Master", "Endurance Elite", "Power Performer", "Ultimate Athlete", "Fitness Guru", "Master Trainer", "Elite Champion", "Fitness God"];
+
+        console.log(newUnlockedTitles)
+        console.log(level)
+
+        newUnlockedTitles.push(titles[0])
+
+        if(level > 190)
+        {
+          if(!newUnlockedTitles.includes(titles[18])){
+            newUnlockedTitles.push(titles[18])
+          }
+        }
+        else if(level > 180)
+        {
+          if(!newUnlockedTitles.includes(titles[17])){
+            newUnlockedTitles.push(titles[17])
+          }
+        }
+        else if(level > 170)
+        {
+          if(!newUnlockedTitles.includes(titles[16])){
+            newUnlockedTitles.push(titles[16])
+          }
+        }
+        else if(level > 160)
+        {
+          if(!newUnlockedTitles.includes(titles[15])){
+            newUnlockedTitles.push(titles[15])
+          }
+        }
+        else if(level > 150)
+        {
+          if(!newUnlockedTitles.includes(titles[14])){
+            newUnlockedTitles.push(titles[14])
+          }
+        }
+        else if(level > 140)
+        {
+          if(!newUnlockedTitles.includes(titles[14])){
+            newUnlockedTitles.push(titles[14])
+          }
+        }
+        else if(level > 130)
+        {
+          if(!newUnlockedTitles.includes(titles[13])){
+            newUnlockedTitles.push(titles[13])
+          }
+        }
+        else if(level > 120)
+        {
+          if(!newUnlockedTitles.includes(titles[12])){
+            newUnlockedTitles.push(titles[12])
+          }
+        }
+        else if(level > 110)
+        {
+          if(!newUnlockedTitles.includes(titles[11])){
+            newUnlockedTitles.push(titles[11])
+          }
+        }
+        else if(level > 100)
+        {
+          if(!newUnlockedTitles.includes(titles[10])){
+            newUnlockedTitles.push(titles[10])
+          }
+        }
+        else if(level > 90)
+        {
+          if(!newUnlockedTitles.includes(titles[9])){
+            newUnlockedTitles.push(titles[9])
+          }
+        }
+        else if(level > 80)
+        {
+          if(!newUnlockedTitles.includes(titles[8])){
+            newUnlockedTitles.push(titles[8])
+          }
+        }
+        else if(level > 70)
+        {
+          if(!newUnlockedTitles.includes(titles[7])){
+            newUnlockedTitles.push(titles[7])
+          }
+        }
+        else if(level > 60)
+        {
+          if(!newUnlockedTitles.includes(titles[6])){
+            newUnlockedTitles.push(titles[6])
+          }
+        }
+        else if(level > 50)
+        {
+          if(!newUnlockedTitles.includes(titles[5])){
+            newUnlockedTitles.push(titles[5])
+          }
+        }
+        else if(level > 40)
+        {
+          if(!newUnlockedTitles.includes(titles[4])){
+            newUnlockedTitles.push(titles[4])
+          }
+        }
+        else if(level > 30)
+        {
+          if(!newUnlockedTitles.includes(titles[3])){
+            newUnlockedTitles.push(titles[3])
+          }
+        }
+        else if(level > 20)
+        {
+          if(!newUnlockedTitles.includes(titles[2])){
+            newUnlockedTitles.push(titles[2])
+          }
+        }
+        else if(level > 10)
+        {
+          if(!newUnlockedTitles.includes(titles[1])){
+            newUnlockedTitles.push(titles[1])
+          }
+        }
+
+        console.log(newUnlockedTitles)
+
+        realm.write(() => {
+          userData[0].titles = newUnlockedTitles
+        })
+
       }, [realm, user])
 
       const calculateLevel = (currLvl:number, currXp:number, xpGained:number) => {
@@ -383,25 +535,19 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
       };
     
       const [visible, setVisible] = useState<boolean>(false)
-      const [modalInput, setModalInput] = useState<string>('')
-      const [noNameAlert, setNoNameAlert] = useState<boolean>(false)
+      const [addingExercise, setAddingExercise] = useState<boolean>(false)
     
       const onClose = () => {
-    
-        setVisible(false);
-        setModalInput('')
-        setNoNameAlert(false)
+        setVisible(false)
+      }
+
+      const exitExerciseManipulation = () => {
+        setAddingExercise(false)
       }
     
     
       const addExercise = useCallback(
         (input:string, selectedMuscles:string) => {
-    
-          if(!input.trim())
-          {
-            setNoNameAlert(true)
-            return;
-          }
     
           realm.write(() => {
             return new ExtraExercises(realm, {
@@ -413,7 +559,6 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
             })
           })
     
-          onClose()
           updateExerciseList()
         }, [realm, user])
     
@@ -741,37 +886,6 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
     
   ]
 
-  const muscles = ["Neck", "Back", "Shoulders", "Chest", "Biceps", "Triceps", "Forearms", "Core", "Quads", "Glutes", "Hip Flexors", "Groin", "Hamstrings", "Calves", "Other"]
-  const [boxChecked, setBoxChecked] = useState<boolean[]>([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false])
-
-  const [selectedMuscles, setSelectedMuscles] = useState<string>('')
-
-  const addSelectedMuscle = (muscle:string, index:any) => {
-    let musclesBefore = selectedMuscles;
-
-    if(!musclesBefore.includes(muscle))
-    {
-      const newMuscles = musclesBefore + (muscle + ",")
-      setSelectedMuscles(newMuscles)
-
-      console.log(newMuscles)
-    }
-    else
-    {
-      const newMuscles = musclesBefore.replace(muscle + ",", "")
-      setSelectedMuscles(newMuscles)
-
-      console.log(newMuscles)
-    }
-    
-    const newCheckedBoxes = boxChecked;
-    newCheckedBoxes[index] = !newCheckedBoxes[index];
-    setBoxChecked(newCheckedBoxes)
-    
-
-    //console.log(newMuscles)
-  }
-
   const AccordionView = () => {
 
     const [collapsed, setCollapsed] = useState<boolean[]>([true, true, true, true, true, true, true, true, true, true, true, true, true, true, true])
@@ -1088,7 +1202,7 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
     
     <>
     {
-      !selectingExercise && 
+      (!selectingExercise && !addingExercise) && 
       <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, backgroundColor: colors.black}}>
         <TouchableOpacity onPress={handleCancel}>
             <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
@@ -1099,20 +1213,20 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
       </View>
     }
     {
-      selectingExercise &&
+      (selectingExercise && !addingExercise) &&
       <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, backgroundColor: colors.black}}>
         <TouchableOpacity onPress={() => setSelectingExercise(false)}>
             <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setVisible(true)}>
-            <MaterialCommunityIcons name="plus" color={'white'} size={40} style={{marginRight: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
+            <MaterialCommunityIcons name="dots-vertical" color={'white'} size={40} style={{marginRight: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
         </TouchableOpacity>
       </View>
     }
     
 
     {
-      selectingExercise &&
+      (selectingExercise && !addingExercise) &&
       <View style={{width: '100%', backgroundColor: colors.black}} onTouchStart={Keyboard.dismiss}>
         <TextInput
         style={{ height: 40, width: '80%', marginRight: 'auto', marginLeft: 'auto', borderColor: 'black', backgroundColor: 'white', borderWidth: 1, borderRadius: 15, marginBottom: 20, padding: 10, }}
@@ -1140,7 +1254,7 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
       </View>
     }
     {
-      !selectingExercise &&
+      (!selectingExercise && !addingExercise) &&
     <View style={styles.container}>
         
       {forms.map((form:any, formIndex:any) => (
@@ -1204,7 +1318,12 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
     </View>
     }
 
-    <Modal
+    {
+      addingExercise &&
+      <AddExercise addExercise={addExercise} exit={exitExerciseManipulation}/>
+    }
+
+<Modal
       visible={visible}
       animationType="fade"
       transparent={true}
@@ -1213,31 +1332,10 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
       <TouchableWithoutFeedback  onPress={onClose}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', }}>
           <TouchableWithoutFeedback>
-            <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 , width: '80%',}}>
-              <Text style={{ fontSize: 18, marginBottom: 10 }}>Enter Exercise Name:</Text>
-              <TextInput
-                style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 20, padding: 10 }}
-                placeholder="Enter name..."
-                value={modalInput}
-                onChangeText={setModalInput}
-              />
-              {
-                muscles.map((item, index) => (
-                  <> 
-                  <View key={index} style={styles.muscleChoice}>
-                    <Text>{item}</Text>
-                    <TouchableOpacity style={[styles.checkbox, boxChecked[index] && {backgroundColor: colors.green}]} onPress={() => addSelectedMuscle(item, index)}></TouchableOpacity>
-                  </View>
-                  <View style={styles.borderBottom}></View>
-                  </>
-                  
-                ))
-              }
-              <Button title="Submit" onPress={() => addExercise(modalInput, selectedMuscles)} />
-              {
-                noNameAlert &&
-                <Text style={{color: 'red', fontSize: 18, fontWeight: '800', textAlign: 'center'}}>A name is required!</Text>
-              }
+            <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 , width: '80%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+              <TouchableOpacity style={styles.addExerciseButton} onPress={() => {setAddingExercise(true); onClose()}} >
+                <Text style={styles.addExerciseButtonText}>Add Exercise</Text>
+              </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -1428,31 +1526,23 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 
-  muscleChoice: {
-    width: '50%',
-    marginRight: 'auto',
-    marginLeft: 'auto',
-    marginBottom: 5,
-    marginTop: 5,
+  addExerciseButton: {
+    width: 150,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: colors.blue,
+
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
 
-    flexDirection: 'row',
+    marginTop: 5,
+    marginBottom: 5,
   },
 
-  checkbox: {
-    borderWidth: 2,
-    borderColor: colors.green,
-    width: 25,
-    height: 25,
+  addExerciseButtonText: {
+    fontWeight: '800',
+    color: 'white'
   },
-
-  borderBottom: {
-    width: '100%',
-    height: 2,
-    backgroundColor: 'lightgray',
-  }
-
     
   });

@@ -26,7 +26,8 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 
   const [selectingExercise, setSelectingExercise] = useState(false)
 
-  const userStatistics = useQuery(UserStatistics).filtered("userId == $0", user.id);
+  const userStatistics = realm.objects("UserStatistics").filtered("userId == $0", user.id);
+  const userData = realm.objects("Users").filtered("userId == $0", user.id);
 
   let extraExercises = useQuery(ExtraExercises).filtered("userId == $0 && type == $1", user.id, "Cardio");
   const normalExercises = ["Treadmill", "Elliptical", "Indoor Bike", "Jump Rope", "Outdoor Bike", "Swimming", "Rowing Machine", "Outdoor Run", "Outdoor Walk", "Stair Machine", "Sprints"];
@@ -174,22 +175,37 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
       exercises.push(JSON.stringify(forms[i].exercise))
       extraNotes.push(JSON.stringify(forms[i].extraNotes))
 
-      forms[i].timeInputs.forEach(({item}:any) => totalTime += Number(item.value))
-      forms[i].distanceInputs.forEach(({item}:any) => totalDistance += Number(item.value))
+      console.log(forms[i].timeInputs[0].value)
+
+      forms[i].timeInputs.forEach(({item}:any) => {
+        if(item && item.value != null)
+          {
+            totalTime += Number(item.value)
+          }
+      })
+
+      forms[i].distanceInputs.forEach(({item}:any) => {
+        if(item && item.value != null)
+          {
+            totalDistance += Number(item.value)
+          }
+        
+      })
       if(!allExercises.includes(forms[i].exercise.value))
       {
         allExercises.push(forms[i].exercise.value)
       }
     }
 
-    let previousLevel = userStatistics[0].lvl;
+    let previousLevel = userStatistics[0].lvl as number;
 
     const id = new BSON.ObjectID();
     createItem(id, exercises, times, distances, extraNotes, totalTime, totalDistance, allExercises)
     logWorkout(id, "Cardio")
     updateUserStatistics(totalTime, totalDistance)
+    updateUserTitles(userStatistics[0].lvl as number)
 
-    let postLevel = userStatistics[0].lvl;
+    let postLevel = userStatistics[0].lvl as number;
     let levelUp = false;
 
     if(postLevel > previousLevel)
@@ -239,8 +255,8 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
   const updateUserStatistics = useCallback(
     (totalTime:number, totalDistance:number) => {
 
-      let lvl = userStatistics[0].lvl;
-      let xp = userStatistics[0].xp;
+      let lvl = userStatistics[0].lvl as number;
+      let xp = userStatistics[0].xp as number;
 
       let xpGained:number = totalTime + totalDistance + 100;
 
@@ -257,15 +273,152 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
         newXpTarget = object?.newXpTarget;
       }
 
+      let numWorkouts = userStatistics[0].numWorkouts as number;
+      let numCardioWorkouts = userStatistics[0].numCardioWorkouts as number;
+
 
       realm.write(() => {
         userStatistics[0].lvl = newLvl,
         userStatistics[0].xp = newXp,
-        userStatistics[0].numWorkouts++,
-        userStatistics[0].numCardioWorkouts++,
+        userStatistics[0].numWorkouts = numWorkouts + 1,
+        userStatistics[0].numCardioWorkouts = numCardioWorkouts + 1,
         userStatistics[0].xpTarget = newXpTarget
       })
     }, [realm, user])
+
+    const updateUserTitles = useCallback(
+      (level:any) => {
+        let newUnlockedTitles:string[] = [];
+
+        const titles = ["Newbie", "Starter", "Rookie", "Novice", "Fitness Enthusiast", "Active Achiever", "Workout Warrior", "Movement Monk", "Determined Disciple", "Fitness Pro", "Exercise Expert", "Strength Master", "Endurance Elite", "Power Performer", "Ultimate Athlete", "Fitness Guru", "Master Trainer", "Elite Champion", "Fitness God"];
+
+        console.log(newUnlockedTitles)
+        console.log(level)
+
+        newUnlockedTitles.push(titles[0])
+
+        if(level > 190)
+        {
+          if(!newUnlockedTitles.includes(titles[18])){
+            newUnlockedTitles.push(titles[18])
+          }
+        }
+        else if(level > 180)
+        {
+          if(!newUnlockedTitles.includes(titles[17])){
+            newUnlockedTitles.push(titles[17])
+          }
+        }
+        else if(level > 170)
+        {
+          if(!newUnlockedTitles.includes(titles[16])){
+            newUnlockedTitles.push(titles[16])
+          }
+        }
+        else if(level > 160)
+        {
+          if(!newUnlockedTitles.includes(titles[15])){
+            newUnlockedTitles.push(titles[15])
+          }
+        }
+        else if(level > 150)
+        {
+          if(!newUnlockedTitles.includes(titles[14])){
+            newUnlockedTitles.push(titles[14])
+          }
+        }
+        else if(level > 140)
+        {
+          if(!newUnlockedTitles.includes(titles[14])){
+            newUnlockedTitles.push(titles[14])
+          }
+        }
+        else if(level > 130)
+        {
+          if(!newUnlockedTitles.includes(titles[13])){
+            newUnlockedTitles.push(titles[13])
+          }
+        }
+        else if(level > 120)
+        {
+          if(!newUnlockedTitles.includes(titles[12])){
+            newUnlockedTitles.push(titles[12])
+          }
+        }
+        else if(level > 110)
+        {
+          if(!newUnlockedTitles.includes(titles[11])){
+            newUnlockedTitles.push(titles[11])
+          }
+        }
+        else if(level > 100)
+        {
+          if(!newUnlockedTitles.includes(titles[10])){
+            newUnlockedTitles.push(titles[10])
+          }
+        }
+        else if(level > 90)
+        {
+          if(!newUnlockedTitles.includes(titles[9])){
+            newUnlockedTitles.push(titles[9])
+          }
+        }
+        else if(level > 80)
+        {
+          if(!newUnlockedTitles.includes(titles[8])){
+            newUnlockedTitles.push(titles[8])
+          }
+        }
+        else if(level > 70)
+        {
+          if(!newUnlockedTitles.includes(titles[7])){
+            newUnlockedTitles.push(titles[7])
+          }
+        }
+        else if(level > 60)
+        {
+          if(!newUnlockedTitles.includes(titles[6])){
+            newUnlockedTitles.push(titles[6])
+          }
+        }
+        else if(level > 50)
+        {
+          if(!newUnlockedTitles.includes(titles[5])){
+            newUnlockedTitles.push(titles[5])
+          }
+        }
+        else if(level > 40)
+        {
+          if(!newUnlockedTitles.includes(titles[4])){
+            newUnlockedTitles.push(titles[4])
+          }
+        }
+        else if(level > 30)
+        {
+          if(!newUnlockedTitles.includes(titles[3])){
+            newUnlockedTitles.push(titles[3])
+          }
+        }
+        else if(level > 20)
+        {
+          if(!newUnlockedTitles.includes(titles[2])){
+            newUnlockedTitles.push(titles[2])
+          }
+        }
+        else if(level > 10)
+        {
+          if(!newUnlockedTitles.includes(titles[1])){
+            newUnlockedTitles.push(titles[1])
+          }
+        }
+
+        console.log(newUnlockedTitles)
+
+        realm.write(() => {
+          userData[0].titles = newUnlockedTitles
+        })
+
+      }, [realm, user])
 
     const calculateLevel = (currLvl:number, currXp:number, xpGained:number) => {
 

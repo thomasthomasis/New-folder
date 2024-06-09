@@ -31,6 +31,43 @@ export const GroupMembersSettingsScreen = (props:GroupMembersSettingsScreenProps
         return user.username;
     }
 
+    const getProfilePicture = (userId:string) => {
+
+        const user:any = realm.objects("Users").filtered('userId == $0', userId)[0]
+
+        console.log(user)
+        
+
+        if(user.profilePicture)
+        {
+            const path = user.profilePicture ?? ""
+
+            if(path.includes('1'))
+            {
+                return require('./Group/assets/1.png')
+            }
+            else if(path.includes('2'))
+            {
+                return require('./Group/assets/2.png')
+            }
+            else if(path.includes('3'))
+            {
+                return require('./Group/assets/3.png')
+            }
+            else if(path.includes('4'))
+            {
+                return require('./Group/assets/4.png')
+            }
+        }
+
+        else
+        {
+            return ""
+        }
+        
+        
+      }
+
     const getUserRole = (userId:string) => {
 
         const index = stringIds.indexOf(userId)
@@ -134,7 +171,7 @@ export const GroupMembersSettingsScreen = (props:GroupMembersSettingsScreenProps
                             <>
                             <View key={(new BSON.ObjectID()).toString()} style={styles.userInfoContainer}>
                                 <View style={styles.userData}>
-                                    <Image source={require('./Group/assets/1.png')} style={styles.image}/>
+                                    <Image source={getProfilePicture(item)} style={styles.image}/>
                                     <View>
                                         <Text style={styles.username}>{getUserName(item)}</Text>
                                         <Text style={styles.role}>{getUserRole(item)}</Text>

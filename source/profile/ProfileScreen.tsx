@@ -1,5 +1,5 @@
 import React, {useCallback, useState, useEffect, useRef} from 'react';
-import {Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View, Image, TouchableOpacity} from 'react-native';
+import {Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator} from 'react-native';
 import {Input, Button} from '@rneui/base';
 import { useQuery, useRealm, useUser } from '@realm/react';
 import { Users } from '../schemas/UsersSchema';
@@ -22,11 +22,51 @@ export const ProfileScreen = (props:ProfileScreenProps) => {
     const realm = useRealm();
     const user = useUser();
   
-    const userData = useQuery(Users).sorted('_id').filtered("userId == $0", props.user);
-    const userStats = useQuery(UserStatistics).filtered("userId == $0", props.user);
+    let userData = realm.objects("Users").sorted('_id').filtered("userId == $0", props.user);
+    let userStats = realm.objects("UserStatistics").filtered("userId == $0", props.user);
 
     const [showAccount, setShowAccount] = useState<boolean>(false)
-    const [imageSource, setImageSource] = useState(require('./assets/1.png'))
+    const [imageSource, setImageSource] = useState()
+
+    const [unleveled, setUnleveled] = useState<number>(200);
+    const [leveled, setLeveled] = useState<number>(0);
+
+    const [loading, setLoading] = useState<boolean>(true)
+    
+    useEffect(() => {
+        getUserStats()
+    }, [])
+
+    const delay = (ms:any) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const getUserStats = async () => {
+
+      if(userData && userStats && userStats.length > 0)
+      {
+        let xp:any = userStats[0].xp;
+        let xpTarget:any = userStats[0].xpTarget
+        if(xp)
+        {
+          setLeveled(Number(((xp/xpTarget) * 200).toFixed(0)));
+          setUnleveled(200 - leveled);
+  
+          setLoading(false)
+        }
+        else
+        {
+          getUserStats()
+        }
+      }
+
+      else
+      {
+        userData = realm.objects("Users").sorted('_id').filtered("userId == $0", props.user);
+        userStats = realm.objects("UserStatistics").filtered("userId == $0", props.user);
+        await delay(500)
+        getUserStats()
+      }
+      
+    }
 
     const closeAccountScreen = () => {
       setShowAccount(false)
@@ -56,39 +96,35 @@ export const ProfileScreen = (props:ProfileScreenProps) => {
       );
     };
 
-    
-
     useEffect(() => {
       //console.log(userData)
-      if(userData[0].profilePicture?.includes('1'))
+      let user = userData[0];
+      let profilePicture:string = user.profilePicture as string;
+
+      if(profilePicture)
       {
-        setImageSource(require('./assets/1.png'))
+        console.log(profilePicture)
+        if(profilePicture.includes('1'))
+          {
+            setImageSource(require('./assets/1.png'))
+          }
+          else if(profilePicture.includes('2'))
+          {
+            setImageSource(require('./assets/2.png'))
+          }
+          else if(profilePicture.includes('3'))
+          {
+            setImageSource(require('./assets/3.png'))
+          }
+          else if(profilePicture.includes('4'))
+          {
+            setImageSource(require('./assets/4.png'))
+          }
       }
-      else if(userData[0].profilePicture?.includes('2'))
-      {
-        setImageSource(require('./assets/2.png'))
-      }
-      else if(userData[0].profilePicture?.includes('3'))
-      {
-        setImageSource(require('./assets/3.png'))
-      }
-      else if(userData[0].profilePicture?.includes('4'))
-      {
-        setImageSource(require('./assets/4.png'))
-      }
+      
+      
     }, [userData])
 
-
-    const [unleveled, setUnleveled] = useState<number>(200);
-    const [leveled, setLeveled] = useState<number>(0);
-    
-    useEffect(() => {
-        let xp = userStats[0].xp;
-
-        setLeveled(Number(((xp/userStats[0].xpTarget) * 200).toFixed(0)));
-        setUnleveled(200 - leveled);
-
-    }, [userStats])
 
     useEffect(() => {
       realm.subscriptions.update(mutableSubs => {
@@ -103,9 +139,13 @@ export const ProfileScreen = (props:ProfileScreenProps) => {
       }, [realm, user]);
 
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, loading && {justifyContent: 'center'}]}>
         {
-          !showAccount &&
+          loading &&
+          <ActivityIndicator size="large" color="#0000ff" />
+        }
+        {
+          (!showAccount && !loading) &&
           <>
           <View style={[styles.information, shadow.shadow]}>
             {
@@ -130,13 +170,21 @@ export const ProfileScreen = (props:ProfileScreenProps) => {
             
             <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
               <View style={styles.profilePictureContainer}>
-                  <Image source={imageSource} style={{width: 120, height: 120, borderRadius: 100,}}/>
+              {
+                imageSource &&
+                <Image source={imageSource} style={{width: 120, height: 120, borderRadius: 100,}}/>
+              }
+              {
+                !imageSource &&
+                <Image source={require("./assets/3.png")} style={{width: 120, height: 120, borderRadius: 100,}}/>
+              }
+                  
                 </View>
               
               <View style={{display: 'flex', flexDirection: 'column'}}>
-                <Text style={styles.name}>{userData[0].firstName} {userData[0].lastName}</Text>
-                <Text style={styles.username}>{userData[0].username}</Text>
-                <Text style={styles.title}>Newbie</Text>
+                <Text style={styles.name}>{userData[0].firstName as string} {userData[0].lastName as string}</Text>
+                <Text style={styles.username}>{userData[0].username as string}</Text>
+                <Text style={styles.title}>{userData[0].selectedTitle as string}</Text>
               </View>
             </View>
               
