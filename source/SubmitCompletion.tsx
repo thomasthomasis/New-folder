@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Pressable, StyleSheet, Text, View, TouchableOpacity, ScrollView, Image} from 'react-native';
+import {Pressable, StyleSheet, Text, View, TouchableOpacity, ScrollView, Image, Dimensions} from 'react-native';
 import {colors} from './Colors';
 import { LogWorkoutCardio } from './components/LogWorkoutCardio'; 
 import { LogWorkoutResistance } from './components/LogWorkoutResistance';
@@ -14,7 +14,7 @@ type SubmitCompletionProps = {
     gainedXp:number,
 }
 
-
+const {width, height} = Dimensions.get("window")
 
 export const SubmitCompletion = (props:SubmitCompletionProps) => {
 
@@ -41,6 +41,8 @@ export const SubmitCompletion = (props:SubmitCompletionProps) => {
           )
       });
       }, [realm, user]);
+
+    
 
     return (
         <View style={styles.container}>
@@ -92,7 +94,7 @@ export const SubmitCompletion = (props:SubmitCompletionProps) => {
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        height: '100%',
+        height: height,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',

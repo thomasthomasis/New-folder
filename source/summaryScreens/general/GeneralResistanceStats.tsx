@@ -2,7 +2,7 @@ import React, {useCallback, useState, useEffect} from 'react';
 import {Alert, FlatList, Pressable, SafeAreaView, StyleSheet, Switch, Text, View} from 'react-native';
 import { CardioStats } from '../specific/CardioStats';
 
-import { colors } from '../../../Colors'
+import { colors } from '../../Colors'
 import { ResistanceStats } from '../specific/ResistanceStats';
 
 type GeneralResistanceStatsProps = {

@@ -120,6 +120,7 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
   const storage = new Storage({
     size: 1000,
     storageBackend: AsyncStorage,
+    defaultExpires: null,
   })
 
   const saveCurrentWorkout = () => {
@@ -582,7 +583,7 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
     <>
     {
       !selectingExercise && 
-      <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, backgroundColor: colors.red}}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={handleCancel}>
             <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
         </TouchableOpacity>
@@ -593,7 +594,7 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
     }
     {
       selectingExercise &&
-      <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, backgroundColor: colors.red}}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => setSelectingExercise(false)}>
             <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
         </TouchableOpacity>
@@ -606,7 +607,7 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 
     {
       selectingExercise &&
-      <View style={{width: '100%', backgroundColor: colors.red}} onTouchStart={Keyboard.dismiss}>
+      <View style={{width: '100%', backgroundColor: colors.red}}>
         <TextInput
         style={{ height: 40, width: '80%', marginRight: 'auto', marginLeft: 'auto', borderColor: 'black', backgroundColor: 'white', borderWidth: 1, borderRadius: 15, marginBottom: 20, padding: 10, }}
         placeholder="Search..."
@@ -628,50 +629,65 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
     <View style={styles.container}>
         
       {forms.map((form:any, formIndex:any) => (
-        <View key={form.id} style={styles.form}>
+        <View key={new BSON.ObjectID().toString()} style={styles.form}>
           <Text style={styles.exercise}>{forms[formIndex].exercise.value}</Text>
+          <View style={styles.smallBorder}></View>
       {form.inputs.map((input:any, inputIndex:any) => (
-        <View key={input.id} style={styles.row}>
+        <View key={new BSON.ObjectID().toString()} style={styles.row}>
             <View style={styles.inputs}>
-              <View style={styles.inputContainer}>
-                {
-                  inputIndex == 0 &&
-                  <Text style={{fontSize: 16, color: 'white'}}>Time</Text>
-                }
-                <TextInput
-                  placeholder=""
-                  value={form.timeInputs[inputIndex].value}
-                  onChangeText={(text) => handleTimeInputChange(text, formIndex, inputIndex)}
-                  style={styles.input}
-                  keyboardType="numeric"
-                />
+              <View style={styles.inputBoxes}>
+                <View style={styles.inputContainer}>
+                  {
+                    inputIndex == 0 &&
+                    <Text style={{fontSize: 14, color: 'black', marginBottom: 10, fontWeight: '700'}}>Time</Text>
+                  }
+                  {
+                    inputIndex > 0 &&
+                    <Text></Text>
+                  }
+                  <TextInput
+                    placeholder=""
+                    value={form.timeInputs[inputIndex].value}
+                    onChangeText={(text) => handleTimeInputChange(text, formIndex, inputIndex)}
+                    style={styles.input}
+                    keyboardType="numeric"
+                  />
+                </View>
+                
+                <View style={styles.inputContainer}>
+                  {
+                    inputIndex == 0 &&
+                    <Text style={{fontSize: 14, color: 'black', marginBottom: 10, fontWeight: '700'}}>Distance</Text>
+                  }
+                  {
+                    inputIndex > 0 &&
+                    <Text></Text>
+                  }
+                  <TextInput
+                    placeholder=""
+                    value={form.distanceInputs[inputIndex].value}
+                    onChangeText={(text) => handleDistanceInputChange(text, formIndex, inputIndex)}
+                    style={styles.input}
+                    keyboardType="numeric"
+                  />
+                </View>
               </View>
               
-              <View style={styles.inputContainer}>
-                {
-                  inputIndex == 0 &&
-                  <Text style={{fontSize: 16, color: 'white'}}>Distance</Text>
-                }
-                <TextInput
-                  placeholder=""
-                  value={form.distanceInputs[inputIndex].value}
-                  onChangeText={(text) => handleDistanceInputChange(text, formIndex, inputIndex)}
-                  style={styles.input}
-                  keyboardType="numeric"
-                />
-              </View>
             </View>
             
+            <View style={styles.inputContainer}>
               <View style={styles.removeButtonContainer}>
-                <Pressable onPress={() => handleRemoveInput(formIndex, inputIndex)} style={styles.removeButton}>
-                  <Text style={{color: 'white', fontSize: 20}}>X</Text>
-                </Pressable>
+                <TouchableOpacity onPress={() => handleRemoveInput(formIndex, inputIndex)} style={styles.removeButton}>
+                  <MaterialCommunityIcons name="delete" color={colors.red} size={30} style={{borderRadius: 40}}/>
+                </TouchableOpacity>
               </View>
+            </View>
+              
         </View>
       ))}
 
       <View style={styles.textareaContainer}>
-        <Text style={{color: 'white'}}>Extra Info</Text>
+      <Text style={{fontSize: 14, color: 'black', marginBottom: 10, fontWeight: '700', marginTop: 30}}>Extra Info</Text>
         <TextInput 
           value={form.extraNotes.value} 
           onChangeText={(text) => handleExtraNotesInputChange(text, formIndex)} 
@@ -683,20 +699,23 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
         />
       </View>
       
-      <Pressable onPress={() => handleAddInput(formIndex)} style={styles.addButton}>
-        <Text>Add Interval</Text>
-      </Pressable>
+      <View style={styles.rowButtons}>
+        <TouchableOpacity onPress={() => handleAddInput(formIndex)} style={styles.addButton}>
+          <Text>Add Interval</Text>
+        </TouchableOpacity>
 
-      <Pressable onPress={() => handleRemoveForm(formIndex)} style={styles.addButton}>
-        <Text>Remove Exercise</Text>
-      </Pressable>
-      
+        <TouchableOpacity onPress={() => handleRemoveForm(formIndex)} style={styles.addButton}>
+          <Text>Remove Exercise</Text>
+        </TouchableOpacity>
+        
+        </View>
       </View>
+      
       ))}
 
-      <Pressable onPress={() => setSelectingExercise(true)} style={styles.button}>
-        <Text>Add Exercise</Text>
-      </Pressable>
+      <TouchableOpacity onPress={() => setSelectingExercise(true)} style={[styles.button, shadow.shadow]}>
+        <Text style={{color: 'gray', fontWeight: '800', fontSize: 20,}}>Add Exercise</Text>
+      </TouchableOpacity>
       
     </View>
     }
@@ -738,10 +757,24 @@ export const LogWorkoutCardio = (props:LogWorkoutCardioProps) => {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: "#f2f2f2",
+    marginTop: -30,
+    height: '100%',
+  },
+
+  header: {
+    display: 'flex', 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    width: '100%', 
+    paddingTop: 10, 
+    paddingBottom: 50, 
+    backgroundColor: colors.red,
   },
 
   form: {
-    backgroundColor: colors.red,
     padding: 10,
     marginBottom: 10,
     borderBottomWidth: 2, 
@@ -750,62 +783,94 @@ const styles = StyleSheet.create({
 
   exercise: {
     textAlign: 'center',
-    fontSize: 30,
-    paddingTop: 10,
+    fontSize: 20,
+    paddingTop: 5,
     fontWeight: '700',
-    color: 'white',
   },
 
-  dropdownButton: {
-    width: '100%',
-    borderRadius: 5,
-    marginBottom: 10,
-    height: 40,
+  smallBorder: {
+    width: 130,
+    height: 2,
+    backgroundColor: 'lightgray',
+    marginRight: 'auto',
+    marginLeft: 'auto',
+    marginBottom: 20,
   },
 
   row: {
     width: '100%',
     display: 'flex',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
+    flexDirection: 'row',
+
+    marginBottom: 0,
+  },
+
+  rowButtons: {
+    width: '100%',
+    display: 'flex',
     flexDirection: 'row',
 
     marginBottom: 10,
+    marginTop: 30,
   },
 
   inputs: {
     width: '90%',
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
+  },
+
+  inputBoxes: {
+    display: 'flex',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    marginRight: 70,
   },
 
   inputContainer: {
-    width: '48%',
+    width: 50,
+    marginLeft: 5,
+    marginRight: 5,
     display: 'flex',
     flexDirection: 'column',
 
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
   input: {
-    backgroundColor: '#F7D1D7',
+    backgroundColor: 'lightgray',
+    borderWidth: 1,
+    borderColor: 'gray',
     borderRadius: 5,
     width: '100%',
-    height: 40,
+    fontSize: 23,
+    fontWeight: '800',
+    textAlign: 'center',
+    padding: 0,
+    height: 35,
   },
 
   removeButtonContainer: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 40,
+    height: 30,
     width: 30,
+
+    marginLeft: - 50,
   },
 
   removeButton: {
-    backgroundColor: 'black',
-    height: 30,
-    width: 30,
+    backgroundColor: 'lightgray',
+    borderWidth: 1,
+    borderColor: 'gray',
+    height: 35,
+    width: 40,
     borderRadius: 3,
 
     display: 'flex',
@@ -822,7 +887,9 @@ const styles = StyleSheet.create({
   },
 
   textarea: {
-    backgroundColor: '#F7D1D7',
+    backgroundColor: 'lightgray',
+    borderWidth: 1,
+    borderColor: 'gray',
     borderRadius: 5,
     width: '100%',
     height: 100,
@@ -852,7 +919,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 'auto',
     marginLeft: 'auto',
-    marginBottom: 5,
+    marginBottom: 100,
+    marginTop: 10,
   },
 
   submitButton: {

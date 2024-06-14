@@ -1,18 +1,7 @@
 import React, {useCallback, useState, useEffect, useRef} from 'react';
 import {Alert, FlatList, ScrollView, Pressable, StyleSheet, Button, Switch, Text, View, TouchableOpacity, TextInput, Dimensions, Modal, TouchableWithoutFeedback, Keyboard} from 'react-native';
-import SelectDropdown from 'react-native-select-dropdown'
 import {colors} from '../Colors';
-import {BSON} from 'realm';
-import {useUser, useRealm, useQuery} from '@realm/react';
-import { ResistanceWorkout } from '../schemas/ResistanceWorkoutSchema';
-import { Workouts } from '../schemas/WorkoutSchema';
-import { UserStatistics } from '../schemas/UserStatisticsSchema';
-import { ExtraExercises } from '../schemas/ExtraExercisesSchema';
-import { shadow } from '../Shadow';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Storage from 'react-native-storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Collapsible from 'react-native-collapsible';
 
 type AddExerciseProps = {
   addExercise:any,
@@ -81,7 +70,7 @@ export const AddExercise = (props:AddExerciseProps) => {
             </TouchableOpacity>
         </View>
 
-        <View style={{marginBottom: 20,}}>
+        <View style={{marginBottom: 100,}}>
             <Text style={{ fontSize: 18, marginBottom: 10, textAlign: 'center', fontWeight: '800' }}>Enter Exercise Name:</Text>
             <TextInput
             style={{ height: 40, width: '80%', borderColor: 'gray', borderWidth: 1, marginBottom: 20, padding: 10, marginRight: 'auto', marginLeft: 'auto' }}

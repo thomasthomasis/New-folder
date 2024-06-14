@@ -12,7 +12,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function LogWorkoutScreen() {
 
-  const [showGrid, setShowGrid] = useState<boolean>(true);
+  const [showGrid, setShowGrid] = useState<boolean>(false);
+  const [showButton, setShowButton] = useState<boolean>(true)
   const [showSection, setShowSection] = useState<string>('');
 
   const calcShowSection = (workoutType:string) => {
@@ -34,12 +35,15 @@ export function LogWorkoutScreen() {
     setShowSection(workoutType); 
     setShowGrid(false); 
     setContinuingWorkout(true)
+    setShowButton(false)
   }
 
 
   const clearWorkout = () => {
-    setShowGrid(true)
+    setShowGrid(false)
     setShowSection('')
+    setContinuingWorkout(false)
+    setShowButton(true)
   }
 
   const onSubmit = (levelUp:boolean, gainedXp:number) => {
@@ -54,7 +58,8 @@ export function LogWorkoutScreen() {
 
   const closeResults = () => {
     setShowResults(false)
-    setShowGrid(true)
+    setShowGrid(false)
+    setShowButton(true)
   }
   
 
@@ -117,13 +122,22 @@ export function LogWorkoutScreen() {
   
 
   return (
-    <View style={styles.viewWrapper}>
+    <View>
 
       { showResults &&
         <SubmitCompletion onPress={closeResults} levelUp={levelUp} gainedXp={gainedXp}/>
       }
 
-      { showGrid &&
+      {
+        (!showGrid && showButton && currentWorkout.length == 0) &&
+        <View style={[styles.container, {height: screenHeight - 50, alignItems: 'center'}]}>
+          <TouchableOpacity style={styles.logWorkoutButton} onPress={() => {setShowGrid(true); setShowButton(false)}}>
+            <Text style={styles.logWorkoutButtonText}>Log Workout</Text>
+          </TouchableOpacity>
+        </View>
+      }
+
+      { (showGrid && !showButton && currentWorkout.length == 0) &&
         <View style={[styles.container, {height: screenHeight - 110}]}>  
           <TouchableOpacity style={[styles.gridOption, {backgroundColor: '#ED97A5'}, shadow.shadow]} onPress={() => calcShowSection("Cardio")}>
             <View style={[styles.circle, {backgroundColor: colors.red}]}>
@@ -141,10 +155,12 @@ export function LogWorkoutScreen() {
       }
 
       {
-        currentWorkout.length > 0 &&
-        <TouchableOpacity style={styles.continueButton} onPress={() => continueWorkout(currentWorkoutType)}>
-          <Text style={styles.buttonText}>Continue Workout</Text>
-        </TouchableOpacity>
+        (currentWorkout.length > 0 && showSection == "") &&
+        <View style={[styles.container, {height: screenHeight - 50, alignItems: 'center'}]}>
+          <TouchableOpacity style={styles.continueButton} onPress={() => continueWorkout(currentWorkoutType)}>
+            <Text style={styles.buttonText}>Continue Workout</Text>
+          </TouchableOpacity>
+        </View>
       }
 
   
@@ -166,9 +182,6 @@ export function LogWorkoutScreen() {
 }
 
 const styles = StyleSheet.create({
-    viewWrapper: {
-      
-    },
 
    
     container: {
@@ -252,6 +265,22 @@ const styles = StyleSheet.create({
     },
 
     buttonText: {
+      fontWeight: '800',
+      color: 'white',
+      fontSize: 20,
+    },
+
+    logWorkoutButton:{
+      width: 150,
+      height: 40,
+      backgroundColor: colors.blue,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 10,
+    },
+
+    logWorkoutButtonText:{
       fontWeight: '800',
       color: 'white',
       fontSize: 20,

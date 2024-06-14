@@ -1,5 +1,5 @@
 import React, {useCallback, useState, useEffect, useRef} from 'react';
-import {Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, Modal, TouchableWithoutFeedback} from 'react-native';
+import {Alert, FlatList, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, Modal, TouchableWithoutFeedback, KeyboardAvoidingView, Keyboard} from 'react-native';
 import {Input, Button} from '@rneui/base';
 import { useQuery, useRealm, useUser } from '@realm/react';
 import { Users } from '../schemas/UsersSchema';
@@ -177,99 +177,106 @@ export const AccountScreen = (props: AccountScreenProps) => {
             <>
 
             {
-                isLoading ? (
-                    <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
-                        <ActivityIndicator size="large" color="#0000ff" />
-                    </View>
-                    
-                ) : (
-                    <>
-                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 10,}}>
-                <TouchableOpacity onPress={props.onPress}>
-                    <MaterialCommunityIcons name="arrow-left" color={'black'} size={40} style={{marginLeft: 10,}}/>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleConfirm}>
-                    <MaterialCommunityIcons name="check" color={'black'} size={40} style={{marginRight: 10,}}/>
-                </TouchableOpacity>
-            </View>
+                isLoading && 
+                <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+            }
+            {
+                !isLoading &&
+                <>
 
-            <TouchableOpacity onPress={() => setSelectingProfilePicture(true)}>
-                <Image source={imageSource} style={{width: 150, height: 150, borderRadius: 100,}}/>
-                <MaterialCommunityIcons name="image-edit-outline" color={'black'} size={40} style={{backgroundColor: 'white', borderRadius: 40, position: 'absolute', bottom: 0, right: 10, padding: 5,}}/>
-            </TouchableOpacity>
-
-            <View style={[styles.information, shadow.shadow]}>
-                <Text style={{fontSize: 25, fontWeight: '900', marginBottom: 5,}}>Information</Text>
-                <View style={styles.smallBorder}></View>
-                <View style={styles.row}>
-                    <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Email</Text>
-                    <Text style={{fontSize: 18, fontWeight: '600'}}>{user.profile.email}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Username</Text>
-                    <TextInput
-                        style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
-                        onChangeText={handleUsernameChange}
-                        value={username}
-                    />
-                </View>
-                <View style={styles.row}>
-                    <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>First Name</Text>
-                    <TextInput
-                        style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
-                        onChangeText={handlefirstNameChange}
-                        value={firstName}
-                    />
-                </View>
-                <View style={styles.row}>
-                    <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Surname</Text>
-                    <TextInput
-                        style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
-                        onChangeText={handleSurnameChange}
-                        value={surname}
-                    />
-                </View>
-                <View style={styles.row}>
-                    <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Title</Text>
-                    <TouchableOpacity style={{borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}} onPress={() => setShowModal(true)}>
-                    <Text style={{fontSize: 18, fontWeight: '600', }}>{title}</Text>
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 10, position: 'absolute', zIndex: 2}}>
+                    <TouchableOpacity onPress={props.onPress}>
+                        <MaterialCommunityIcons name="arrow-left" color={'black'} size={40} style={{marginLeft: 10,}}/>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleConfirm}>
+                        <MaterialCommunityIcons name="check" color={'black'} size={40} style={{marginRight: 10,}}/>
                     </TouchableOpacity>
                 </View>
-                <View style={styles.row}>
-                    <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Joined</Text>
-                    <Text style={{fontSize: 18, fontWeight: '600'}}>{userData[0].dateCreated?.toLocaleString()}</Text>
-                </View>
-            </View>
+            
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={styles.container}>
+                        <TouchableOpacity onPress={() => setSelectingProfilePicture(true)}>
+                            <Image source={imageSource} style={{width: 150, height: 150, borderRadius: 100,}}/>
+                            <MaterialCommunityIcons name="image-edit-outline" color={'black'} size={40} style={{backgroundColor: 'white', borderRadius: 40, position: 'absolute', bottom: 0, right: 10, padding: 5,}}/>
+                        </TouchableOpacity>
 
-            <Modal
-            animationType="fade"
-            transparent={true}
-            visible={showModal}
-            onRequestClose={() => setShowModal(!showModal)}
-            >
-                <TouchableWithoutFeedback onPress={() => setShowModal(!showModal)}>
-                    <View style={styles.modalContainer}>
-                        <TouchableWithoutFeedback>
-                        
-                            <View style={styles.modalContent}>
-                                {
-                                    titles.map((item, index) => (
-                                        <TouchableOpacity key={index} onPress={() => {setShowModal(!showModal); setTitle(item)}} style={[styles.titleButton, {marginTop: 5, marginBottom: 5}]}>
-                                            <Text style={styles.titleButtonText}>{item}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                }
+                        <View style={[styles.information, shadow.shadow]}>
+                            <Text style={{fontSize: 25, fontWeight: '900', marginBottom: 5,}}>Information</Text>
+                            <View style={styles.smallBorder}></View>
+                            <View style={styles.row}>
+                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Email</Text>
+                                <Text style={{fontSize: 18, fontWeight: '600'}}>{user.profile.email}</Text>
                             </View>
-                        
-                        </TouchableWithoutFeedback>
+                            <View style={styles.row}>
+                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Username</Text>
+                                <TextInput
+                                    style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
+                                    onChangeText={handleUsernameChange}
+                                    value={username}
+                                />
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>First Name</Text>
+                                <TextInput
+                                    style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
+                                    onChangeText={handlefirstNameChange}
+                                    value={firstName}
+                                />
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Surname</Text>
+                                <TextInput
+                                    style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
+                                    onChangeText={handleSurnameChange}
+                                    value={surname}
+                                />
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Title</Text>
+                                <TouchableOpacity style={{borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}} onPress={() => setShowModal(true)}>
+                                <Text style={{fontSize: 18, fontWeight: '600', }}>{title}</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Joined</Text>
+                                <Text style={{fontSize: 18, fontWeight: '600'}}>{userData[0].dateCreated?.toLocaleString()}</Text>
+                            </View>
+                        </View>
                     </View>
                 </TouchableWithoutFeedback>
-                
-            </Modal>
+            
+
+                <Modal
+                animationType="fade"
+                transparent={true}
+                visible={showModal}
+                onRequestClose={() => setShowModal(!showModal)}
+                >
+                    <TouchableWithoutFeedback onPress={() => setShowModal(!showModal)}>
+                        <View style={styles.modalContainer}>
+                            <TouchableWithoutFeedback>
+                            
+                                <View style={styles.modalContent}>
+                                    {
+                                        titles.map((item, index) => (
+                                            <TouchableOpacity key={index} onPress={() => {setShowModal(!showModal); setTitle(item)}} style={[styles.titleButton, {marginTop: 5, marginBottom: 5}]}>
+                                                <Text style={styles.titleButtonText}>{item}</Text>
+                                            </TouchableOpacity>
+                                        ))
+                                    }
+                                </View>
+                            
+                            </TouchableWithoutFeedback>
+                        </View>
+                    </TouchableWithoutFeedback>
+                    
+                </Modal>
             </>
-                )
-                
             }
+
+            
 
             
             </>
@@ -305,6 +312,14 @@ export const AccountScreen = (props: AccountScreenProps) => {
 }
 
 const styles = StyleSheet.create({
+
+    container: {
+        width: '100%',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: -70,
+    },
 
     information: {
         width: '90%', 

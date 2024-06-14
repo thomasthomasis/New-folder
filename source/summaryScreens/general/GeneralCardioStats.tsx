@@ -1,7 +1,7 @@
 import {StyleSheet, Text, View} from 'react-native';
 
 
-import { colors } from '../../../Colors'
+import { colors } from '../../Colors'
 
 type GeneralCardioStatsProps = {
     cardioObjects:any,

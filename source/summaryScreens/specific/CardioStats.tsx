@@ -2,7 +2,7 @@ import React, {useCallback, useState, useEffect, Component} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {Alert, FlatList, SectionList, Pressable, ScrollView, StyleSheet, Switch, Text, View, Dimensions} from 'react-native';
 
-import { colors } from '../../../Colors'
+import { colors } from '../../Colors'
 import moment from 'moment'
 
 type CardioStatsProps = {

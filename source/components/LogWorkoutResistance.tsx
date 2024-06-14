@@ -1,5 +1,5 @@
 import React, {useCallback, useState, useEffect, useRef} from 'react';
-import {Alert, FlatList, ScrollView, Pressable, StyleSheet, Button, Switch, Text, View, TouchableOpacity, TextInput, Dimensions, Modal, TouchableWithoutFeedback, Keyboard} from 'react-native';
+import {Alert, FlatList, ScrollView, Pressable, StyleSheet, Button, Switch, Text, View, TouchableOpacity, TextInput, Dimensions, Modal, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView} from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown'
 import {colors} from '../Colors';
 import {BSON} from 'realm';
@@ -129,6 +129,7 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
   const storage = new Storage({
     size: 1000,
     storageBackend: AsyncStorage,
+    defaultExpires: null,
   })
 
   const saveCurrentWorkout = () => {
@@ -142,7 +143,7 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
     storage.save({
       key: 'workoutType',
       data: {
-        workoutType: "Cardio",
+        workoutType: "Resistance",
       }
     })
 
@@ -515,6 +516,27 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
         );
       };
 
+      const handleConfirmRemoveExercise = (formIndex:any) => {
+        // Show confirmation popup
+        
+        Alert.alert(
+          'Confirm Action',
+          'Are you sure you want to remove this exercise from your current workout?',
+          [
+            {
+              text: 'Cancel',
+              onPress: () => console.log('Cancel Pressed'),
+              style: 'cancel',
+            },
+            {
+              text: 'OK',
+              onPress: () => handleRemoveForm(formIndex),
+            },
+          ],
+          { cancelable: false }
+        );
+      };
+
       const addedExercisesArray = extraExercises.map(item => item.name ?? "");
       let totalExercises = addedExercisesArray.concat(normalExercises);
     
@@ -534,13 +556,8 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
         }
       };
     
-      const [visible, setVisible] = useState<boolean>(false)
       const [addingExercise, setAddingExercise] = useState<boolean>(false)
-    
-      const onClose = () => {
-        setVisible(false)
-      }
-
+     
       const exitExerciseManipulation = () => {
         setAddingExercise(false)
       }
@@ -1203,7 +1220,7 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
     <>
     {
       (!selectingExercise && !addingExercise) && 
-      <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, backgroundColor: colors.black}}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={handleCancel}>
             <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
         </TouchableOpacity>
@@ -1214,12 +1231,12 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
     }
     {
       (selectingExercise && !addingExercise) &&
-      <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, backgroundColor: colors.black}}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => setSelectingExercise(false)}>
             <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setVisible(true)}>
-            <MaterialCommunityIcons name="dots-vertical" color={'white'} size={40} style={{marginRight: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
+        <TouchableOpacity onPress={() => setAddingExercise(true)}>
+            <MaterialCommunityIcons name="plus" color={'white'} size={40} style={{marginRight: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
         </TouchableOpacity>
       </View>
     }
@@ -1227,7 +1244,7 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
 
     {
       (selectingExercise && !addingExercise) &&
-      <View style={{width: '100%', backgroundColor: colors.black}} onTouchStart={Keyboard.dismiss}>
+      <View style={{width: '100%', backgroundColor: colors.black}}>
         <TextInput
         style={{ height: 40, width: '80%', marginRight: 'auto', marginLeft: 'auto', borderColor: 'black', backgroundColor: 'white', borderWidth: 1, borderRadius: 15, marginBottom: 20, padding: 10, }}
         placeholder="Search..."
@@ -1258,15 +1275,21 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
     <View style={styles.container}>
         
       {forms.map((form:any, formIndex:any) => (
-        <View key={form.id} style={styles.form}>
+        <View key={new BSON.ObjectID().toString()} style={styles.form}>
           <Text style={styles.exercise}>{forms[formIndex].exercise.value}</Text>
+          <View style={styles.smallBorder}></View>
       {form.inputs.map((input:any, inputIndex:any) => (
-        <View key={input.id} style={styles.row}>
+        <View key={new BSON.ObjectID().toString()} style={styles.row}>
             <View style={styles.inputs}>
+              <View style={styles.inputBoxes}>
               <View style={styles.inputContainer}>
                 {
                   inputIndex == 0 &&
-                  <Text style={{fontSize: 16, color: 'white'}}>Weight</Text>
+                  <Text style={{fontSize: 17, color: 'black', marginBottom: 10, fontWeight: '700'}}>Weight</Text>
+                }
+                {
+                  inputIndex > 0 &&
+                  <Text></Text>
                 }
                 <TextInput
                   placeholder=""
@@ -1280,7 +1303,11 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
               <View style={styles.inputContainer}>
                 {
                   inputIndex == 0 &&
-                  <Text style={{fontSize: 16, color: 'white'}}>Reps</Text>
+                  <Text style={{fontSize: 17, color: 'black', marginBottom: 10, fontWeight: '700'}}>Reps</Text>
+                }
+                {
+                  inputIndex > 0 &&
+                  <Text></Text>
                 }
                 <TextInput
                   placeholder=""
@@ -1290,30 +1317,41 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
                   keyboardType="numeric"
                 />
               </View>
+              </View>
+              
+              
+              <View style={styles.inputContainer}>
+                <Text></Text>
+                <View style={styles.removeButtonContainer}>
+                  <TouchableOpacity onPress={() => handleRemoveInput(formIndex, inputIndex)} style={styles.removeButton}>
+                  <MaterialCommunityIcons name="delete" color={colors.red} size={30} style={{borderRadius: 40}}/>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              
             </View>
             
-              <View style={styles.removeButtonContainer}>
-                <Pressable onPress={() => handleRemoveInput(formIndex, inputIndex)} style={styles.removeButton}>
-                  <Text style={{color: 'white', fontSize: 20}}>X</Text>
-                </Pressable>
-              </View>
+              
         </View>
       ))}
       
-      <Pressable onPress={() => handleAddInput(formIndex)} style={styles.addButton}>
-        <Text>Add Set</Text>
-      </Pressable>
+      <View style={styles.rowButtons}>
+        <TouchableOpacity onPress={() => handleAddInput(formIndex)} style={[styles.addButton, shadow.shadow]}>
+          <Text style={{color: 'gray', fontWeight: '800', fontSize: 15}}>Add Set</Text>
+        </TouchableOpacity>
 
-      <Pressable onPress={() => handleRemoveForm(formIndex)} style={styles.addButton}>
-        <Text>Remove Exercise</Text>
-      </Pressable>
+        <TouchableOpacity onPress={() => handleConfirmRemoveExercise(formIndex)} style={[styles.addButton, shadow.shadow]}>
+          <Text  style={{color: 'gray', fontWeight: '800', fontSize: 15}}>Remove Exercise</Text>
+        </TouchableOpacity>
+      </View>
+      
       
       </View>
       ))}
 
-      <Pressable onPress={() => setSelectingExercise(true)} style={styles.button}>
-        <Text>Add Exercise</Text>
-      </Pressable>
+      <TouchableOpacity onPress={() => setSelectingExercise(true)} style={[styles.button, shadow.shadow]}>
+        <Text style={{color: 'gray', fontWeight: '800', fontSize: 20,}}>Add Exercise</Text>
+      </TouchableOpacity>
       
     </View>
     }
@@ -1322,25 +1360,6 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
       addingExercise &&
       <AddExercise addExercise={addExercise} exit={exitExerciseManipulation}/>
     }
-
-<Modal
-      visible={visible}
-      animationType="fade"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <TouchableWithoutFeedback  onPress={onClose}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', }}>
-          <TouchableWithoutFeedback>
-            <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 , width: '80%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-              <TouchableOpacity style={styles.addExerciseButton} onPress={() => {setAddingExercise(true); onClose()}} >
-                <Text style={styles.addExerciseButtonText}>Add Exercise</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
     </>
   
 )};
@@ -1351,10 +1370,24 @@ export const LogWorkoutResistance = (props:LogWorkoutResistanceProps) => {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: "#f2f2f2",
+    marginTop: -30,
+    height: '100%',
+  },
+
+  header: {
+    display: 'flex', 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    width: '100%', 
+    paddingTop: 10, 
+    paddingBottom: 50, 
+    backgroundColor: colors.black,
   },
 
   form: {
-    backgroundColor: colors.black,
     padding: 10,
     marginBottom: 10,
     borderBottomWidth: 2, 
@@ -1363,62 +1396,93 @@ const styles = StyleSheet.create({
 
   exercise: {
     textAlign: 'center',
-    fontSize: 30,
-    paddingTop: 10,
+    fontSize: 20,
+    paddingTop: 5,
     fontWeight: '700',
-    color: 'white',
   },
 
-  dropdownButton: {
-    width: '100%',
-    borderRadius: 5,
-    marginBottom: 10,
-    height: 40,
+  smallBorder: {
+    width: 130,
+    height: 2,
+    backgroundColor: 'lightgray',
+    marginRight: 'auto',
+    marginLeft: 'auto',
+    marginBottom: 20,
   },
 
   row: {
     width: '100%',
     display: 'flex',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
+    flexDirection: 'row',
+
+    marginBottom: 0,
+  },
+
+  rowButtons: {
+    width: '100%',
+    display: 'flex',
     flexDirection: 'row',
 
     marginBottom: 10,
+    marginTop: 30,
   },
 
   inputs: {
     width: '90%',
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
+  },
+
+  inputBoxes: {
+    display: 'flex',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    marginRight: 70,
   },
 
   inputContainer: {
-    width: '48%',
+    width: 50,
+    marginLeft: 5,
+    marginRight: 5,
     display: 'flex',
     flexDirection: 'column',
 
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
   input: {
-    backgroundColor: 'white',
+    backgroundColor: 'lightgray',
+    borderWidth: 1,
+    borderColor: 'gray',
     borderRadius: 5,
     width: '100%',
-    height: 40,
+    fontSize: 23,
+    fontWeight: '800',
+    textAlign: 'center',
+    padding: 0,
+    height: 35,
   },
 
   removeButtonContainer: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 40,
+    height: 30,
     width: 30,
+    marginLeft: 30,
   },
 
   removeButton: {
-    backgroundColor: 'black',
-    height: 30,
-    width: 30,
+    backgroundColor: 'lightgray',
+    borderWidth: 1,
+    borderColor: 'gray',
+    height: 35,
+    width: 40,
     borderRadius: 3,
 
     display: 'flex',
@@ -1426,25 +1490,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  textareaContainer: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-
-  textarea: {
-    backgroundColor: '#F7D1D7',
-    borderRadius: 5,
-    width: '100%',
-    height: 100,
-    textAlignVertical: "top"
-  },
-
   addButton: {
     width: 120,
-    backgroundColor: 'white',
+    backgroundColor: 'lightgray',
     borderRadius: 5,
     height: 40,
     display: 'flex',
@@ -1465,7 +1513,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 'auto',
     marginLeft: 'auto',
-    marginBottom: 5,
+    marginBottom: 100,
+    marginTop: 10,
   },
 
   submitButton: {
@@ -1526,23 +1575,4 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 
-  addExerciseButton: {
-    width: 150,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: colors.blue,
-
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    marginTop: 5,
-    marginBottom: 5,
-  },
-
-  addExerciseButtonText: {
-    fontWeight: '800',
-    color: 'white'
-  },
-    
   });
