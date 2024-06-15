@@ -4,9 +4,9 @@ import {AppProvider, UserProvider, RealmProvider} from '@realm/react';
 import {appId, baseUrl} from '../atlasConfig.json';
 
 import {App} from './App';
-import {WelcomeView} from './WelcomeView';
+import {WelcomeScreen} from './screens/WelcomeScreen/WelcomeScreen';
 
-import {Item} from './ItemSchema';
+import {Item} from './schemas/ItemSchema';
 import { CardioWorkout } from './schemas/CardioWorkoutSchema';
 import { Users } from './schemas/UsersSchema';
 import { ResistanceWorkout } from './schemas/ResistanceWorkoutSchema';
@@ -27,7 +27,7 @@ const LoadingIndicator = () => {
 export const AppWrapper = () => {
   return (
     <AppProvider id={appId} baseUrl={baseUrl}>
-      <UserProvider fallback={WelcomeView}>
+      <UserProvider fallback={WelcomeScreen}>
         <RealmProvider
           schema={[Item, CardioWorkout, Users, ResistanceWorkout, Workouts, UserStatistics, Groups, JoinGroupRequests, ExtraExercises]}
           sync={{
