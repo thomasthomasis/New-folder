@@ -6,6 +6,17 @@ const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
 
+  header: {
+    width: '100%', 
+    height: 60, 
+    display: 'flex', 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    backgroundColor: 'lightgray',
+    paddingBottom: 10,
+  },
+
   headerText: {
     fontWeight: '900',
     fontSize: 25,
@@ -23,8 +34,6 @@ const styles = StyleSheet.create({
 
   container: {
     width: '100%',
-    
-    borderRadius: 20,
     marginRight: 'auto',
     marginLeft: 'auto',
     paddingTop: 10,
@@ -32,19 +41,44 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+
+    backgroundColor: 'lightgray',
    
   },
 
   containerPieChart: {
     width: screenWidth - 30,
-    backgroundColor: 'lightgray',
+    backgroundColor: 'white',
     height: screenHeight - 110 - 200,
     borderRadius: 60,
 
     display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    
+    marginBottom: 20,
+
+
+  },
+
+  rowPieChart: {
+    width: screenWidth - 70,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+
+  pieChart: {
+    height: screenHeight - 110 - 200 - 60,
+    width: screenWidth - 40,
+
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+
+    borderRadius: 60,
   },
 
   row: {
@@ -59,7 +93,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'lightgray',
+    backgroundColor: 'white',
     borderRadius: 40,
     height: screenHeight - 110 - (screenHeight - 250),
     width: screenWidth - 130,
@@ -201,6 +235,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    
 
 
   },
