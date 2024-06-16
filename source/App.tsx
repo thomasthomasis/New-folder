@@ -15,6 +15,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { SocialScreen } from './screens/SocialScreen/SocialScreen';
 import { useRealm, useUser } from '@realm/react';
 import { Easing } from 'react-native';
+import { LogWorkoutCardioScreen } from './screens/LogWorkoutCardioScreen/LogWorkoutCardioScreen';
+import { LogWorkoutResistanceScreen } from './screens/LogWorkoutResistanceScreen/LogWorkoutResistanceScreen';
+import { AddExerciseScreen } from './screens/AddExerciseScreen/AddExerciseScreen';
+import { SubmitCompletion } from './screens/SubmitCompletionScreen/SubmitCompletion';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -24,6 +28,7 @@ const dataExplorerMessage = `View your data in MongoDB Atlas: ${dataExplorerLink
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator()
+
 
 export const App = () => {
 
@@ -38,7 +43,7 @@ export const App = () => {
           close: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
         },
       }}>
-        <Stack.Screen name="Profile" options={{ headerShown: false}} >
+        <Stack.Screen name="ProfileScreen" options={{ headerShown: false}} >
           {() => <ProfileScreen restrictedView={false} user={user.id} closeProfile={''}></ProfileScreen>}
         </Stack.Screen>
         <Stack.Screen name="Account" options={{ headerShown: false}}>
@@ -48,16 +53,46 @@ export const App = () => {
     )
   }
 
-  const StatisticsNavigation = () => {
-
+  const StatisticsStack = () => {
+    return (
+    <Stack.Navigator screenOptions={{
+      transitionSpec: {
+        open: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
+        close: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
+      },
+    }}>
+      <Stack.Screen name="Profile" options={{ headerShown: false}} >
+        {() => <HomeScreen></HomeScreen>}
+      </Stack.Screen>
+    </Stack.Navigator>
+    )
   }
 
   const SocialNavigation = () => {
 
   }
 
-  const LogWorkoutNavigation = () => {
-
+  const LogWorkoutStack = () => {
+    return (
+      <Stack.Navigator screenOptions={{
+        transitionSpec: {
+          open: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
+          close: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
+        },
+      }}>
+        <Stack.Screen name="LogWorkout" component={LogWorkoutScreen}  options={{ headerShown: false}} />
+        <Stack.Screen name="LogWorkoutCardio" component={LogWorkoutCardioScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}} />
+        <Stack.Screen name="LogWorkoutResistance" options={{ headerShown: false}} >
+          {() => <LogWorkoutResistanceScreen continuingWorkout={false} />}
+        </Stack.Screen>
+        <Stack.Screen name="AddExercise" options={{ headerShown: false}} >
+          {() => <AddExerciseScreen />}
+        </Stack.Screen>
+        <Stack.Screen name="SubmitCompletion" options={{ headerShown: false}} >
+          {() => <SubmitCompletion levelUp={false} gainedXp={0} />}
+        </Stack.Screen>
+      </Stack.Navigator>
+      )
   }
 
 
@@ -72,7 +107,7 @@ export const App = () => {
             >
             <Tab.Screen 
               name='Statistics' 
-              component={HomeScreen}
+              component={StatisticsStack}
               options={{
                 headerStyle: {
                   height: 0
@@ -84,7 +119,7 @@ export const App = () => {
               />
             <Tab.Screen 
               name="Log Workout" 
-              component={LogWorkoutScreen} 
+              component={LogWorkoutStack} 
               options={{
                 headerStyle: {
                   height: 0
@@ -109,7 +144,7 @@ export const App = () => {
               />
               
             <Tab.Screen 
-              name="ProfileStack"
+              name="Profile"
               component={ProfileStack}
               options={{
                 headerStyle: {

@@ -3,13 +3,11 @@ import {Alert, Text, View, TouchableOpacity, TextInput} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './AddExerciseScreen.style';
+import { useNavigation } from '@react-navigation/native';
 
-type AddExerciseProps = {
-  addExercise:any,
-  exit:any
-}
+export const AddExerciseScreen = () => {
 
-export const AddExerciseScreen = (props:AddExerciseProps) => {
+    const navigation = useNavigation()
 
     const [modalInput, setModalInput] = useState<string>('')
 
@@ -43,6 +41,10 @@ export const AddExerciseScreen = (props:AddExerciseProps) => {
         setBoxChecked(newCheckedBoxes)
         
       }
+
+    const addExercise = (modalInput:any, selectedMuscles:any) => {
+
+    }
       
     const submit = () => {
         if(modalInput.length == 0)
@@ -55,15 +57,15 @@ export const AddExerciseScreen = (props:AddExerciseProps) => {
         }
         else
         {
-            props.addExercise(modalInput, selectedMuscles)
-            props.exit()
+            addExercise(modalInput, selectedMuscles)
+            navigation.goBack()
         }
     }
 
     return (
         <>
         <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, paddingBottom: 10, backgroundColor: colors.black, marginBottom: 10,}}>
-            <TouchableOpacity onPress={props.exit}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
                 <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={submit}>

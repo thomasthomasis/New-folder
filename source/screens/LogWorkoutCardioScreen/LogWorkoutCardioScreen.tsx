@@ -12,17 +12,17 @@ import { shadow } from '../../sharedStyling/Shadow';
 import Storage from 'react-native-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './LogWorkoutCardioScreen.style';
+import { useNavigation } from '@react-navigation/native';
 
-type LogWorkoutCardioProps = {
-  onPress:any,
-  closeWorkout:any,
+interface LogWorkoutCardioProps {
   continuingWorkout:boolean,
 }
-
 
 export const LogWorkoutCardioScreen = (props:LogWorkoutCardioProps) => {
   const realm = useRealm();
   const user = useUser();
+
+  const navigation = useNavigation()
 
   const [selectingExercise, setSelectingExercise] = useState(false)
 
@@ -213,7 +213,10 @@ export const LogWorkoutCardioScreen = (props:LogWorkoutCardioProps) => {
     {
       levelUp = true;
     }
-    props.onPress(levelUp, (totalTime + totalDistance + 100))
+
+    //navigation.navigate(("SubmitCompletion" as never, {levelUp: levelUp, xpGained:(totalDistance + totalTime + 100)} as never))
+    //navigation.navigate("SubmitCompletion")
+    
   }
 
 
@@ -506,7 +509,7 @@ export const LogWorkoutCardioScreen = (props:LogWorkoutCardioProps) => {
         },
         {
           text: 'OK',
-          onPress: () => props.closeWorkout(),
+          onPress: () => navigation.goBack(),
         },
       ],
       { cancelable: false }

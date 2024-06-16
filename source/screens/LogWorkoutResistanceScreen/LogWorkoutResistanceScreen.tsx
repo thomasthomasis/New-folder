@@ -14,16 +14,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Collapsible from 'react-native-collapsible';
 import { AddExerciseScreen } from '../AddExerciseScreen/AddExerciseScreen';
 import styles from './LogWorkoutResistanceScreen.style'
+import { useNavigation } from '@react-navigation/native';
 
 type LogWorkoutResistanceProps = {
-  onPress:any,
-  closeWorkout:any,
   continuingWorkout:boolean,
 }
 
 export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
   const realm = useRealm();
   const user = useUser();
+
+  const navigation = useNavigation()
 
   const [selectingExercise, setSelectingExercise] = useState(false)
 
@@ -218,7 +219,7 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
     {
       levelUp = true;
     }
-    props.onPress(levelUp, (totalVolume + totalReps + 100))
+    
   }
 
 
@@ -509,7 +510,7 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
             },
             {
               text: 'OK',
-              onPress: () => props.closeWorkout(),
+              onPress: () => navigation.goBack(),
             },
           ],
           { cancelable: false }
@@ -1354,11 +1355,6 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
       </TouchableOpacity>
       
     </View>
-    }
-
-    {
-      addingExercise &&
-      <AddExerciseScreen addExercise={addExercise} exit={exitExerciseManipulation}/>
     }
     </>
   

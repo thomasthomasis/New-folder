@@ -4,10 +4,10 @@ import {colors} from '../../sharedStyling/Colors';
 import { useQuery, useRealm, useUser } from '@realm/react';
 import { UserStatistics } from '../../schemas/UserStatisticsSchema';
 import styles from './SubmitCompletionScreen.style';
+import { useNavigation } from '@react-navigation/native';
 
 
 type SubmitCompletionProps = {
-    onPress:any,
     levelUp:boolean,
     gainedXp:number,
 }
@@ -16,6 +16,8 @@ export const SubmitCompletion = (props:SubmitCompletionProps) => {
 
     const realm = useRealm();
     const user = useUser();
+
+    const navigation = useNavigation()
   
     const userStats = useQuery(UserStatistics).filtered("userId == $0", user.id);
 
@@ -80,7 +82,7 @@ export const SubmitCompletion = (props:SubmitCompletionProps) => {
                     <Text style={styles.smallCircleText}>{userStats[0].lvl + 1}</Text>
                 </View>
             </View>
-            <TouchableOpacity onPress={props.onPress} style={styles.continueButton}>
+            <TouchableOpacity onPress={() => navigation.navigate("LogWorkout" as never)} style={styles.continueButton}>
                 <Text style={styles.text}>Continue</Text>
             </TouchableOpacity>
         </View>
