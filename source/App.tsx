@@ -20,6 +20,8 @@ import { LogWorkoutResistanceScreen } from './screens/LogWorkoutResistanceScreen
 import { AddExerciseScreen } from './screens/AddExerciseScreen/AddExerciseScreen';
 import { SubmitCompletion } from './screens/SubmitCompletionScreen/SubmitCompletion';
 
+import { RootStackParamList } from './navgiation/NavigationTypes';
+
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
 // it does not contain the data explorer link. Download the
@@ -27,7 +29,7 @@ import { SubmitCompletion } from './screens/SubmitCompletionScreen/SubmitComplet
 const dataExplorerMessage = `View your data in MongoDB Atlas: ${dataExplorerLink}.`;
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator()
+const Stack = createStackNavigator<RootStackParamList>()
 
 
 export const App = () => {
@@ -35,25 +37,7 @@ export const App = () => {
   const realm = useRealm()
   const user = useUser()
 
-  const ProfileStack = () => {
-    return (
-      <Stack.Navigator screenOptions={{
-        transitionSpec: {
-          open: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
-          close: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
-        },
-      }}>
-        <Stack.Screen name="ProfileScreen" options={{ headerShown: false}} >
-          {() => <ProfileScreen restrictedView={false} user={user.id} closeProfile={''}></ProfileScreen>}
-        </Stack.Screen>
-        <Stack.Screen name="Account" options={{ headerShown: false}}>
-          {() => <AccountScreen />}
-        </Stack.Screen>
-      </Stack.Navigator>
-    )
-  }
-
-  const StatisticsStack = () => {
+  const HomeStack = () => {
     return (
     <Stack.Navigator screenOptions={{
       transitionSpec: {
@@ -61,12 +45,26 @@ export const App = () => {
         close: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
       },
     }}>
-      <Stack.Screen name="Profile" options={{ headerShown: false}} >
-        {() => <HomeScreen></HomeScreen>}
-      </Stack.Screen>
+      <Stack.Screen name="Home" options={{ headerShown: false}} component={HomeScreen}/>
     </Stack.Navigator>
     )
   }
+
+  const ProfileStack = () => {
+    return (
+      <Stack.Navigator initialRouteName='ProfileScreen' screenOptions={{
+        transitionSpec: {
+          open: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
+          close: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
+        },
+      }}>
+        <Stack.Screen name="ProfileScreen" options={{ headerShown: false}} component={ProfileScreen} initialParams={{ userId: user.id, restrictedView: false}}/>
+        <Stack.Screen name="Account" options={{ headerShown: false}} component={AccountScreen} />
+      </Stack.Navigator>
+    )
+  }
+
+  
 
   const SocialNavigation = () => {
 
@@ -82,15 +80,10 @@ export const App = () => {
       }}>
         <Stack.Screen name="LogWorkout" component={LogWorkoutScreen}  options={{ headerShown: false}} />
         <Stack.Screen name="LogWorkoutCardio" component={LogWorkoutCardioScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}} />
-        <Stack.Screen name="LogWorkoutResistance" options={{ headerShown: false}} >
-          {() => <LogWorkoutResistanceScreen continuingWorkout={false} />}
-        </Stack.Screen>
-        <Stack.Screen name="AddExercise" options={{ headerShown: false}} >
-          {() => <AddExerciseScreen />}
-        </Stack.Screen>
-        <Stack.Screen name="SubmitCompletion" options={{ headerShown: false}} >
-          {() => <SubmitCompletion levelUp={false} gainedXp={0} />}
-        </Stack.Screen>
+        <Stack.Screen name="LogWorkoutResistance" component={LogWorkoutResistanceScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}}/>
+        <Stack.Screen name="AddExercise" component={AddExerciseScreen} options={{ headerShown: false}}/>
+        <Stack.Screen name="SubmitCompletion" component={SubmitCompletion} initialParams={{ levelUp: false, gainedXp: 0 }} options={{ headerShown: false}}/>
+        
       </Stack.Navigator>
       )
   }
@@ -103,60 +96,49 @@ export const App = () => {
       <GestureHandlerRootView style={{flex: 1}}>
       <SafeAreaProvider>
         <NavigationContainer>
-          <Tab.Navigator
-            >
-            <Tab.Screen 
-              name='Statistics' 
-              component={StatisticsStack}
-              options={{
-                headerStyle: {
-                  height: 0
-                },
-                tabBarIcon: ({ color }) => (
-                  <MaterialCommunityIcons name="chart-box" color={color} size={40} />
-                ),
-              }} 
-              />
-            <Tab.Screen 
-              name="Log Workout" 
-              component={LogWorkoutStack} 
-              options={{
-                headerStyle: {
-                  height: 0
-                },
-                tabBarIcon: ({ color }) => (
-                  <MaterialCommunityIcons name="dumbbell" color={color} size={40} />
-                ),
-              }} 
-              />
-
+          <Tab.Navigator>
+            
               <Tab.Screen 
-              name='Social' 
-              component={SocialScreen}
-              options={{
-                headerStyle: {
-                  height: 0,
-                },
-                tabBarIcon: ({ color }) => (
-                  <MaterialCommunityIcons name="account-group" color={color} size={40} />
-                ),
-              }} 
-              />
-              
-            <Tab.Screen 
-              name="Profile"
-              component={ProfileStack}
-              options={{
-                headerStyle: {
-                  height: 0,
-                },
-                tabBarIcon: ({ color }) => (
-                  <MaterialCommunityIcons name="account" color={color} size={40} />
-                ),
-              }} 
-            >
-            </Tab.Screen>
+                  name="Dashboard"
+                  component={LogWorkoutStack}
+                  options={{
+                    headerStyle: {
+                      height: 0,
+                    },
+                    tabBarIcon: ({ color }) => (
+                      <MaterialCommunityIcons name="view-dashboard" color={color} size={40} />
+                    ),
+                  }} 
+                >
+              </Tab.Screen>
+              <Tab.Screen 
+                  name="Statistics"
+                  component={HomeStack}
+                  options={{
+                    headerStyle: {
+                      height: 0,
+                    },
+                    tabBarIcon: ({ color }) => (
+                      <MaterialCommunityIcons name="poll" color={color} size={40} />
+                    ),
+                  }} 
+                >
+              </Tab.Screen>
+              <Tab.Screen 
+                  name="Profile"
+                  component={ProfileStack}
+                  options={{
+                    headerStyle: {
+                      height: 0,
+                    },
+                    tabBarIcon: ({ color }) => (
+                      <MaterialCommunityIcons name="account" color={color} size={40} />
+                    ),
+                  }} 
+                >
+              </Tab.Screen>
           </Tab.Navigator>
+          
         </NavigationContainer>
       </SafeAreaProvider>
       </GestureHandlerRootView>

@@ -14,15 +14,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './LogWorkoutCardioScreen.style';
 import { useNavigation } from '@react-navigation/native';
 
-interface LogWorkoutCardioProps {
-  continuingWorkout:boolean,
-}
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { RouteProp } from '@react-navigation/native'
 
-export const LogWorkoutCardioScreen = (props:LogWorkoutCardioProps) => {
+type LogWorkoutCardioProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'LogWorkoutCardio'>; // Adjust according to your navigation stack
+  route: RouteProp<RootStackParamList, 'LogWorkoutCardio'>;
+};
+
+export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioProps) => {
   const realm = useRealm();
   const user = useUser();
 
-  const navigation = useNavigation()
+  const { continuingWorkout } = route.params;
+
+  const goBack = () => {
+    navigation.goBack()
+  }
+
+  const goToSubmitCompletion = (levelUp:boolean, gainedXp:number) => {
+    navigation.navigate("SubmitCompletion", {levelUp: levelUp, gainedXp: gainedXp})
+  }
 
   const [selectingExercise, setSelectingExercise] = useState(false)
 
@@ -152,7 +165,7 @@ export const LogWorkoutCardioScreen = (props:LogWorkoutCardioProps) => {
   }
 
   useEffect(() => {
-    if(props.continuingWorkout)
+    if(continuingWorkout)
       {
         loadCurrentWorkout()
       }
@@ -214,8 +227,7 @@ export const LogWorkoutCardioScreen = (props:LogWorkoutCardioProps) => {
       levelUp = true;
     }
 
-    //navigation.navigate(("SubmitCompletion" as never, {levelUp: levelUp, xpGained:(totalDistance + totalTime + 100)} as never))
-    //navigation.navigate("SubmitCompletion")
+    goToSubmitCompletion(levelUp, (totalDistance + totalTime + 100))
     
   }
 
@@ -509,7 +521,7 @@ export const LogWorkoutCardioScreen = (props:LogWorkoutCardioProps) => {
         },
         {
           text: 'OK',
-          onPress: () => navigation.goBack(),
+          onPress: () => goBack(),
         },
       ],
       { cancelable: false }

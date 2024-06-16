@@ -6,23 +6,29 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { UserStatistics } from '../../schemas/UserStatisticsSchema';
 import { shadow } from '../../sharedStyling/Shadow'
 import styles from './ProfileScreen.style';
-import { useNavigation } from '@react-navigation/native';
+
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { RouteProp } from '@react-navigation/native'
 
 type ProfileScreenProps = {
-  restrictedView:boolean,
-  user:any,
-  closeProfile:any,
-}
+  navigation: StackNavigationProp<RootStackParamList, 'ProfileScreen'>; // Adjust according to your navigation stack
+  route: RouteProp<RootStackParamList, 'ProfileScreen'>;
+};
 
-export const ProfileScreen = (props:ProfileScreenProps) => {
+export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
 
   const realm = useRealm();
   const user = useUser();
 
-  const navigation = useNavigation()
+  const { restrictedView, userId } = route.params;
 
+  const goToAccount = () => {
+    navigation.navigate("Account")
+  }
 
-  let userData = realm.objects("Users").sorted('_id').filtered("userId == $0", props.user);
+  let userData = realm.objects("Users").sorted('_id').filtered("userId == $0", userId);
+  //let userData = realm.objects("Users").sorted('_id').filtered("userId == $0", props.user);
 
   const [imageSource, setImageSource] = useState()
 
@@ -96,17 +102,17 @@ export const ProfileScreen = (props:ProfileScreenProps) => {
        
           <View style={[styles.information, shadow.shadow]}>
             {
-              props.restrictedView &&
+              restrictedView &&
               <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
-                  <TouchableOpacity onPress={props.closeProfile}>
+                  <TouchableOpacity onPress={() => console.log("exit")}>
                     <MaterialCommunityIcons name="arrow-left" color={'lightgray'} size={40} style={{marginLeft: 10,}}/>
                   </TouchableOpacity>
               </View>
             }
             {
-              !props.restrictedView &&
+              !restrictedView &&
               <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-                <TouchableOpacity onPress={() => navigation.navigate("Account" as never)}>
+                <TouchableOpacity onPress={goToAccount}>
                   <MaterialCommunityIcons name="cog" color={'lightgray'} size={40} style={{marginRight: 10,}}/>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleConfirm}>

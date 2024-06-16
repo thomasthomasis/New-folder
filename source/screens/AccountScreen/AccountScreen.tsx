@@ -5,14 +5,22 @@ import { Users } from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { shadow } from '../../sharedStyling/Shadow';
 import styles from './AccountScreen.style';
-import { useNavigation } from '@react-navigation/native';
 
-export const AccountScreen = () => {
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+
+type AccountScreenProps = {
+    navigation: StackNavigationProp<RootStackParamList, 'Account'>;
+}
+
+export const AccountScreen = ({ navigation }: AccountScreenProps) => {
 
     const realm = useRealm()
     const user = useUser()
 
-    const navigation = useNavigation()
+    const goBack = () => {
+        navigation.goBack()
+    }   
 
     const userData = useQuery(Users).sorted('_id').filtered("userId == $0", user.id);
     

@@ -1,5 +1,5 @@
 import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, StyleSheet, Text, View, TouchableOpacity, TextInput} from 'react-native';
+import {Alert, StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import {BSON} from 'realm';
 import {useUser, useRealm, useQuery} from '@realm/react';
@@ -16,15 +16,32 @@ import { AddExerciseScreen } from '../AddExerciseScreen/AddExerciseScreen';
 import styles from './LogWorkoutResistanceScreen.style'
 import { useNavigation } from '@react-navigation/native';
 
-type LogWorkoutResistanceProps = {
-  continuingWorkout:boolean,
-}
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { RouteProp } from '@react-navigation/native'
 
-export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
+type LogWorkoutResistanceProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'LogWorkoutResistance'>; // Adjust according to your navigation stack
+  route: RouteProp<RootStackParamList, 'LogWorkoutResistance'>;
+};
+
+export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResistanceProps) => {
   const realm = useRealm();
   const user = useUser();
 
-  const navigation = useNavigation()
+  const { continuingWorkout } = route.params;
+
+  const goBack = () => {
+    navigation.goBack()
+  }
+
+  const goToSubmitCompletion = (levelUp:boolean, gainedXp:number) => {
+    navigation.navigate("SubmitCompletion", {levelUp: levelUp, gainedXp: gainedXp})
+  }
+
+  const goToAddExercise = () => {
+    navigation.navigate("AddExercise")
+  }
 
   const [selectingExercise, setSelectingExercise] = useState(false)
 
@@ -162,7 +179,7 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
   }
 
   useEffect(() => {
-    if(props.continuingWorkout)
+    if(continuingWorkout)
       {
         loadCurrentWorkout()
       }
@@ -219,6 +236,8 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
     {
       levelUp = true;
     }
+
+    goToSubmitCompletion(levelUp, (totalReps + totalVolume + 100))
     
   }
 
@@ -510,7 +529,7 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
             },
             {
               text: 'OK',
-              onPress: () => navigation.goBack(),
+              onPress: () => goBack(),
             },
           ],
           { cancelable: false }
@@ -556,97 +575,63 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
           setFilteredData(filtered);
         }
       };
-    
-      const [addingExercise, setAddingExercise] = useState<boolean>(false)
-     
-      const exitExerciseManipulation = () => {
-        setAddingExercise(false)
+
+      const addExtraExercisesToSection = () => {
+
+        for(let i = 0; i < extraExercises.length; i++)
+          {
+            let extraInformation = extraExercises[i].extraInformation ?? ""
+
+            if(extraInformation == "")
+              {
+                let section = sections.find(section => section.title == "Other")
+
+                if(section)
+                  {
+                    let alreadyExists = section.content.some(item => item.name === extraExercises[i].name)
+                    if(alreadyExists) continue
+
+                    let name = extraExercises[i].name ?? ""
+                    let newExercise = { name: name }
+                    section.content.push(newExercise)
+                  }
+                continue
+              }
+
+
+            let muscleGroups = extraInformation.split(",")
+
+            for(let j = 0; j < muscleGroups.length; j++)
+              {
+                if(muscleGroups[j] == "") continue;
+
+                let section = sections.find(section => section.title == muscleGroups[j])
+
+                if(section)
+                  {
+                    let name = extraExercises[i].name ?? ""
+                    let newExercise = { name: name }
+                    section.content.push(newExercise)
+                  }
+
+                section = sections.find(section => section.title == "Other")
+
+                if(section)
+                  {
+                    let alreadyExists = section.content.some(item => item.name === extraExercises[i].name)
+                    if(alreadyExists) continue
+                    
+                    let name = extraExercises[i].name ?? ""
+                    let newExercise = { name: name }
+                    section.content.push(newExercise)
+                  }
+              }
+          }
       }
-    
-    
-      const addExercise = useCallback(
-        (input:string, selectedMuscles:string) => {
-    
-          realm.write(() => {
-            return new ExtraExercises(realm, {
-              _id: new BSON.ObjectID,
-              extraInformation: selectedMuscles,
-              type: "Resistance",
-              name: input.trim(),
-              userId: user.id,
-            })
-          })
-    
-          updateExerciseList()
-        }, [realm, user])
-    
-        const updateExerciseList = () => {
-    
-          let newList = extraExercises.map(item => item.name ?? "");
-          console.log("Updated list: ", newList)
-    
-          totalExercises = newList.concat(normalExercises)
-          console.log(totalExercises)
-    
-          setFilteredData(totalExercises)
-        }
 
-        const addExtraExercisesToSection = () => {
-
-          for(let i = 0; i < extraExercises.length; i++)
-            {
-              let extraInformation = extraExercises[i].extraInformation ?? ""
-
-              if(extraInformation == "")
-                {
-                  let section = sections.find(section => section.title == "Other")
-
-                  if(section)
-                    {
-                      let alreadyExists = section.content.some(item => item.name === extraExercises[i].name)
-                      if(alreadyExists) continue
-
-                      let name = extraExercises[i].name ?? ""
-                      let newExercise = { name: name }
-                      section.content.push(newExercise)
-                    }
-                  continue
-                }
-
-
-              let muscleGroups = extraInformation.split(",")
-
-              for(let j = 0; j < muscleGroups.length; j++)
-                {
-                  if(muscleGroups[j] == "") continue;
-
-                  let section = sections.find(section => section.title == muscleGroups[j])
-
-                  if(section)
-                    {
-                      let name = extraExercises[i].name ?? ""
-                      let newExercise = { name: name }
-                      section.content.push(newExercise)
-                    }
-
-                  section = sections.find(section => section.title == "Other")
-
-                  if(section)
-                    {
-                      let alreadyExists = section.content.some(item => item.name === extraExercises[i].name)
-                      if(alreadyExists) continue
-                      
-                      let name = extraExercises[i].name ?? ""
-                      let newExercise = { name: name }
-                      section.content.push(newExercise)
-                    }
-                }
-            }
-        }
-
-        useEffect(() => {
-          addExtraExercisesToSection()
-        })
+      useEffect(() => {
+        addExtraExercisesToSection()
+      })
 
   const sections = [
     {
@@ -1220,7 +1205,7 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
     
     <>
     {
-      (!selectingExercise && !addingExercise) && 
+      !selectingExercise && 
       <View style={styles.header}>
         <TouchableOpacity onPress={handleCancel}>
             <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
@@ -1231,27 +1216,34 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
       </View>
     }
     {
-      (selectingExercise && !addingExercise) &&
+      selectingExercise &&
       <View style={styles.header}>
         <TouchableOpacity onPress={() => setSelectingExercise(false)}>
             <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setAddingExercise(true)}>
+        <TouchableOpacity onPress={goToAddExercise}>
             <MaterialCommunityIcons name="plus" color={'white'} size={40} style={{marginRight: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
         </TouchableOpacity>
       </View>
     }
+
+    
     
 
     {
-      (selectingExercise && !addingExercise) &&
-      <View style={{width: '100%', backgroundColor: colors.black}}>
+      selectingExercise &&
+      <>
+      <View style={{backgroundColor: colors.black}}>
         <TextInput
-        style={{ height: 40, width: '80%', marginRight: 'auto', marginLeft: 'auto', borderColor: 'black', backgroundColor: 'white', borderWidth: 1, borderRadius: 15, marginBottom: 20, padding: 10, }}
-        placeholder="Search..."
-        value={searchText}
-        onChangeText={handleSearch}
-        />
+          style={{ height: 40, width: '80%', marginRight: 'auto', marginLeft: 'auto', borderColor: 'black', backgroundColor: 'white', borderWidth: 1, borderRadius: 15, marginBottom: 20, padding: 10, }}
+          placeholder="Search..."
+          value={searchText}
+          onChangeText={handleSearch}
+          />
+      </View>
+      
+      <ScrollView style={{width: '100%', backgroundColor: colors.black}}>
+        
         {
           searchText.length > 0 && 
           filteredData.map((item) => (
@@ -1269,10 +1261,11 @@ export const LogWorkoutResistanceScreen = (props:LogWorkoutResistanceProps) => {
         
 
         
-      </View>
+      </ScrollView>
+      </>
     }
     {
-      (!selectingExercise && !addingExercise) &&
+      !selectingExercise &&
     <View style={styles.container}>
         
       {forms.map((form:any, formIndex:any) => (

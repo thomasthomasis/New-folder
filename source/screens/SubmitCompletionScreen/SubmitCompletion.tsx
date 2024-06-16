@@ -6,18 +6,26 @@ import { UserStatistics } from '../../schemas/UserStatisticsSchema';
 import styles from './SubmitCompletionScreen.style';
 import { useNavigation } from '@react-navigation/native';
 
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { RouteProp } from '@react-navigation/native'
 
 type SubmitCompletionProps = {
-    levelUp:boolean,
-    gainedXp:number,
-}
+  navigation: StackNavigationProp<RootStackParamList, 'SubmitCompletion'>; // Adjust according to your navigation stack
+  route: RouteProp<RootStackParamList, 'SubmitCompletion'>;
+};
 
-export const SubmitCompletion = (props:SubmitCompletionProps) => {
+
+export const SubmitCompletion = ({ navigation, route}: SubmitCompletionProps) => {
 
     const realm = useRealm();
     const user = useUser();
 
-    const navigation = useNavigation()
+    const { levelUp, gainedXp } = route.params;
+
+    const goToLogWorkout = () => {
+        navigation.navigate("LogWorkout")
+    }
   
     const userStats = useQuery(UserStatistics).filtered("userId == $0", user.id);
 
@@ -47,11 +55,11 @@ export const SubmitCompletion = (props:SubmitCompletionProps) => {
             <View style={styles.bigCircle}>
                 <Text style={styles.bigCircleText}>{userStats[0].lvl}</Text>
             </View>
-            {   props.levelUp &&
+            {   levelUp &&
                 <Text style={styles.congratsText}>LEVEL UP</Text>
             }
             {
-                !props.levelUp &&
+                !levelUp &&
                 <Text style={styles.congratsText}>WELL DONE</Text>
             }
             <View style={styles.progressBarContainer}>
@@ -65,11 +73,11 @@ export const SubmitCompletion = (props:SubmitCompletionProps) => {
                     </View>
                     <View style={{display: 'flex', flexDirection: 'row', justifyContent:'space-between'}}>
                         {
-                            props.gainedXp >= 0 &&
-                            <Text>+{props.gainedXp}</Text>
+                            gainedXp >= 0 &&
+                            <Text>+{gainedXp}</Text>
                         }
                         {
-                            props.gainedXp < 0 &&
+                            gainedXp < 0 &&
                             <Text>+0</Text>
                         }
                         
@@ -82,7 +90,7 @@ export const SubmitCompletion = (props:SubmitCompletionProps) => {
                     <Text style={styles.smallCircleText}>{userStats[0].lvl + 1}</Text>
                 </View>
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate("LogWorkout" as never)} style={styles.continueButton}>
+            <TouchableOpacity onPress={goToLogWorkout} style={styles.continueButton}>
                 <Text style={styles.text}>Continue</Text>
             </TouchableOpacity>
         </View>

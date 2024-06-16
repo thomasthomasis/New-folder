@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
-import {Alert, Text, View, TouchableOpacity, TextInput} from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {Alert, Text, View, TouchableOpacity, TextInput, ScrollView} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './AddExerciseScreen.style';
-import { useNavigation } from '@react-navigation/native';
 
-export const AddExerciseScreen = () => {
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { useRealm, useUser } from '@realm/react';
+import { ExtraExercises } from '../../schemas/ExtraExercisesSchema';
+import { BSON } from 'realm';
 
-    const navigation = useNavigation()
+type AddExerciseProps = {
+    navigation: StackNavigationProp<RootStackParamList, 'AddExercise'>;
+}
+
+export const AddExerciseScreen = ({ navigation }: AddExerciseProps) => {
+
+    const realm = useRealm()
+    const user = useUser()
+
+    const goBack = () => {
+        navigation.goBack()
+    }   
 
     const [modalInput, setModalInput] = useState<string>('')
 
@@ -42,9 +56,19 @@ export const AddExerciseScreen = () => {
         
       }
 
-    const addExercise = (modalInput:any, selectedMuscles:any) => {
-
-    }
+      const addExercise = useCallback(
+        (input:string, selectedMuscles:string) => {
+    
+          realm.write(() => {
+            return new ExtraExercises(realm, {
+              _id: new BSON.ObjectID,
+              extraInformation: selectedMuscles,
+              type: "Resistance",
+              name: input.trim(),
+              userId: user.id,
+            })
+          })
+        }, [realm, user])
       
     const submit = () => {
         if(modalInput.length == 0)
@@ -63,9 +87,9 @@ export const AddExerciseScreen = () => {
     }
 
     return (
-        <>
+        <ScrollView>
         <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingTop: 10, paddingBottom: 10, backgroundColor: colors.black, marginBottom: 10,}}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity onPress={goBack}>
                 <MaterialCommunityIcons name="arrow-left" color={'white'} size={40} style={{marginLeft: 10, backgroundColor: 'black', borderRadius: 40, padding: 5,}}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={submit}>
@@ -96,6 +120,6 @@ export const AddExerciseScreen = () => {
             ))
         }
         </View>
-        </>
+        </ScrollView>
     )
 }

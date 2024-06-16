@@ -251,7 +251,7 @@ export const GroupScreen = (props:GroupScreenProps) => {
 
         {
             viewingProfile &&
-            <ProfileScreen restrictedView={true} user={selectedUser} closeProfile={closeProfile}/>
+            <Text>Viewing Profile</Text>
         }
 
         <Modal

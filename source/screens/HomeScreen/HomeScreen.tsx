@@ -5,7 +5,14 @@ import { useRealm, useQuery} from '@realm/react';
 import { Users } from '../../schemas/UsersSchema';
 import styles from './HomeScreen.style';
 
-export function HomeScreen() {
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+
+type HomeScreenProps = {
+    navigation: StackNavigationProp<RootStackParamList, 'Home'>;
+}
+
+export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const realm = useRealm()
   const users = useQuery(Users);

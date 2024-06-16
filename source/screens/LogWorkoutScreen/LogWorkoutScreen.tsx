@@ -12,15 +12,31 @@ import styles from './LogWorkoutScreen.styles';
 import Modal from 'react-native-modal';
 import { useRealm, useUser } from '@realm/react';
 import { Users } from '../../schemas/UsersSchema';
-import { useNavigation } from '@react-navigation/native';
+
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+
+type LogWorkoutProps = {
+    navigation: StackNavigationProp<RootStackParamList, 'LogWorkout'>;
+}
 
 
-export function LogWorkoutScreen() {
+export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
 
   const realm = useRealm()
   const user = useUser()
 
-  const navigation = useNavigation()
+  const goBack = () => {
+    navigation.goBack()
+  }
+
+  const logResitanceWorkout = () => {
+    navigation.navigate("LogWorkoutResistance", {continuingWorkout: false})
+  }
+
+  const logCardioWorkout = () => {
+    navigation.navigate("LogWorkoutCardio", { continuingWorkout: false})
+  }
 
   let userData = realm.objects("Users").sorted('_id').filtered("userId == $0", user.id);
 
@@ -149,13 +165,13 @@ export function LogWorkoutScreen() {
               <Text style={styles.modalHeaderText}>Log a Workout</Text> 
             </View>
             <View style={styles.rowModal}>
-              <TouchableOpacity style={[styles.gridOption, {backgroundColor: '#ED97A5'}, shadow.shadow]} onPress={() => {closeModal(); navigation.navigate("LogWorkoutCardio" as never)}}>
+              <TouchableOpacity style={[styles.gridOption, {backgroundColor: '#ED97A5'}, shadow.shadow]} onPress={() => {closeModal(); logCardioWorkout()}}>
                 <View style={[styles.circle, {backgroundColor: colors.red}]}>
                   <Image style={styles.image} source={require('../../assets/Heart.png')} />
                 </View>
                 <Text style={styles.plus}>+</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.gridOption, {backgroundColor: '#afb0b2'}, shadow.shadow]} onPress={() => {closeModal(); navigation.navigate("LogWorkoutResistance" as never)}}>
+              <TouchableOpacity style={[styles.gridOption, {backgroundColor: '#afb0b2'}, shadow.shadow]} onPress={() => {closeModal(); logResitanceWorkout()}}>
                 <View style={[styles.circle, {backgroundColor: colors.black}]}>
                   <MaterialCommunityIcons name="weight" color={'black'} size={80}/>
                 </View>
