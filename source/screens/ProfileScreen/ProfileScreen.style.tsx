@@ -50,6 +50,23 @@ const styles = StyleSheet.create({
       color: 'lightgray',
       marginBottom: 10,
     },
+
+    status: {
+      width: 100,
+      height: 30,
+      borderRadius: 5,
+
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+
+    },
+
+    statusText: {
+      fontWeight: '800',
+      color: 'white',
+      fontSize: 20,
+    },
   
     smallBorder: {
       width: '85%',

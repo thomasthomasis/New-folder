@@ -208,6 +208,42 @@ const styles = StyleSheet.create({
       fontSize: 18,
       color: 'white',
     },
+
+    modalView: {
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'flex-end',
+      margin: 0,
+    },
+
+    modalContent: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'white',
+      padding: 10,
+      borderRadius: 20,
+    },
+      
+
+    modalButton: {
+      width: 170,
+      height: 40,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.blue,
+      marginBottom: 10,
+      borderRadius: 15,
+    },
+
+    modalButtonText: {
+      fontWeight: '800',
+      color: 'white',
+      fontSize: 20,
+    }
+
   
     });
 

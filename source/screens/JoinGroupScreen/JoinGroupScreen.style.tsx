@@ -1,5 +1,8 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { colors } from "../../sharedStyling/Colors";
+
+const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
 
@@ -20,19 +23,39 @@ const styles = StyleSheet.create({
         color: 'white',
     },
 
+    headerTitle: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    searchBar: {
+        width: screenWidth,
+        height: 50,
+        marginTop: 20,
+        marginBottom: 10,
+        display: 'flex', 
+        flexDirection: 'row', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+    },
+
     input: {
         borderWidth: 2,
         borderColor: 'lightgray',
         borderRadius: 30,
         paddingLeft: 10,
-        marginBottom: 10,
-        width: 200,
-        marginTop: 20,
+        width: screenWidth - 50,
 
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center'
+    },
+
+    bellIcon: {
+        marginRight: 10,
     },
 
     groups: {
@@ -41,9 +64,9 @@ const styles = StyleSheet.create({
     },
 
     group: {
-        width: 230,
-        height: 40,
-        borderRadius: 20,
+        width: screenWidth - 50,
+        height: 50,
+        borderRadius: 15,
         backgroundColor: colors.purple,
         display: 'flex',
         justifyContent: 'space-evenly',
@@ -53,6 +76,8 @@ const styles = StyleSheet.create({
     },
 
     icon: {
+        position: 'absolute',
+        right: 10,
         color: 'white'
     },
 

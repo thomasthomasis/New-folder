@@ -1,5 +1,5 @@
 import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Button, Text, View, TouchableOpacity, TextInput, Modal, TouchableWithoutFeedback} from 'react-native';
+import {Alert, Button, Text, View, TouchableOpacity, TextInput, TouchableWithoutFeedback, ScrollView} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import {BSON} from 'realm';
 import {useUser, useRealm, useQuery} from '@realm/react';
@@ -13,6 +13,7 @@ import Storage from 'react-native-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './LogWorkoutCardioScreen.style';
 import { useNavigation } from '@react-navigation/native';
+import Modal from 'react-native-modal';
 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
@@ -37,14 +38,52 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
     navigation.navigate("SubmitCompletion", {levelUp: levelUp, gainedXp: gainedXp})
   }
 
+  const goToEditExercise = (exerciseId:string) => {
+    navigation.navigate("EditCardioExercise", { exercise: exerciseId})
+  }
+
   const [selectingExercise, setSelectingExercise] = useState(false)
 
   const userStatistics = realm.objects("UserStatistics").filtered("userId == $0", user.id);
   const userData = realm.objects("Users").filtered("userId == $0", user.id);
 
   let extraExercises = useQuery(ExtraExercises).filtered("userId == $0 && type == $1", user.id, "Cardio");
-  const normalExercises = ["Treadmill", "Elliptical", "Indoor Bike", "Jump Rope", "Outdoor Bike", "Swimming", "Rowing Machine", "Outdoor Run", "Outdoor Walk", "Stair Machine", "Sprints"];
+  const normalExercises = [
+    "Treadmill", 
+    "Elliptical", 
+    "Indoor Bike", 
+    "Jump Rope", 
+    "Outdoor Bike", 
+    "Swimming", 
+    "Rowing Machine", 
+    "Outdoor Run", 
+    "Outdoor Walk", 
+    "Stair Machine", 
+    "Sprints"
+  ];
+
+  const getExerciseName = (id:string) => {
+    const exercise = extraExercises.filtered("userId == $0 AND exerciseId == $1", user.id, id)
+
+    if(exercise.length == 0)
+    {
+      for (let exercise of normalExercises) {
+        let exercise = normalExercises.find(ex => ex === id);
+        if (exercise) {
+          return exercise
+        }
+      }
+      return ""; // Return null if the exercise is not found
+    }
   
+    else
+    {
+      return exercise[0].name ?? ""
+    }
+
+    
+  } 
+
 
   useEffect(() => {
       realm.subscriptions.update(mutableSubs => {
@@ -528,8 +567,52 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
     );
   };
 
-  const addedExercisesArray = extraExercises.map(item => item.name ?? "");
+  const handleConfirmRemoveExercise = (formIndex:any) => {
+    // Show confirmation popup
+    
+    Alert.alert(
+      'Confirm Action',
+      'Are you sure you want to remove this exercise from your current workout?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => handleRemoveForm(formIndex),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const handleConfirmDeleteAddedExercise = () => {
+    // Show confirmation popup
+    
+    Alert.alert(
+      'Confirm Action',
+      'Are you sure you want to delete this exercise permanently?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {onClose(); deleteExercise(selectedExercise)},
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const addedExercisesArray = extraExercises.map(item => (getExerciseName(item.exerciseId) + "+" + item.exerciseId));
   let totalExercises = addedExercisesArray.concat(normalExercises);
+
+  console.log(totalExercises)
 
   const [searchText, setSearchText] = useState<string>('')
   const [filteredData, setFilteredData] = useState<string[]>(addedExercisesArray.concat(normalExercises));
@@ -542,7 +625,7 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
     }
     else
     {
-      const filtered = totalExercises.filter(item => item.toLowerCase().includes(text.toLowerCase()));
+      const filtered = totalExercises.filter(item => item.toLowerCase().startsWith(text.toLowerCase()));
       setFilteredData(filtered);
     }
   };
@@ -550,12 +633,16 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
   const [visible, setVisible] = useState<boolean>(false)
   const [modalInput, setModalInput] = useState<string>('')
   const [noNameAlert, setNoNameAlert] = useState<boolean>(false)
+  
+  const [visibleOptions, setVisibleOptions] = useState<boolean>(false)
+  const [selectedExercise, setSelectedExercise] = useState<string>('')
 
   const onClose = () => {
 
     setVisible(false);
     setModalInput('')
     setNoNameAlert(false)
+    setVisibleOptions(false)
   }
 
 
@@ -574,6 +661,7 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
           type: "Cardio",
           name: input.trim(),
           userId: user.id,
+          exerciseId: new BSON.ObjectID().toString()
         })
       })
 
@@ -591,6 +679,15 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
 
       setFilteredData(totalExercises)
     }
+
+  const deleteExercise = (exerciseId:string) => {
+
+    const exercise = realm.objects(ExtraExercises).filtered("exerciseId == $0", exerciseId)
+
+    realm.write(() => {
+      realm.delete(exercise)
+    })
+  }
     
 
   return (
@@ -622,30 +719,99 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
 
     {
       selectingExercise &&
-      <View style={{width: '100%', backgroundColor: colors.red}}>
-        <TextInput
-        style={{ height: 40, width: '80%', marginRight: 'auto', marginLeft: 'auto', borderColor: 'black', backgroundColor: 'white', borderWidth: 1, borderRadius: 15, marginBottom: 20, padding: 10, }}
-        placeholder="Search..."
-        value={searchText}
-        onChangeText={handleSearch}
-        />
+      <>
+        <View style={{backgroundColor: colors.red}}>
+          <TextInput
+          style={{ height: 40, width: '80%', marginRight: 'auto', marginLeft: 'auto', borderColor: 'black', backgroundColor: 'white', borderWidth: 1, borderRadius: 15, marginBottom: 20, padding: 10, }}
+          placeholder="Search..."
+          value={searchText}
+          onChangeText={handleSearch}
+          />
+        </View>
+
+        <ScrollView style={{width: '100%', backgroundColor: colors.red,}}>
         {
+          searchText.length > 0 && 
           filteredData.map((item) => (
-            <TouchableOpacity key={new BSON.ObjectID().toString()} style={[{ backgroundColor: 'lightgray', borderRadius: 20, padding: 10, marginBottom: 10, width: '80%', marginRight: 'auto', marginLeft: 'auto'}, shadow.shadow]} onPress={() => {handleAddForm(item); setSelectingExercise(false)}}>
-              <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item}</Text>
+            <TouchableOpacity key={new BSON.ObjectID().toString()} style={[{ backgroundColor: 'lightgray', borderRadius: 20, padding: 10, marginBottom: 10, width: '80%', marginRight: 'auto', marginLeft: 'auto'}, shadow.shadow]} onPress={() => {
+              if(item.includes("+"))
+              {
+                let id = item.split("+")[1]
+                handleAddForm(id)
+                setSelectingExercise(false)
+              }
+              else
+              {
+                handleAddForm(item)
+                setSelectingExercise(false)
+              }
+              }} onLongPress={() => {
+                if(item.includes("+"))
+                {
+                  setSelectedExercise(item.split("+")[1])
+                  setVisibleOptions(true)
+                }
+              }}>
+                {
+                  item.includes("+") &&
+                  <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item.split("+")[0]}</Text>
+                }
+                {
+                  !item.includes("+") &&
+                  <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item}</Text>
+                }
             </TouchableOpacity>
             
-          ))
-        }
-      </View>
+            
+            ))
+          }
+          {
+            searchText.length == 0 &&
+            totalExercises.map((item) => (
+              <TouchableOpacity key={new BSON.ObjectID().toString()} style={[{ backgroundColor: 'lightgray', borderRadius: 20, padding: 10, marginBottom: 10, width: '80%', marginRight: 'auto', marginLeft: 'auto'}, shadow.shadow]} onPress={() => {
+                if(item.includes("+"))
+                {
+                  let id = item.split("+")[1]
+                  handleAddForm(id)
+                  setSelectingExercise(false)
+                }
+                else
+                {
+                  handleAddForm(item)
+                  setSelectingExercise(false)
+                }
+                }} onLongPress={() => {
+                  if(item.includes("+"))
+                  {
+                    setSelectedExercise(item.split("+")[1])
+                    setVisibleOptions(true)
+                  }
+                }}>
+                  {
+                    item.includes("+") &&
+                    <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item.split("+")[0]}</Text>
+                  }
+                  {
+                    !item.includes("+") &&
+                    <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item}</Text>
+                  }
+              </TouchableOpacity>
+              
+              
+              ))
+          }
+      </ScrollView>
+      </>
+      
     }
     {
       !selectingExercise &&
     <View style={styles.container}>
+      <ScrollView>
         
       {forms.map((form:any, formIndex:any) => (
         <View key={new BSON.ObjectID().toString()} style={styles.form}>
-          <Text style={styles.exercise}>{forms[formIndex].exercise.value}</Text>
+          <Text style={styles.exercise}>{getExerciseName(forms[formIndex].exercise.value)}</Text>
           <View style={styles.smallBorder}></View>
       {form.inputs.map((input:any, inputIndex:any) => (
         <View key={new BSON.ObjectID().toString()} style={styles.row}>
@@ -697,6 +863,7 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
                 </TouchableOpacity>
               </View>
             </View>
+             
               
         </View>
       ))}
@@ -715,12 +882,12 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
       </View>
       
       <View style={styles.rowButtons}>
-        <TouchableOpacity onPress={() => handleAddInput(formIndex)} style={styles.addButton}>
-          <Text>Add Interval</Text>
+      <TouchableOpacity onPress={() => handleAddInput(formIndex)} style={[styles.addButton, shadow.shadow]}>
+          <Text style={{color: 'gray', fontWeight: '800', fontSize: 15}}>Add Interval</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => handleRemoveForm(formIndex)} style={styles.addButton}>
-          <Text>Remove Exercise</Text>
+        <TouchableOpacity onPress={() => handleConfirmRemoveExercise(formIndex)} style={[styles.addButton, shadow.shadow]}>
+          <Text  style={{color: 'gray', fontWeight: '800', fontSize: 15}}>Remove Exercise</Text>
         </TouchableOpacity>
         
         </View>
@@ -732,19 +899,19 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
         <Text style={{color: 'gray', fontWeight: '800', fontSize: 20,}}>Add Exercise</Text>
       </TouchableOpacity>
       
+      </ScrollView>
     </View>
     }
 
     <Modal
-      visible={visible}
-      animationType="fade"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <TouchableWithoutFeedback  onPress={onClose}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)', }}>
-          <TouchableWithoutFeedback>
-            <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 , width: '80%',}}>
+      isVisible={visible}
+      swipeDirection={['down']}
+      onSwipeComplete={onClose}
+      onBackdropPress={onClose}
+      style={styles.modalView}
+      >
+          <View style={styles.modalContent}>
+          <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 , width: '80%',}}>
               <Text style={{ fontSize: 18, marginBottom: 10 }}>Enter Exercise Name:</Text>
               <TextInput
                 style={{ height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 20, padding: 10 }}
@@ -758,10 +925,22 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
                 <Text style={{color: 'red', fontSize: 18, fontWeight: '800', textAlign: 'center'}}>A name is required!</Text>
               }
             </View>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+          </View>
+        
+          
+      </Modal>
+
+    <Modal isVisible={visibleOptions} swipeDirection={['down']} onSwipeComplete={onClose} onBackdropPress={onClose} style={styles.modalView}>
+          <View style={styles.modalContent}>
+           
+            <TouchableOpacity onPress={() => {onClose(); goToEditExercise(selectedExercise)}} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Edit Exercise</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {handleConfirmDeleteAddedExercise()}} style={[styles.modalButton, {backgroundColor: colors.red}]}>
+              <Text style={styles.modalButtonText}>Delete Exercise</Text>
+            </TouchableOpacity>
+          </View>
+      </Modal>
     </>
   
 )};

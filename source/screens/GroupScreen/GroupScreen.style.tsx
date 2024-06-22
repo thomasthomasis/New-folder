@@ -15,8 +15,16 @@ const styles = StyleSheet.create({
         marginLeft: 10,
 
         display: 'flex',
-        justifyContent: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
+    },
+
+    headerTitle: {
+        width: 150,
+        paddingLeft: 15,
+        fontSize: 20,
+        fontWeight: '800',
     },
 
 

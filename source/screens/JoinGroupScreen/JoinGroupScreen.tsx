@@ -9,18 +9,25 @@ import Modal from 'react-native-modal';
 import { JoinGroupRequests } from "../../schemas/JoinGroupRequestsSchema";
 import styles from "./JoinGroupScreen.style";
 
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { shadow } from "../../sharedStyling/Shadow";
 
 type JoinGroupScreenProps = {
-    onPress:any;
+    navigation: StackNavigationProp<RootStackParamList, 'Account'>;
 }
 
-export const JoinGroupScreen = (props:JoinGroupScreenProps) => {
+export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
 
     const realm = useRealm()
     const user = useUser()
 
+    const goBack = () => {
+        navigation.goBack()
+    }
+
     const [groupName, setGroupName] = useState('');
-    const groups = useQuery(Groups).filtered('name CONTAINS[c] $0', groupName);
+    const groups = useQuery(Groups).filtered('name BEGINSWITH[c] $0', groupName);
     const groupsApartOfList = useQuery(Groups).filtered('ANY members == $0', user.id);
     const groupJoinRequests = useQuery(JoinGroupRequests).filtered('userId == $0', user.id.toString())
     const reqeustedGroups = groupJoinRequests.map(item => item.groupName)
@@ -78,12 +85,18 @@ export const JoinGroupScreen = (props:JoinGroupScreenProps) => {
     
     return (
         <>
-            <View style={{width: '100%', height: 60, backgroundColor: 'lightgray', display: 'flex', justifyContent: 'center'}}>
-                <TouchableOpacity onPress={() => props.onPress("join")} style={styles.closeButton}>
-                    <MaterialCommunityIcons name="close" size={40}/>
-                </TouchableOpacity> 
+            <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',}}>
+                <View style={styles.headerTitle}>
+                    <TouchableOpacity onPress={goBack} style={styles.closeButton}>
+                        <MaterialCommunityIcons name="arrow-left" size={40}/>
+                    </TouchableOpacity> 
+                    <Text style={{fontSize: 20, fontWeight: '800', marginLeft: 20,}}>Join group</Text>
+                </View>
+                <TouchableOpacity onPress={() => setModalPendingRequestsVisible(true)} style={styles.bellIcon}>
+                    <MaterialCommunityIcons name='bell' size={35} />
+                </TouchableOpacity>
             </View>
-            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+            <View style={styles.searchBar}>
                 <View style={styles.input}>
                     <MaterialCommunityIcons name="search-web" color={'gray'} size={40} />
                     <TextInput
@@ -93,21 +106,20 @@ export const JoinGroupScreen = (props:JoinGroupScreenProps) => {
                     />
                     
                 </View>
-                <TouchableOpacity onPress={() => setModalPendingRequestsVisible(true)}>
-                    <MaterialCommunityIcons name='bell' size={35} />
-                </TouchableOpacity>
+                
             </View>
-            
+            <ScrollView>
 
             <View style={styles.groups}>
                 {
                     groups.map((group:any, index:any) => {
                         return (
-                            <TouchableOpacity key={index} style={styles.group} onPress={() => {setModalGroupName(group.name); setModalGroupNumMembers(group.members.length); setModalGroupInfoVisible(true)}}>
+                            <TouchableOpacity key={index} style={[styles.group, shadow.shadow, group.color && {backgroundColor: group.color}]} onPress={() => {setModalGroupName(group.name); setModalGroupNumMembers(group.members.length); setModalGroupInfoVisible(true)}}>
+                                <MaterialCommunityIcons name={group.image} size={35} style={{position: 'absolute', left: 10,}}/>
                                 <Text style={{fontSize: 20, color: 'white', fontWeight: '800',}}>{group.name}</Text>
                                 {
                                     reqeustedGroups.includes(group.name) &&
-                                    <MaterialCommunityIcons key={index + 5} name="clock-alert-outline" size={35} style={styles.icon}/>
+                                    <MaterialCommunityIcons name="clock-alert-outline" size={35} style={styles.icon}/>
                                 }
                             </TouchableOpacity>
                         )
@@ -115,6 +127,7 @@ export const JoinGroupScreen = (props:JoinGroupScreenProps) => {
                 }
 
             </View>
+            </ScrollView>
 
              
             <Modal

@@ -7,6 +7,7 @@ export class Users extends Realm.Object<Users> {
   lastName?: string;
   profilePicture?: string;
   selectedTitle?: string;
+  status?: string;
   titles!: Realm.List<string>;
   userId!: string;
   username?: string;
@@ -20,6 +21,7 @@ export class Users extends Realm.Object<Users> {
     lastName: 'string?',
     profilePicture: 'string?',
     selectedTitle: 'string?',
+    status: 'string?',
     titles: 'string[]',
     userId: 'string',
     username: 'string?',

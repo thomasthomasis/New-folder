@@ -9,29 +9,39 @@ import { Groups } from "../../schemas/GroupsSchema";
 import { shadow } from "../../sharedStyling/Shadow";
 import styles from "./GroupSettingsScreen.style";
 
-type GroupSettingsScreenProps = {
-    onPress:any;
-    group:string;
-}
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { RouteProp } from '@react-navigation/native'
 
-export const GroupSettingsScreen = (props:GroupSettingsScreenProps) => {
+type GroupSettingsScreenProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'GroupSettings'>; // Adjust according to your navigation stack
+  route: RouteProp<RootStackParamList, 'GroupSettings'>;
+};
+
+export const GroupSettingsScreen = ({ navigation, route }: GroupSettingsScreenProps) => {
 
     const realm = useRealm()
     const user = useUser()
-    
-    const group = useQuery(Groups).filtered("name == $0", props.group)
 
-    const [groupName, setGroupName] = useState<string>(group[0].name)
-    const [groupDescription, setGroupDescription] = useState<string>(group[0].description ?? "")
+    const { group } = route.params
+
+    const goBack = () => {
+        navigation.goBack()
+    }
+    
+    const groupData = useQuery(Groups).filtered("name == $0", group)
+
+    const [groupName, setGroupName] = useState<string>(groupData[0].name)
+    const [groupDescription, setGroupDescription] = useState<string>(groupData[0].description ?? "")
 
     const updateGroupInfo = () => {
         realm.write(() => {
-            group[0].name = groupName;
-            group[0].description = groupDescription;
+            groupData[0].name = groupName;
+            groupData[0].description = groupDescription;
         })
 
         Alert.alert("Group Edited Successfully!");
-        props.onPress()
+        goBack()
     }
 
     const handleNameChange = (inputText:string) => {
@@ -73,7 +83,7 @@ export const GroupSettingsScreen = (props:GroupSettingsScreenProps) => {
     return (
         <>
             <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',}}>
-                <TouchableOpacity onPress={() => props.onPress()} style={styles.closeButton}>
+                <TouchableOpacity onPress={goBack} style={styles.closeButton}>
                     <MaterialCommunityIcons name="arrow-left" size={40}/>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleConfirm()} style={{marginRight: 10,}}>

@@ -10,6 +10,8 @@ import styles from './ProfileScreen.style';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 import { RouteProp } from '@react-navigation/native'
+import { colors } from '../../sharedStyling/Colors';
+import { useFocusEffect } from '@react-navigation/native';
 
 type ProfileScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'ProfileScreen'>; // Adjust according to your navigation stack
@@ -23,38 +25,24 @@ export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
 
   const { restrictedView, userId } = route.params;
 
-  const goToAccount = () => {
-    navigation.navigate("Account")
+  const goBack = () => {
+    navigation.goBack()
   }
 
-  let userData = realm.objects("Users").sorted('_id').filtered("userId == $0", userId);
-  //let userData = realm.objects("Users").sorted('_id').filtered("userId == $0", props.user);
+  const goToAppSettings = () => {
+    navigation.navigate("AppSettings")
+  }
+
+  const [userData, setUserData] = useState<any>(realm.objects("Users").sorted('_id').filtered("userId == $0", userId));
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let data = realm.objects("Users").sorted('_id').filtered("userId == $0", userId)
+      setUserData(data)
+    }, [])
+  );
 
   const [imageSource, setImageSource] = useState()
-
-  const signOut = useCallback(() => {
-    user?.logOut();
-  }, [user]);
-
-  const handleConfirm = () => {
-    // Show confirmation popup
-    Alert.alert(
-      'Confirm Action',
-      'Are you sure you want to signout?',
-      [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: () => signOut(),
-        },
-      ],
-      { cancelable: false }
-    );
-  };
 
   useEffect(() => {
     //console.log(userData)
@@ -104,7 +92,7 @@ export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
             {
               restrictedView &&
               <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
-                  <TouchableOpacity onPress={() => console.log("exit")}>
+                  <TouchableOpacity onPress={goBack}>
                     <MaterialCommunityIcons name="arrow-left" color={'lightgray'} size={40} style={{marginLeft: 10,}}/>
                   </TouchableOpacity>
               </View>
@@ -112,11 +100,8 @@ export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
             {
               !restrictedView &&
               <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-                <TouchableOpacity onPress={goToAccount}>
+                <TouchableOpacity onPress={goToAppSettings}>
                   <MaterialCommunityIcons name="cog" color={'lightgray'} size={40} style={{marginRight: 10,}}/>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleConfirm}>
-                  <MaterialCommunityIcons name="logout" color={'lightgray'} size={40} style={{marginRight: 10,}}/>
                 </TouchableOpacity>
               </View>
             }
@@ -138,6 +123,14 @@ export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
                 <Text style={styles.name}>{userData[0].firstName as string} {userData[0].lastName as string}</Text>
                 <Text style={styles.username}>{userData[0].username as string}</Text>
                 <Text style={styles.title}>{userData[0].selectedTitle as string}</Text>
+                {
+                  userData[0].status != "Healthy" &&
+                  <View style={[styles.status, userData[0].status == "Away" && {backgroundColor: colors.orange}, userData[0].status == "Injured" && {backgroundColor: colors.red}]}>
+                    <Text style={styles.statusText}>{userData[0].status as string}</Text>
+                  </View>
+                }
+                
+                
               </View>
             </View>
               

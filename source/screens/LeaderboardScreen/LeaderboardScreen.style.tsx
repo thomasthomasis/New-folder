@@ -1,5 +1,8 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { colors } from "../../sharedStyling/Colors";
+
+const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
 
@@ -49,11 +52,54 @@ const styles = StyleSheet.create({
 
     containerLeaderBoard: {
         width: '100%',
+        height: screenHeight - 380,
+        display: 'flex',
+        alignItems: 'center',
+
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        backgroundColor: 'white',
+        paddingTop: 20,
+    },
+
+    containerPodium: {
+        width: screenWidth - 30,
+
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+    },
+
+    podium: {
+        width: '100%',
+        height: 180,
+
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    podiumContent: {
+        width: '33.33%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    podiumText: {
+        fontWeight: '900',
+        fontSize: 70,
+        color: 'white',
+    },
+
+    containerLoading: {
+        width: '100%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
 
-        marginBottom: 20,
+        height: screenHeight - 280,
     },
 
     row: {
@@ -70,11 +116,21 @@ const styles = StyleSheet.create({
         fontWeight: '800',
     },
 
+    data: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: colors.green,
+    },
+
+    username: {
+        fontSize: 18, 
+        fontWeight: '800',
+    },
+
     image: {
-        width: 60,
-        height: 60,
+        width: 80,
+        height: 80,
         borderRadius: 60,
-        marginRight: 20,
     },
 
     containerColumn: {
@@ -100,7 +156,17 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 100,
-    }
+    },
+
+    linearGradient: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      text: {
+        color: '#ffffff',
+        fontSize: 24,
+      },
 })
 
 export default styles;

@@ -13,60 +13,53 @@ import { GroupSettingsScreen } from '../GroupSettingsScreen/GroupSettingsScreen'
 import { GroupMembersSettingsScreen } from '../GroupMembersSettingsScreen/GroupMembersSettingsScreen';
 import styles from './SocialScreen.style';
 
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 
-export function SocialScreen() {
+type SocialScreenProps = {
+    navigation: StackNavigationProp<RootStackParamList, 'SocialScreen'>;
+}
+
+
+export const SocialScreen = ({ navigation }: SocialScreenProps) => {
 
   const realm = useRealm()
   const user = useUser()
 
+  const goToGroupScreen = (group:string) => {
+    navigation.navigate("Group", { group: group })
+  }
+
+  const goToCreateGroupScreen = () => {
+    navigation.navigate("CreateGroup")
+  }
+
+  const goToJoinGroupScreen = () => {
+    navigation.navigate("JoinGroup")
+  }
+
+  const goToEditingGroupScreen = (group:string) => {
+    navigation.navigate("GroupSettings", { group: group })
+  }
+
+  const goToEditingGroupMembersScreen = (group:string) => {
+    navigation.navigate("GroupMembersSettings", { group: group })
+  }
+
   const groups = useQuery(Groups).filtered('ANY members == $0', user.id);
+
+  console.log(groups)
   
-
-  const createGroup = () => {
-    setCreatingGroup(true)
-  }
-
-  const joinGroup = () => {
-    setJoiningGroup(true)
-  }
-
-  const closeScreen = (name:string) => {
-    if(name == "join")
-    {
-      setJoiningGroup(false)
-    }
-    else if(name == "create")
-    {
-      setCreatingGroup(false)
-    }
-    else if(name == "view")
-    {
-      setViewingGroup(false)
-    }
-  }
-
-  const [creatingGroup, setCreatingGroup] = useState<boolean>(false)
-  const [joiningGroup, setJoiningGroup] = useState<boolean>(false)
-  const [viewingGroup, setViewingGroup] = useState<boolean>(false)
-
-  const [editingGroup, setEditingGroup] = useState<boolean>(false)
-  const [editingGroupMembers, setEditingGroupMembers] = useState<boolean>(false)
   const [selectedGroup, setSelectedGroup] = useState<string>('')
 
   const [group, setGroup] = useState<string>('')
 
   const [showingModal, setShowingModal] = useState<boolean>(false)
+  const [showingModalOptions, setShowingModalOptions] = useState<boolean>(false)
 
   const onClose = () => {
     setShowingModal(false)
-  }
-
-  const stopEditingGroup = () => {
-    setEditingGroup(false)
-  }
-  
-  const stopEditingGroupMembers = () => {
-    setEditingGroupMembers(false)
+    setShowingModalOptions(false)
   }
 
   const checkIfOwner = () => {
@@ -220,13 +213,16 @@ export function SocialScreen() {
   
   return (
     <> 
-    {
-      (!creatingGroup && !joiningGroup && !viewingGroup && !editingGroup && !editingGroupMembers) && 
       <View style={styles.container}>
             <FlatList
+            contentContainerStyle={styles.flatList}
             data={groups}
             renderItem={({ item, index }) => (
-              <TouchableOpacity style={[styles.groupButton, shadow.shadow, {marginTop: 20}]} onPress={() => {setGroup(item.name); setViewingGroup(true)}}>
+              <TouchableOpacity style={[styles.groupButton, shadow.shadow, {marginTop: 20}, item.color != null && {backgroundColor: item.color}]} onPress={() => {goToGroupScreen(item.name)}}>
+                {
+                  item.image &&
+                  <MaterialCommunityIcons name={item.image} color={"black"} size={50} /> 
+                }
                 <Text style={styles.buttonText}>{item.name}</Text>
                 <TouchableOpacity onPress={() => {setShowingModal(true); setSelectedGroup(item.name)}}>
                   <MaterialCommunityIcons name="dots-vertical" color={'white'} size={40} />
@@ -235,47 +231,10 @@ export function SocialScreen() {
             )}
           />
 
-        <View>
-          <TouchableOpacity onPress={createGroup} style={[styles.button, shadow.shadow]}>
-            <Text style={{color: 'white', fontWeight: '800'}}>Create a Group</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={joinGroup} style={[styles.button, shadow.shadow]}>
-            <Text style={{color: 'white', fontWeight: '800'}}>Join a Group</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => setShowingModalOptions(true)} style={[styles.button, {width: 80, height: 80, borderRadius: 80, marginTop: 10,}, shadow.shadow]}>
+          <MaterialCommunityIcons name="plus" color={'white'} size={70} />
+        </TouchableOpacity>
       </View>
-
-      
-    }
-
-    {
-      creatingGroup &&
-      
-        <CreateGroupScreen onPress={closeScreen}/>
-    }
-
-    {
-      joiningGroup &&
-      <ScrollView>
-        <JoinGroupScreen onPress={closeScreen}/>
-      </ScrollView>
-    }
-
-    {
-      viewingGroup &&
-      <GroupScreen onPress={closeScreen} group={group} />
-    }
-
-    {
-      editingGroup &&
-      <GroupSettingsScreen onPress={stopEditingGroup} group={selectedGroup} />
-    }
-
-    {
-      editingGroupMembers &&
-      <GroupMembersSettingsScreen onPress={stopEditingGroupMembers} group={selectedGroup}/>
-    }
 
     <Modal
           isVisible={showingModal}
@@ -285,13 +244,14 @@ export function SocialScreen() {
           style={styles.modalView}
       >
           <View style={styles.modalContent}>
+            <Text style={{fontWeight: '800', fontSize: 25, marginBottom: 10, textDecorationLine: 'underline'}}>{selectedGroup}</Text>
             {
               checkIfOwner() && 
               <>
-                <TouchableOpacity style={styles.button} onPress={() => {setEditingGroup(true); onClose()}}>
+                <TouchableOpacity style={styles.button} onPress={() => {onClose(); goToEditingGroupScreen(selectedGroup)}}>
                   <Text style={styles.buttonText}>Edit Group</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.button, {marginBottom: 50}]} onPress={() => {setEditingGroupMembers(true); onClose()}}>
+                <TouchableOpacity style={[styles.button, {marginBottom: 50}]} onPress={() => {onClose(); goToEditingGroupMembersScreen(selectedGroup); }}>
                   <Text style={styles.buttonText}>Edit Members</Text>
                 </TouchableOpacity>
               </>
@@ -299,11 +259,32 @@ export function SocialScreen() {
             <TouchableOpacity style={[styles.button, {backgroundColor: colors.red}]} onPress={() => {handleConfirmLeave()}}>
               <Text style={styles.buttonText}>Leave Group</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, {backgroundColor: colors.red}]} onPress={() => {handleConfirmDelete()}}>
-              <Text style={styles.buttonText}>Delete Group</Text>
-            </TouchableOpacity>
+            {
+              checkIfOwner() &&
+              <TouchableOpacity style={[styles.button, {backgroundColor: colors.red}]} onPress={() => {handleConfirmDelete()}}>
+                <Text style={styles.buttonText}>Delete Group</Text>
+              </TouchableOpacity>
+            }
+            
                 
             
+          </View>
+      </Modal>
+
+      <Modal
+          isVisible={showingModalOptions}
+          swipeDirection={['down']}
+          onSwipeComplete={onClose}
+          onBackdropPress={onClose}
+          style={styles.modalView}
+      >
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={() => {onClose(); goToCreateGroupScreen()}} style={[styles.button, shadow.shadow]}>
+              <Text style={styles.buttonText}>Create a Group</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {onClose(); goToJoinGroupScreen()}} style={[styles.button, shadow.shadow]}>
+              <Text style={styles.buttonText}>Join a Group</Text>
+            </TouchableOpacity>
           </View>
       </Modal>
     

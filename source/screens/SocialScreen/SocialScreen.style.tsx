@@ -1,20 +1,33 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { colors } from "../../sharedStyling/Colors";
+
+const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
 
     container: {
-      width: '100%',
+      width: screenWidth,
       height: '100%',
   
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
     },
+
+    flatList: {
+      width: screenWidth,
+      marginRight: 'auto',
+      marginLeft: 'auto',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingBottom: 50,
+    },
     
     button: {
-      width: 170,
-      height: 40,
+      width: 200,
+      height: 60,
       backgroundColor: colors.blue,
   
       display: 'flex',
@@ -26,7 +39,7 @@ const styles = StyleSheet.create({
     },
   
     groupButton: {
-      width: 200,
+      width: screenWidth - 30,
       backgroundColor: colors.purple,
   
       display: 'flex',

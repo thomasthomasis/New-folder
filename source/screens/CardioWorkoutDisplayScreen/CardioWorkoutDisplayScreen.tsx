@@ -3,6 +3,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { colors } from "../../sharedStyling/Colors";
 import { BSON } from "realm";
 import styles from "./CardioWorkoutDisplayScreen.style";
+import { useRealm, useUser } from "@realm/react";
+import { ExtraExercises } from "../../schemas/ExtraExercisesSchema";
+import { useEffect } from "react";
 
 type CardioWorkoutDisplayScreenProps = {
     data:any,   
@@ -10,6 +13,9 @@ type CardioWorkoutDisplayScreenProps = {
 
 
 export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProps) => {
+
+    const realm = useRealm()
+    const user = useUser()
 
     const date = new Date(props.data[0].dateCreated)
     const formatedDate = date.toUTCString()
@@ -25,9 +31,46 @@ export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProp
 
     //console.log(JSON.parse(distance[0])[0])
 
-    console.log(JSON.parse(time[0]))
+    const convertIdToName = (id:string) => {
+        const exercise = realm.objects(ExtraExercises).filtered("userId == $0 AND exerciseId == $1", user.id, id)
 
+        console.log(id)
 
+        if(exercise.length == 0)
+        {
+
+            return id; // Return null if the exercise is not found
+        }
+    
+        else
+        {
+            return exercise[0].name ?? ""
+        }
+
+    }  
+
+    const normalExercises = [
+        "Treadmill", 
+        "Elliptical", 
+        "Indoor Bike", 
+        "Jump Rope", 
+        "Outdoor Bike", 
+        "Swimming", 
+        "Rowing Machine", 
+        "Outdoor Run", 
+        "Outdoor Walk", 
+        "Stair Machine", 
+        "Sprints"
+      ];
+
+      useEffect(() => {
+        realm.subscriptions.update(mutableSubs => {
+  
+          mutableSubs.add(
+            realm.objects(ExtraExercises)
+          )
+        });
+    }, [realm, user]);
 
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -49,7 +92,7 @@ export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProp
                 allExercises.map((item:any, index:any) => {
                     return (
                         <>
-                            <Text key={new BSON.ObjectID().toString()} style={{fontSize: 20, fontWeight: '800', marginBottom: 10, color: colors.blue,}}>{item}</Text>
+                            <Text key={new BSON.ObjectID().toString()} style={{fontSize: 20, fontWeight: '800', marginBottom: 10, color: colors.blue,}}>{convertIdToName(item)}</Text>
                             {
                                 JSON.parse(time[index]).map((item:any, innerIndex:any) => {
                                     return (

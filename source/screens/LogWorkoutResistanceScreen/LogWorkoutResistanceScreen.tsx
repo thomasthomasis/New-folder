@@ -1,5 +1,5 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView} from 'react-native';
+import React, {useCallback, useState, useEffect, useRef} from 'react';
+import {Alert, StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView, Animated} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import {BSON} from 'realm';
 import {useUser, useRealm, useQuery} from '@realm/react';
@@ -18,7 +18,8 @@ import { useNavigation } from '@react-navigation/native';
 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
-import { RouteProp } from '@react-navigation/native'
+import { RouteProp } from '@react-navigation/native';
+import Modal from 'react-native-modal';
 
 type LogWorkoutResistanceProps = {
   navigation: StackNavigationProp<RootStackParamList, 'LogWorkoutResistance'>; // Adjust according to your navigation stack
@@ -41,6 +42,10 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
 
   const goToAddExercise = () => {
     navigation.navigate("AddExercise")
+  }
+
+  const goToEditExercise = (exerciseId:string) => {
+    navigation.navigate("EditResistanceExercise", { exercise: exerciseId })
   }
 
   const [selectingExercise, setSelectingExercise] = useState(false)
@@ -66,7 +71,38 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
     "Hip Adductor",
     "Seated Calf Raises", "Standing Calf Raises"
   ];
+
+  const getExerciseName = (id:string) => {
+    const exercise = extraExercises.filtered("userId == $0 AND exerciseId == $1", user.id, id)
+
+    if(exercise.length == 0)
+    {
+      for (let section of sections) {
+        let exercise = section.content.find(ex => ex.id === id);
+        if (exercise) {
+          return exercise.name
+        }
+      }
+      return ""; // Return null if the exercise is not found
+    }
   
+    else
+    {
+      return exercise[0].name ?? ""
+    }
+
+    
+  } 
+
+  const convertIdToName = (id:string) => {
+    console.log("id: ", id)
+
+    let name = getExerciseName(id)
+
+    console.log("name: ", name)
+
+    return name;
+  }
 
 
   useEffect(() => {
@@ -92,6 +128,9 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
   const [forms, setForms] = useState<any>([]);
   
   const handleAddForm = (exercise:string) => {
+
+    console.log("exercise: ", exercise)
+
     const newForm = { id: forms.length + 1, exercise: {id: 1, value: exercise}, inputs: [{id: 1}], repInputs: [{ id: 1, value: '' }], weightInputs: [{ id: 1, value: ''}], extraNotes: {id: 1, value: ''} };
     setForms([...forms, newForm]);
 
@@ -557,11 +596,36 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         );
       };
 
-      const addedExercisesArray = extraExercises.map(item => item.name ?? "");
+      const handleConfirmDeleteAddedExercise = () => {
+        // Show confirmation popup
+        
+        Alert.alert(
+          'Confirm Action',
+          'Are you sure you want to delete this exercise permanently?',
+          [
+            {
+              text: 'Cancel',
+              onPress: () => console.log('Cancel Pressed'),
+              style: 'cancel',
+            },
+            {
+              text: 'OK',
+              onPress: () => {onClose(); deleteExercise(selectedExercise)},
+            },
+          ],
+          { cancelable: false }
+        );
+      };
+
+      const addedExercisesArray = extraExercises.map(item => (getExerciseName(item.exerciseId) + "+" + item.exerciseId));
       let totalExercises = addedExercisesArray.concat(normalExercises);
+
+      console.log(totalExercises)
+      
     
       const [searchText, setSearchText] = useState<string>('')
       const [filteredData, setFilteredData] = useState<string[]>(addedExercisesArray.concat(normalExercises));
+      //console.log(filteredData)
     
       const handleSearch = (text:string) => {
         setSearchText(text);
@@ -581,6 +645,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         for(let i = 0; i < extraExercises.length; i++)
           {
             let extraInformation = extraExercises[i].extraInformation ?? ""
+            //console.log(extraExercises[i])
 
             if(extraInformation == "")
               {
@@ -588,11 +653,11 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
 
                 if(section)
                   {
-                    let alreadyExists = section.content.some(item => item.name === extraExercises[i].name)
+                    let alreadyExists = section.content.some(item => item.name === getExerciseName(extraExercises[i].exerciseId))
                     if(alreadyExists) continue
 
-                    let name = extraExercises[i].name ?? ""
-                    let newExercise = { name: name }
+                    let name = getExerciseName(extraExercises[i].exerciseId)
+                    let newExercise = { id: extraExercises[i].exerciseId, name: name }
                     section.content.push(newExercise)
                   }
                 continue
@@ -609,8 +674,8 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
 
                 if(section)
                   {
-                    let name = extraExercises[i].name ?? ""
-                    let newExercise = { name: name }
+                    let name = getExerciseName(extraExercises[i].exerciseId)
+                    let newExercise = { id: extraExercises[i].exerciseId, name: name }
                     section.content.push(newExercise)
                   }
 
@@ -618,11 +683,11 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
 
                 if(section)
                   {
-                    let alreadyExists = section.content.some(item => item.name === extraExercises[i].name)
+                    let alreadyExists = section.content.some(item => item.name === getExerciseName(extraExercises[i].exerciseId))
                     if(alreadyExists) continue
                     
-                    let name = extraExercises[i].name ?? ""
-                    let newExercise = { name: name }
+                    let name = getExerciseName(extraExercises[i].exerciseId)
+                    let newExercise = { id: extraExercises[i].exerciseId, name: name }
                     section.content.push(newExercise)
                   }
               }
@@ -633,261 +698,259 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         addExtraExercisesToSection()
       })
 
-  const sections = [
-    {
-      title: "Neck",
-      content: [
-        { name: "Neck Curls"},
-        { name: "Neck Raises"},
-        { name: "Side Raises"},
-      ],
-    },
-    {
-      title: "Back",
-      content: [
-        { name: "Bar Pullover"},
-        { name: "Barbell Incline Row"},
-        { name: "Barbell Row"},
-        { name: "Barbell Upright Row"},
-        { name: "Cable Row"},
-        { name: "Chest Supported Row" },
-        { name: "Chin Up"},
-        { name: "Clean & Press"},
-        { name: "Deadlift"},
-        { name: "Dumbbell One Arm Rown"},
-        { name: "Farmer Carry"},
-        { name: "Good Morning"},
-        { name: "Hypeprextension"},
-        { name: "Iso-lateral Pulldown"},
-        { name: "Iso-lateral Row Machine"},
-        { name: "Lat Pulldown"},
-        { name: "Pendlay Row"},
-        { name: "Pull Up"},
-        { name: "Lat Pulldown"},
-        { name: "Rope Pullover"},
-        { name: "Seated Row Machine"},
-        { name: "Single Arm Lat Pulldown"},
-        { name: "T-Bar Row"},
-        { name: "Weighted Pullup"},
-      ]
-    },
-    {
-      title: "Shoulders",
-      content: [
-        { name: "Arnold Press"},
-        { name: "Cable Front Raise"},
-        { name: "Cable Lateral Raise"},
-        { name: "Cable Rear Delt Fly"},
-        { name: "Cable Shoulder Press"},
-        { name: "Clean & Press"},
-        { name: "Dumbbell Front Raise"},
-        { name: "Dumbbell Lateral Raise" },
-        { name: "Dumbbell Rear Delt Fly" },
-        { name: "Dumbbell Shoulder Press" },
-        { name: "External Rotations" },
-        { name: "Face Pull" },
-        { name: "Internal Rotations" },
-        { name: "Lateral Raise Machine" },
-        { name: "Military Press" },
-        { name: "Rear Delt Fly Machine" },
-        { name: "Seated Lateral Raise" },
-        { name: "Shoulder Press Machine" },
-        { name: "Smit Machine Shoulder Press" },
-        { name: "Upright Row" },
-      ]
-    },
-    {
-      title: "Chest",
-      content: [
-        { name: "Barbell Bench Press" },
-        { name: "Cable Chest Press" },
-        { name: "Cable Crossover" },
-        { name: "Cable Fly (high to low)" },
-        { name: "Cable Fly (low to high)" },
-        { name: "Close Grip Bench Press" },
-        { name: "Decline Bench Press" },
-        { name: "Decline Dumbbell Press" },
-        { name: "Decline Smith Machine Bench Press" },
-        { name: "Dips" },
-        { name: "Dumbbell Fly" },
-        { name: "Dumbbell Press" },
-        { name: "Incline Bench Press" },
-        { name: "Incline Cable Press" },
-        { name: "Incline Dumbbell Fly" },
-        { name: "Incline Dumbbell Press" },
-        { name: "Incline Smith Machine Press" },
-        { name: "Iso-lateral Chest Press" },
-        { name: "Pec Deck Machine" },
-        { name: "Push Up" },
-        { name: "Seated Chest Press Machine" },
-        { name: "Smith Machine Bench Press" },
-        { name: "Weighted Dips" },
-      ]
-    },
-    {
-      title: "Biceps",
-      content: [
-        { name: "Barbell Bicep Curl" },
-        { name: "Barbell Preacher Curl" },
-        { name: "Bayesian Curl" },
-        { name: "Cable Curl" },
-        { name: "Cable Hammer Curl" },
-        { name: "Chin Up" },
-        { name: "Concentration Curl" },
-        { name: "Dumbbell Bicep Curl" },
-        { name: "Dumbbell Preacher Curl" },
-        { name: "EZ Bar Preacher Curl" },
-        { name: "Face Away Cable Curl" },
-        { name: "Hammer Curl" },
-        { name: "Preacher Curl Machine" },
-        { name: "Spider Curl" },
-      ]
-    },
-    {
-      title: "Triceps",
-      content: [
-        { name: "Bar Pushdown" },
-        { name: "Barbell Skullcrusher" },
-        { name: "Cable Kickback" },
-        { name: "Cable Single Arm Extension" },
-        { name: "Close Grip Bench Press" },
-        { name: "Dips" },
-        { name: "Dumbbell Kickback" },
-        { name: "Dumbbell Skullcrusher" },
-        { name: "Dumbbell Tricep Extension" },
-        { name: "EZ Bar Skullcrusher" },
-        { name: "Katana Extension" },
-        { name: "Diamond Push Up" },
-        { name: "Rope Overhead Extension" },
-        { name: "Smith Machine JM Press" },
-        { name: "Tricep Extension" },
-        { name: "Weighted Dips" },
-      ]
-    },
-    {
-      title: "Forearms",
-      content: [
-        { name: "Reverse Barbell Curl" },
-        { name: "Reverse Dumbbell Curl" },
-        { name: "Wrist Curl" },
-      ]
-    },
-    {
-      title: "Core",
-      content: [
-        { name: "Ab Crunch" },
-        { name: "Back Extension" },
-        { name: "Cable Crunch" },
-        { name: "Ex Oblique Cable Twist" },
-        { name: "Farmer Carry" },
-        { name: "Good Morning" },
-        { name: "Russian Twist" },
-        { name: "Sit Up" },
-        
-      ]
-    },
-    {
-      title: "Quads",
-      content: [
-        { name: "Barbell Back Squat" },
-        { name: "Barbell Front Squat" },
-        { name: "Barbell Lunge" },
-        { name: "Bodyweight Pistol Squat" },
-        { name: "Bulgarian Split Squat" },
-        { name: "Clean" },
-        { name: "Deadlift" },
-        { name: "Dumbbell Lunge" },
-        { name: "Goblet Squat" },
-        { name: "Hack Squat" },
-        { name: "Leg Extension" },
-        { name: "Leg Press" },
-        { name: "Lunge" },
-        { name: "Pendulum Squat" },
-        { name: "Reverse Nordic" },
-        { name: "Single-Leg Leg Press" },
-        { name: "Sled Push" },
-        { name: "Smith Machine Squat" },
-        { name: "Snatch" },
-        { name: "Sumo Deadlift" },
-      ]
-    },
-    {
-      title: "Glutes",
-      content: [
-        { name: "Barbell Back Squat" },
-        { name: "Barbell Front Squat" },
-        { name: "Barbell Lunge" },
-        { name: "Barbell RDL" },
-        { name: "Bulgarian Split Squat" },
-        { name: "Clean" },
-        { name: "Deadlift" },
-        { name: "Donkey Kick" },
-        { name: "Dumbbell Lunge" },
-        { name: "Glute Ham Raise" },
-        { name: "Glute Kickback" },
-        { name: "Good Morning" },
-        { name: "Hip Abductor" },
-        { name: "Hip Thrust" },
-        { name: "Leg Press" },
-        { name: "Lunge" },
-        { name: "Romanian Deadlift" },
-        { name: "Single-Leg Leg Press" },
-        { name: "Sled Push" },
-        { name: "Still Leg Deadlift" },
-        { name: "Sumo Deadlift" },
-      ]
-    },
-    {
-      title: "Hamstrings",
-      content: [
-        { name: "Barbell Back Squat" },
-        { name: "Barbell Lunge" },
-        { name: "Barbell RDL" },
-        { name: "Bulgarian Split Squat" },
-        { name: "Deadlift" },
-        { name: "Dumbbell Lunge" },
-        { name: "Dumbbell RDL" },
-        { name: "Glute Ham Raise" },
-        { name: "Good Morning" },
-        { name: "Leg Curl" },
-        { name: "Lunge" },
-        { name: "Lying Leg Curl" },
-        { name: "Nordic Curls" },
-        { name: "Romanian Deadlift" },
-        { name: "Sled Push" },
-        { name: "Stiff Leg Deadlift" },
-        { name: "Sumo Deadlift" },
-        
-      ]
-    },
-    {
-      title: "Hip Flexors",
-      content: [
-        { name: "Hip March" },
-        { name: "Lying Reverse Squat" },
-      ]
-    },
-    {
-      title: "Groin",
-      content: [
-        { name: "Hip Adductor" },
-      ]
-    },
-    {
-      title: "Calves",
-      content: [
-        { name: "Seated Calf Raises" },
-        { name: "Standing Calf Raises" },
-      ]
-    },
-    {
-      title: "Other",
-      content: [
-        
-      ]
-    },
-    
-  ]
+      const sections = [
+        {
+          title: "Neck",
+          content: [
+            { id: "0", name: "Neck Curls" },
+            { id: "1", name: "Neck Raises" },
+            { id: "2", name: "Side Raises" },
+          ],
+        },
+        {
+          title: "Back",
+          content: [
+            { id: "3", name: "Bar Pullover" },
+            { id: "4", name: "Barbell Incline Row" },
+            { id: "5", name: "Barbell Row" },
+            { id: "6", name: "Barbell Upright Row" },
+            { id: "7", name: "Cable Row" },
+            { id: "8", name: "Chest Supported Row" },
+            { id: "9", name: "Chin Up" },
+            { id: "10", name: "Clean & Press" },
+            { id: "11", name: "Deadlift" },
+            { id: "12", name: "Dumbbell One Arm Row" },
+            { id: "13", name: "Farmer Carry" },
+            { id: "14", name: "Good Morning" },
+            { id: "15", name: "Hyperextension" },
+            { id: "16", name: "Iso-lateral Pulldown" },
+            { id: "17", name: "Iso-lateral Row Machine" },
+            { id: "18", name: "Lat Pulldown" },
+            { id: "19", name: "Pendlay Row" },
+            { id: "20", name: "Pull Up" },
+            { id: "21", name: "Lat Pulldown" },
+            { id: "22", name: "Rope Pullover" },
+            { id: "23", name: "Seated Row Machine" },
+            { id: "24", name: "Single Arm Lat Pulldown" },
+            { id: "25", name: "T-Bar Row" },
+            { id: "26", name: "Weighted Pullup" },
+          ]
+        },
+        {
+          title: "Shoulders",
+          content: [
+            { id: "27", name: "Arnold Press" },
+            { id: "28", name: "Cable Front Raise" },
+            { id: "29", name: "Cable Lateral Raise" },
+            { id: "30", name: "Cable Rear Delt Fly" },
+            { id: "31", name: "Cable Shoulder Press" },
+            { id: "32", name: "Clean & Press" },
+            { id: "33", name: "Dumbbell Front Raise" },
+            { id: "34", name: "Dumbbell Lateral Raise" },
+            { id: "35", name: "Dumbbell Rear Delt Fly" },
+            { id: "36", name: "Dumbbell Shoulder Press" },
+            { id: "37", name: "External Rotations" },
+            { id: "38", name: "Face Pull" },
+            { id: "39", name: "Internal Rotations" },
+            { id: "40", name: "Lateral Raise Machine" },
+            { id: "41", name: "Military Press" },
+            { id: "42", name: "Rear Delt Fly Machine" },
+            { id: "43", name: "Seated Lateral Raise" },
+            { id: "44", name: "Shoulder Press Machine" },
+            { id: "45", name: "Smith Machine Shoulder Press" },
+            { id: "46", name: "Upright Row" },
+          ]
+        },
+        {
+          title: "Chest",
+          content: [
+            { id: "47", name: "Barbell Bench Press" },
+            { id: "48", name: "Cable Chest Press" },
+            { id: "49", name: "Cable Crossover" },
+            { id: "50", name: "Cable Fly (high to low)" },
+            { id: "51", name: "Cable Fly (low to high)" },
+            { id: "52", name: "Close Grip Bench Press" },
+            { id: "53", name: "Decline Bench Press" },
+            { id: "54", name: "Decline Dumbbell Press" },
+            { id: "55", name: "Decline Smith Machine Bench Press" },
+            { id: "56", name: "Dips" },
+            { id: "57", name: "Dumbbell Fly" },
+            { id: "58", name: "Dumbbell Press" },
+            { id: "59", name: "Incline Bench Press" },
+            { id: "60", name: "Incline Cable Press" },
+            { id: "61", name: "Incline Dumbbell Fly" },
+            { id: "62", name: "Incline Dumbbell Press" },
+            { id: "63", name: "Incline Smith Machine Press" },
+            { id: "64", name: "Iso-lateral Chest Press" },
+            { id: "65", name: "Pec Deck Machine" },
+            { id: "66", name: "Push Up" },
+            { id: "67", name: "Seated Chest Press Machine" },
+            { id: "68", name: "Smith Machine Bench Press" },
+            { id: "69", name: "Weighted Dips" },
+          ]
+        },
+        {
+          title: "Biceps",
+          content: [
+            { id: "70", name: "Barbell Bicep Curl" },
+            { id: "71", name: "Barbell Preacher Curl" },
+            { id: "72", name: "Bayesian Curl" },
+            { id: "73", name: "Cable Curl" },
+            { id: "74", name: "Cable Hammer Curl" },
+            { id: "75", name: "Chin Up" },
+            { id: "76", name: "Concentration Curl" },
+            { id: "77", name: "Dumbbell Bicep Curl" },
+            { id: "78", name: "Dumbbell Preacher Curl" },
+            { id: "79", name: "EZ Bar Preacher Curl" },
+            { id: "80", name: "Face Away Cable Curl" },
+            { id: "81", name: "Hammer Curl" },
+            { id: "82", name: "Preacher Curl Machine" },
+            { id: "83", name: "Spider Curl" },
+          ]
+        },
+        {
+          title: "Triceps",
+          content: [
+            { id: "84", name: "Bar Pushdown" },
+            { id: "85", name: "Barbell Skullcrusher" },
+            { id: "86", name: "Cable Kickback" },
+            { id: "87", name: "Cable Single Arm Extension" },
+            { id: "88", name: "Close Grip Bench Press" },
+            { id: "89", name: "Dips" },
+            { id: "90", name: "Dumbbell Kickback" },
+            { id: "91", name: "Dumbbell Skullcrusher" },
+            { id: "92", name: "Dumbbell Tricep Extension" },
+            { id: "93", name: "EZ Bar Skullcrusher" },
+            { id: "94", name: "Katana Extension" },
+            { id: "95", name: "Diamond Push Up" },
+            { id: "96", name: "Rope Overhead Extension" },
+            { id: "97", name: "Smith Machine JM Press" },
+            { id: "98", name: "Tricep Extension" },
+            { id: "99", name: "Weighted Dips" },
+          ]
+        },
+        {
+          title: "Forearms",
+          content: [
+            { id: "100", name: "Reverse Barbell Curl" },
+            { id: "101", name: "Reverse Dumbbell Curl" },
+            { id: "102", name: "Wrist Curl" },
+          ]
+        },
+        {
+          title: "Core",
+          content: [
+            { id: "103", name: "Ab Crunch" },
+            { id: "104", name: "Back Extension" },
+            { id: "105", name: "Cable Crunch" },
+            { id: "106", name: "Ex Oblique Cable Twist" },
+            { id: "107", name: "Farmer Carry" },
+            { id: "108", name: "Good Morning" },
+            { id: "109", name: "Russian Twist" },
+            { id: "110", name: "Sit Up" },
+          ]
+        },
+        {
+          title: "Quads",
+          content: [
+            { id: "111", name: "Barbell Back Squat" },
+            { id: "112", name: "Barbell Front Squat" },
+            { id: "113", name: "Barbell Lunge" },
+            { id: "114", name: "Bodyweight Pistol Squat" },
+            { id: "115", name: "Bulgarian Split Squat" },
+            { id: "116", name: "Clean" },
+            { id: "117", name: "Deadlift" },
+            { id: "118", name: "Dumbbell Lunge" },
+            { id: "119", name: "Goblet Squat" },
+            { id: "120", name: "Hack Squat" },
+            { id: "121", name: "Leg Extension" },
+            { id: "122", name: "Leg Press" },
+            { id: "123", name: "Lunge" },
+            { id: "124", name: "Pendulum Squat" },
+            { id: "125", name: "Reverse Nordic" },
+            { id: "126", name: "Single-Leg Leg Press" },
+            { id: "127", name: "Sled Push" },
+            { id: "128", name: "Smith Machine Squat" },
+            { id: "129", name: "Snatch" },
+            { id: "130", name: "Sumo Deadlift" },
+          ]
+        },
+        {
+          title: "Glutes",
+          content: [
+            { id: "131", name: "Barbell Back Squat" },
+            { id: "132", name: "Barbell Front Squat" },
+            { id: "133", name: "Barbell Lunge" },
+            { id: "134", name: "Barbell RDL" },
+            { id: "135", name: "Bulgarian Split Squat" },
+            { id: "136", name: "Clean" },
+            { id: "137", name: "Deadlift" },
+            { id: "138", name: "Donkey Kick" },
+            { id: "139", name: "Dumbbell Lunge" },
+            { id: "140", name: "Glute Ham Raise" },
+            { id: "141", name: "Glute Kickback" },
+            { id: "142", name: "Good Morning" },
+            { id: "143", name: "Hip Abductor" },
+            { id: "144", name: "Hip Thrust" },
+            { id: "145", name: "Leg Press" },
+            { id: "146", name: "Lunge" },
+            { id: "147", name: "Romanian Deadlift" },
+            { id: "148", name: "Single-Leg Leg Press" },
+            { id: 149, name: "Sled Push" },
+            { id: 150, name: "Stiff Leg Deadlift" },
+            { id: 151, name: "Sumo Deadlift" },
+          ]
+        },
+        {
+          title: "Hamstrings",
+          content: [
+            { id: "152", name: "Barbell Back Squat" },
+            { id: "153", name: "Barbell Lunge" },
+            { id: "154", name: "Barbell RDL" },
+            { id: "155", name: "Bulgarian Split Squat" },
+            { id: "156", name: "Deadlift" },
+            { id: "157", name: "Dumbbell Lunge" },
+            { id: "158", name: "Dumbbell RDL" },
+            { id: "159", name: "Glute Ham Raise" },
+            { id: "160", name: "Good Morning" },
+            { id: "161", name: "Leg Curl" },
+            { id: "162", name: "Lunge" },
+            { id: "163", name: "Lying Leg Curl" },
+            { id: "164", name: "Nordic Curls" },
+            { id: "165", name: "Romanian Deadlift" },
+            { id: "166", name: "Sled Push" },
+            { id: "167", name: "Stiff Leg Deadlift" },
+            { id: "168", name: "Sumo Deadlift" },
+          ]
+        },
+        {
+          title: "Hip Flexors",
+          content: [
+            { id: "169", name: "Hip March" },
+            { id: "170", name: "Lying Reverse Squat" },
+          ]
+        },
+        {
+          title: "Groin",
+          content: [
+            { id: "171", name: "Hip Adductor" },
+          ]
+        },
+        {
+          title: "Calves",
+          content: [
+            { id: "172", name: "Seated Calf Raises" },
+            { id: "173", name: "Standing Calf Raises" },
+          ]
+        },
+        {
+          title: "Other",
+          content: [
+            // Additional exercises can be added here
+          ]
+        },
+      ];
+      
 
   const AccordionView = () => {
 
@@ -914,9 +977,27 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[0] && 
               
               sections[0].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
               ))
               
             }
@@ -934,10 +1015,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[1] && 
               
               sections[1].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length >= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           
@@ -955,10 +1054,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[2] && 
               
               sections[2].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -974,11 +1091,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[3] && 
               
               sections[3].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
-              
+                <>
+                {
+                  (item.id as string).length >= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
             }
             
           </Collapsible>
@@ -994,10 +1128,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[4] && 
               
               sections[4].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length >= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -1014,10 +1166,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[5] && 
               
               sections[5].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length >= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -1033,10 +1203,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[6] && 
               
               sections[6].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -1052,10 +1240,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[7] && 
               
               sections[7].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -1072,10 +1278,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[8] && 
               
               sections[8].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -1091,10 +1315,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[9] && 
               
               sections[9].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
             
@@ -1111,10 +1353,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[10] && 
               
               sections[10].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -1131,10 +1391,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[11] && 
               
               sections[11].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -1150,10 +1428,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[12] && 
               
               sections[12].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -1169,10 +1465,28 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[13] && 
               
               sections[13].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+          ))
               
             }
           </Collapsible>
@@ -1188,10 +1502,29 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
               !collapsed[14] && 
               
               sections[14].content.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.accordionContent} onPress={() => {handleAddForm(item.name); setSelectingExercise(false)}}>
-                  <Text style={styles.accordionContentText}>{item.name}</Text>
-                </TouchableOpacity>
-              ))
+                <>
+                {
+                  (item.id as string).length > 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }} onLongPress={() => {setSelectedExercise(item.id as string); setVisibleOptions(true); }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                {
+                  (item.id as string).length <= 3 &&
+                  <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.accordionContent} onPress={() => { 
+                      handleAddForm(item.id as string)
+                      setSelectingExercise(false)
+                    }}>
+                    <Text style={styles.accordionContentText}>{item.name}</Text>
+                  </TouchableOpacity>
+                }
+                
+                </>
+                
+          ))
               
             }
           </Collapsible>
@@ -1199,6 +1532,29 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         </>
         
       )
+  }
+
+  const scrollViewRef = useRef<ScrollView | null>(null)
+
+  const scrollToBottom = () => {
+    scrollViewRef.current?.scrollToEnd({ animated: true })
+  }
+
+  const deleteExercise = (exerciseId:string) => {
+
+    const exercise = realm.objects(ExtraExercises).filtered("exerciseId == $0", exerciseId)
+
+    realm.write(() => {
+      realm.delete(exercise)
+    })
+  }
+
+  const [visibleOptions, setVisibleOptions] = useState<boolean>(false)
+  const [selectedExercise, setSelectedExercise] = useState<string>('')
+
+  const onClose = () => {
+
+    setVisibleOptions(false)
   }
 
   return (
@@ -1247,8 +1603,33 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         {
           searchText.length > 0 && 
           filteredData.map((item) => (
-            <TouchableOpacity key={new BSON.ObjectID().toString()} style={[{ backgroundColor: 'lightgray', borderRadius: 20, padding: 10, marginBottom: 10, width: '80%', marginRight: 'auto', marginLeft: 'auto'}, shadow.shadow]} onPress={() => {handleAddForm(item); setSelectingExercise(false)}}>
-              <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item}</Text>
+            <TouchableOpacity key={new BSON.ObjectID().toString()} style={[{ backgroundColor: 'lightgray', borderRadius: 20, padding: 10, marginBottom: 10, width: '80%', marginRight: 'auto', marginLeft: 'auto'}, shadow.shadow]} onPress={() => {
+              if(item.includes("+"))
+              {
+                let id = item.split("+")[1]
+                handleAddForm(id)
+                setSelectingExercise(false)
+              }
+              else
+              {
+                handleAddForm(item)
+                setSelectingExercise(false)
+              }
+              }} onLongPress={() => {
+                if(item.includes("+"))
+                {
+                  setSelectedExercise(item.split("+")[1])
+                  setVisibleOptions(true)
+                }
+              }}>
+                {
+                  item.includes("+") &&
+                  <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item.split("+")[0]}</Text>
+                }
+                {
+                  !item.includes("+") &&
+                  <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item}</Text>
+                }
             </TouchableOpacity>
             
           ))
@@ -1266,11 +1647,13 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
     }
     {
       !selectingExercise &&
+     
     <View style={styles.container}>
+       <ScrollView ref={scrollViewRef}>
         
       {forms.map((form:any, formIndex:any) => (
         <View key={new BSON.ObjectID().toString()} style={styles.form}>
-          <Text style={styles.exercise}>{forms[formIndex].exercise.value}</Text>
+          <Text style={styles.exercise}>{convertIdToName(forms[formIndex].exercise.value)}</Text>
           <View style={styles.smallBorder}></View>
       {form.inputs.map((input:any, inputIndex:any) => (
         <View key={new BSON.ObjectID().toString()} style={styles.row}>
@@ -1347,8 +1730,22 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         <Text style={{color: 'gray', fontWeight: '800', fontSize: 20,}}>Add Exercise</Text>
       </TouchableOpacity>
       
+      </ScrollView>
     </View>
     }
+
+    <Modal isVisible={visibleOptions} swipeDirection={['down']} onSwipeComplete={onClose} onBackdropPress={onClose} style={styles.modalView}>
+          <View style={styles.modalContent}>
+           
+            <TouchableOpacity onPress={() => {onClose(); goToEditExercise(selectedExercise)}} style={styles.modalButton}>
+              <Text style={styles.modalButtonText}>Edit Exercise</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {handleConfirmDeleteAddedExercise()}} style={[styles.modalButton, {backgroundColor: colors.red}]}>
+              <Text style={styles.modalButtonText}>Delete Exercise</Text>
+            </TouchableOpacity>
+          </View>
+      </Modal>
+
     </>
   
 )};

@@ -4,18 +4,18 @@ import { useQuery, useRealm, useUser } from '@realm/react';
 import { Users } from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { shadow } from '../../sharedStyling/Shadow';
-import styles from './AccountScreen.style';
+import styles from './ProfileSettingsScreen.style';
 import Modal from 'react-native-modal';
 
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 import { colors } from '../../sharedStyling/Colors';
 
-type AccountScreenProps = {
-    navigation: StackNavigationProp<RootStackParamList, 'Account'>;
+type ProfileSettingsProps = {
+    navigation: StackNavigationProp<RootStackParamList, 'ProfileSettings'>;
 }
 
-export const AccountScreen = ({ navigation }: AccountScreenProps) => {
+export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
 
     const realm = useRealm()
     const user = useUser()

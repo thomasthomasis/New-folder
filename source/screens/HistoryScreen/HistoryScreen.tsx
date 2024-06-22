@@ -7,21 +7,30 @@ import { Workouts } from "../../schemas/WorkoutSchema"
 import { BSON } from "realm"
 import styles from "./HistoryScreen.style"
 
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { RouteProp } from '@react-navigation/native'
+
 type HistoryScreenProps = {
-    group:string,
-    onPress:any,
-    loadData:any,
-}
+  navigation: StackNavigationProp<RootStackParamList, 'History'>; // Adjust according to your navigation stack
+  route: RouteProp<RootStackParamList, 'History'>;
+};
 
-
-export const HistoryScreen = (props: HistoryScreenProps) => {
+export const HistoryScreen = ({ navigation, route }:HistoryScreenProps) => {
 
     const realm = useRealm()
     const user = useUser()
 
-    const group = useQuery(Groups).filtered('name == $0', props.group);
-    const stringIds = group[0].members.map(member => member)
-    const datesJoined = group[0].membersDateJoined.map(date => date)
+    const {group} = route.params
+
+    const goToWorkoutDisplayScreen = (data:any, dataType:string) => {
+        navigation.navigate("WorkoutDisplay", {data:data, dataType:dataType})
+        console.log("navigating")
+    }
+
+    const groupData = useQuery(Groups).filtered('name == $0', group);
+    const stringIds = groupData[0].members.map(member => member)
+    const datesJoined = groupData[0].membersDateJoined.map(date => date)
 
 
     const currentDate = new Date()
@@ -138,7 +147,7 @@ export const HistoryScreen = (props: HistoryScreenProps) => {
                     </View>
                 }
                 
-                <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.container} onPress={() => {props.onPress(); props.loadData(item.workoutId, item.workoutType)}}>
+                <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.container} onPress={() => {goToWorkoutDisplayScreen(item.workoutId, item.workoutType ?? "")}}>
                     {
                         (item.workoutId != null && afterJoiningDate(item.userId, item.dateCreated)) &&
                         <>

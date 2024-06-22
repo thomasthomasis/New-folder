@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View, TouchableOpacity, ScrollView, Image, Dimensions, Alert} from 'react-native';
+import {Text, View, TouchableOpacity, ScrollView, Image, Dimensions, Alert, ActivityIndicator} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import { LogWorkoutCardioScreen } from '../LogWorkoutCardioScreen/LogWorkoutCardioScreen'; 
 import { LogWorkoutResistanceScreen } from '../LogWorkoutResistanceScreen/LogWorkoutResistanceScreen';
@@ -20,6 +20,7 @@ import { BSON } from 'realm';
 import { UserStatistics } from '../../schemas/UserStatisticsSchema';
 import { CardioWorkout } from '../../schemas/CardioWorkoutSchema';
 import { ResistanceWorkout } from '../../schemas/ResistanceWorkoutSchema';
+import { useFocusEffect } from '@react-navigation/native';
 
 type LogWorkoutProps = {
     navigation: StackNavigationProp<RootStackParamList, 'LogWorkout'>;
@@ -32,6 +33,7 @@ type PieChartProps = {
 const PieChartExample = (props:PieChartProps) => {
 
   console.log("num cardio workout: ", props.data[0].numCardioWorkouts)
+  console.log(props.data)
 
   let cardioWorkouts = props.data[0].numCardioWorkouts
   let resistanceWorkouts = props.data[1].numResistanceWorkouts
@@ -69,7 +71,15 @@ const PieChartExample = (props:PieChartProps) => {
         innerRadius={85}
       />
       <View style={{position: 'absolute'}}>
-        <Text style={{fontWeight: '800', fontSize: 20, textAlign: 'center'}}>You focused on {'\n'}{getFocusedWorkoutType()} {'\n'} most this week!</Text>
+        {
+          (data[0].value == 0 && data[1].value == 0) &&
+          <Text style={{fontWeight: '800', fontSize: 20, textAlign: 'center'}}>No Workouts Logged {'\n'} This Week</Text>
+        }
+        {
+          (data[0].value > 0 || data[1].value > 0) &&
+          <Text style={{fontWeight: '800', fontSize: 20, textAlign: 'center'}}>You focused on {'\n'}{getFocusedWorkoutType()} {'\n'} most this week!</Text>
+        }
+        
       </View>
       {renderLegendComponent(data)}
     </View>
@@ -176,6 +186,8 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
 
   const { monday, sunday } = getMondayAndSunday();
 
+  console.log(user.id)
+
   let CardioObjectsOfWeek = realm.objects(CardioWorkout).filtered("user_id == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
   let ResistanceObjectsOfWeek = realm.objects(ResistanceWorkout).filtered("userId == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
 
@@ -188,6 +200,12 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
     }
   ]
 
+  useEffect(() => {
+    CardioObjectsOfWeek = realm.objects(CardioWorkout).filtered("user_id == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
+    ResistanceObjectsOfWeek = realm.objects(ResistanceWorkout).filtered("userId == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
+  }, [userStats])
+
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [imageSource, setImageSource] = useState()
 
   const [currentWorkout, setCurrentWorkout] = useState<any>([]);
@@ -277,7 +295,15 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
     const screenHeight = Dimensions.get('window').height;
 
   return (
-    <View>
+    <>
+    {
+      isLoading ? (
+        <ActivityIndicator size="large" color={colors.blue}/>
+      ) :
+      (
+        <View>
+
+      
 
         <View style={styles.header}>
             <Text style={styles.headerText}>UltiTracker</Text>
@@ -357,5 +383,10 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
       </Modal>
 
     </View>
+      )
+    }
+    </>
+    
+  
   )
 }

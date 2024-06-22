@@ -18,53 +18,44 @@ import { ResistanceWorkout } from "../../schemas/ResistanceWorkoutSchema";
 import { ProfileScreen } from "../ProfileScreen/ProfileScreen";
 import styles from "./GroupScreen.style";
 
-type GroupScreenProps = {
-    onPress:any;
-    group:string;
-}
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { RouteProp, useNavigation } from '@react-navigation/native'
 
-export const GroupScreen = (props:GroupScreenProps) => {
+type GroupScreenProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'Group'>; // Adjust according to your navigation stack
+  route: RouteProp<RootStackParamList, 'Group'>;
+};
+
+export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
 
     const realm = useRealm()
     const user = useUser()
 
-    let selectedGroup = useQuery(Groups).filtered("name == $0", props.group)
-    const groupJoinRequests = useQuery(JoinGroupRequests).filtered('groupName == $0', props.group)
+    const { group } = route.params
+    let groupName = group;
+
+    const goBack = () => {
+        navigation.goBack()
+    }
+
+    const goToProfileScreen = (userId:string, restrictedView:boolean) => {
+        navigation.navigate("ProfileScreen", { userId: userId, restrictedView: restrictedView})
+    }
+
+    let selectedGroup = useQuery(Groups).filtered("name == $0", group)
+    const groupJoinRequests = useQuery(JoinGroupRequests).filtered('groupName == $0', group)
 
     const stringIds = selectedGroup[0].members.map(member => member)
 
     //console.log(groupJoinRequests)
 
-    const [viewingWorkout, setViewingWorkout] = useState<boolean>(false)
-
-    const handleHeaderState = () => {
-        setViewingWorkout(true)
-    }
-
-    const [workoutData, setWorkoutData] = useState<any>();
-    const [workoutDataType, setWorkoutDataType] = useState<string>();
-    const loadData = (workoutId:any, dataType:string) => {
-
-        let data:any = {}
-        if(dataType == "Cardio")
-        {
-            data = realm.objects(CardioWorkout).filtered("_id == $0", workoutId)
-        }
-        else if(dataType == "Resistance")
-        {
-            data = realm.objects(ResistanceWorkout).filtered("_id == $0", workoutId)
-        }
-        //console.log(data)
-        setWorkoutData(data)
-        setWorkoutDataType(dataType)
-    }
-
     const History = () => (
-        <HistoryScreen group={props.group} onPress={() => handleHeaderState()} loadData={loadData}/>
+        <HistoryScreen navigation={navigation as StackNavigationProp<RootStackParamList, 'History'>} route={{ key: 'History', name: 'History', params: { group: group } }} />
     )
 
     const Leaderboard = () => (
-        <LeaderboardScreen group={props.group}/>
+        <LeaderboardScreen group={group}/>
     )
 
     const [modalPendingRequestsVisible, setModalPendingRequestsVisible] = useState<boolean>(false)
@@ -78,10 +69,27 @@ export const GroupScreen = (props:GroupScreenProps) => {
         setModalUsersVisible(false)
     }
 
+    const isOwner = (groupName:string, user:string) => {
+        const group = realm.objects(Groups).filtered("name == $0", groupName)
+
+        if(user == group[0].owner)
+            {
+                return true
+            }
+
+        return false
+    }
+
     const getUserName = (userId:string) => {
         const user = realm.objects<Users>(Users).filtered('userId == $0', userId)[0]
 
         return user.username;
+    }
+
+    const getUserStatus = (userId:string) => {
+        const user = realm.objects<Users>(Users).filtered('userId == $0', userId)[0]
+
+        return user.status;
     }
 
     const getUserRole = (userId:string) => {
@@ -160,13 +168,6 @@ export const GroupScreen = (props:GroupScreenProps) => {
             });
         }
     }
-
-    const [selectedUser, setSelectedUser] = useState<string>("");
-    const [viewingProfile, setViewingProfile] = useState<boolean>(false)
-
-    const closeProfile = () => {
-        setViewingProfile(false)
-    }
        
     const [selectedPage, setSelectedPage] = useState(0)
     const pagerRef = React.useRef<PagerView>(null)
@@ -175,12 +176,6 @@ export const GroupScreen = (props:GroupScreenProps) => {
         pagerRef.current?.setPage(pageNumber);
         setSelectedPage(pageNumber)
     }
-
-    const stopViewingWorkout = () => {
-        setViewingWorkout(false)
-    }
-
-    
 
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
@@ -203,18 +198,31 @@ export const GroupScreen = (props:GroupScreenProps) => {
             )
         });
         }, [realm, user]);
+
+        const truncateText = (text:string, limit:number) => {
+            if (text.length > limit) {
+                return text.substring(0, limit) + '...';
+              }
+              return text;
+        }
     
     return (
         
-        <>
-
-        {
-            (!viewingWorkout && !viewingProfile) &&
+        <> 
             <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-                <TouchableOpacity onPress={() => props.onPress("view")} style={styles.closeButton}>
+                <TouchableOpacity onPress={goBack} style={styles.closeButton}>
                     <MaterialCommunityIcons name="close" size={40}/>
+                    <Text style={styles.headerTitle}>{truncateText(selectedGroup[0].name, 15)}</Text>
                 </TouchableOpacity>
                 
+                {
+                    user.id != selectedGroup[0].owner &&
+                    <View style={{display: 'flex', flexDirection: 'row'}}>
+                        <TouchableOpacity style={{marginRight: 10,}} onPress={() => setModalUsersVisible(true)}>
+                            <MaterialCommunityIcons name="account-group" size={40}/>
+                        </TouchableOpacity>
+                    </View>
+                }
                 {
                     user.id == selectedGroup[0].owner &&
                     <View style={{display: 'flex', flexDirection: 'row'}}>
@@ -228,31 +236,17 @@ export const GroupScreen = (props:GroupScreenProps) => {
                     </View>
                 }
             </View>
-        }
-        
-        { 
-            (!viewingWorkout && !viewingProfile) &&
-            <>
-                <View style={styles.pageVisualiser}>
-                    <TouchableOpacity onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 0 && {color: 'white', fontWeight: '800'}}>History</Text></TouchableOpacity>
-                    <TouchableOpacity onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}]}><Text style={selectedPage == 1 && {color: 'white', fontWeight: '800'}}>Leaderboard</Text></TouchableOpacity>
-                </View>
-                <PagerView style={styles.pagerView} initialPage={selectedPage} onPageSelected={(event) => {setSelectedPage(event.nativeEvent.position)}} scrollEnabled={true} ref={pagerRef}>
-                    <History key="1"/>
-                    <Leaderboard key="2"/>
-                </PagerView>
-            </>
-        }
 
-        {
-            (viewingWorkout && !viewingProfile) &&
-            <WorkoutDisplayScreen data={workoutData} dataType={workoutDataType} onPress={stopViewingWorkout}/>
-        }
-
-        {
-            viewingProfile &&
-            <Text>Viewing Profile</Text>
-        }
+        <>
+            <View style={styles.pageVisualiser}>
+                <TouchableOpacity onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 0) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 0 && {color: 'white', fontWeight: '800'}}>History</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 1) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 1 && {color: 'white', fontWeight: '800'}}>Leaderboard</Text></TouchableOpacity>
+            </View>
+            <PagerView style={styles.pagerView} initialPage={selectedPage} onPageSelected={(event) => {setSelectedPage(event.nativeEvent.position)}} scrollEnabled={true} ref={pagerRef}>
+                <History key="1"/>
+                <Leaderboard key="2"/>
+            </PagerView>
+        </>
 
         <Modal
                 isVisible={modalPendingRequestsVisible}
@@ -302,14 +296,29 @@ export const GroupScreen = (props:GroupScreenProps) => {
                             <>
                             <View key={(new BSON.ObjectID()).toString()} style={styles.userInfoContainer}>
                                 <View style={styles.userData}>
-                                    <Image source={getProfilePicture(item)} style={styles.image}/>
+                                    <View>
+                                        <Image source={getProfilePicture(item)} style={styles.image}/>
+                                        {
+                                            getUserStatus(item) == "Injured" &&
+                                            <MaterialCommunityIcons name="circle" size={25} color={colors.red} style={{position: 'absolute', bottom: 0, right: 10,}}/>
+                                        }
+                                        {
+                                            getUserStatus(item) == "Away" &&
+                                            <MaterialCommunityIcons name="circle" size={25} color={colors.orange} style={{position: 'absolute', bottom: 0, right: 10,}}/>
+                                        }
+                                    </View>
+                                    
                                     <View>
                                         <Text style={styles.username}>{getUserName(item)}</Text>
                                         <Text style={styles.role}>{getUserRole(item)}</Text>
+                                        {
+                                            isOwner(groupName, item) &&
+                                            <Text style={styles.role}>owner</Text>
+                                        }
                                     </View>
                                 </View>
                                 <View>
-                                    <TouchableOpacity style={styles.button} onPress={() => {setModalUsersVisible(false); setSelectedUser(item); setViewingProfile(true)}}><Text style={styles.buttonText}>View Profile</Text></TouchableOpacity>
+                                    <TouchableOpacity style={styles.button} onPress={() => {setModalUsersVisible(false); goToProfileScreen(item, true)}}><Text style={styles.buttonText}>View Profile</Text></TouchableOpacity>
                                 </View>
                             </View>
                             <View style={styles.border}>

@@ -8,19 +8,29 @@ import { Users } from "../../schemas/UsersSchema";
 import { BSON } from "realm";
 import styles from "./GroupMembersSettingsScreen.style";
 
-type GroupMembersSettingsScreenProps = {
-    onPress:any;
-    group:string;
-}
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import { RouteProp } from '@react-navigation/native'
 
-export const GroupMembersSettingsScreen = (props:GroupMembersSettingsScreenProps) => {
+type GroupMembersSettingsScreenProps = {
+  navigation: StackNavigationProp<RootStackParamList, 'GroupMembersSettings'>; // Adjust according to your navigation stack
+  route: RouteProp<RootStackParamList, 'GroupMembersSettings'>;
+};
+
+export const GroupMembersSettingsScreen = ({ navigation, route }: GroupMembersSettingsScreenProps) => {
 
     let realm = useRealm()
     let user = useUser()
 
-    const group = useQuery(Groups).filtered("name == $0", props.group)
+    const { group } = route.params
 
-    const stringIds = group[0].members.map(member => member)
+    const goBack = () => {
+        navigation.goBack()
+    }
+
+    const groupData = useQuery(Groups).filtered("name == $0", group)
+
+    const stringIds = groupData[0].members.map(member => member)
 
     const getUserName = (userId:string) => {
         const user = realm.objects<Users>(Users).filtered('userId == $0', userId)[0]
@@ -69,7 +79,7 @@ export const GroupMembersSettingsScreen = (props:GroupMembersSettingsScreenProps
 
         const index = stringIds.indexOf(userId)
 
-        const role = group[0].memberRoles[index];
+        const role = groupData[0].memberRoles[index];
 
         return role;
     }
@@ -79,7 +89,7 @@ export const GroupMembersSettingsScreen = (props:GroupMembersSettingsScreenProps
         const index = stringIds.indexOf(userId)
 
         realm.write(() => {
-            group[0].memberRoles[index] = newRole;
+            groupData[0].memberRoles[index] = newRole;
         })
 
         onClose()
@@ -90,9 +100,9 @@ export const GroupMembersSettingsScreen = (props:GroupMembersSettingsScreenProps
         const index = stringIds.indexOf(userId)
 
         realm.write(() => {
-            group[0].members.splice(index, 1)
-            group[0].membersDateJoined.splice(index, 1);
-            group[0].memberRoles.splice(index, 1);
+            groupData[0].members.splice(index, 1)
+            groupData[0].membersDateJoined.splice(index, 1);
+            groupData[0].memberRoles.splice(index, 1);
         })
     }
 
@@ -158,12 +168,12 @@ export const GroupMembersSettingsScreen = (props:GroupMembersSettingsScreenProps
     return (
         <>
             <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',}}>
-                <TouchableOpacity onPress={() => props.onPress()} style={styles.closeButton}>
+                <TouchableOpacity onPress={goBack} style={styles.closeButton}>
                     <MaterialCommunityIcons name="arrow-left" size={40}/>
                 </TouchableOpacity>
             </View>
             <FlatList 
-                        data = {group[0].members}
+                        data = {groupData[0].members}
                         renderItem={({item, index}) => (
                             <>
                             <View key={(new BSON.ObjectID()).toString()} style={styles.userInfoContainer}>

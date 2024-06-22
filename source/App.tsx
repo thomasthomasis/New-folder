@@ -1,7 +1,7 @@
 import React from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, getFocusedRouteNameFromRoute} from '@react-navigation/native';
 
 import {dataExplorerLink} from '../atlasConfig.json';
 import {LogWorkoutScreen} from './screens/LogWorkoutScreen/LogWorkoutScreen';
@@ -21,6 +21,18 @@ import { AddExerciseScreen } from './screens/AddExerciseScreen/AddExerciseScreen
 import { SubmitCompletion } from './screens/SubmitCompletionScreen/SubmitCompletion';
 
 import { RootStackParamList } from './navgiation/NavigationTypes';
+import { CreateGroupScreen } from './screens/CreateGroupScreen/CreateGroupScreen';
+import { JoinGroupScreen } from './screens/JoinGroupScreen/JoinGroupScreen';
+import { GroupMembersSettingsScreen } from './screens/GroupMembersSettingsScreen/GroupMembersSettingsScreen';
+import { GroupSettingsScreen } from './screens/GroupSettingsScreen/GroupSettingsScreen';
+import { GroupScreen } from './screens/GroupScreen/GroupScreen';
+import { WorkoutDisplayScreen } from './screens/WorkoutDisplayScreen/WorkoutDisplayScreen';
+import { HistoryScreen } from './screens/HistoryScreen/HistoryScreen';
+import { AppSettingsScreen } from './screens/AppSettingsScreen/AppSettingsScreen';
+import { ProfileSettingsScreen } from './screens/ProfileSettingsScreen/ProfileSettingsScreen';
+import { FeedbackScreen } from './screens/FeedbackScreen/FeedbackScreen';
+import { EditResistanceExerciseScreen } from './screens/EditResistanceExerciseScreen/EditResistanceExerciseScreen';
+import { EditCardioExerciseScreen } from './screens/EditCardioExerciseScreen/EditCardioExerciseScreen';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -60,14 +72,34 @@ export const App = () => {
       }}>
         <Stack.Screen name="ProfileScreen" options={{ headerShown: false}} component={ProfileScreen} initialParams={{ userId: user.id, restrictedView: false}}/>
         <Stack.Screen name="Account" options={{ headerShown: false}} component={AccountScreen} />
+        <Stack.Screen name="AppSettings" options={{ headerShown: false }} component={AppSettingsScreen} />
+        <Stack.Screen name="ProfileSettings" options={{ headerShown: false }} component={ProfileSettingsScreen} />
+        <Stack.Screen name="Feedback" options={{ headerShown: false }} component={FeedbackScreen} />
       </Stack.Navigator>
     )
   }
 
   
 
-  const SocialNavigation = () => {
-
+  const SocialStack = () => {
+    return (
+      <Stack.Navigator screenOptions={{
+          transitionSpec: {
+            open: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
+            close: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
+          },
+        }}>
+          <Stack.Screen name="SocialScreen" options={{ headerShown: false}} component={SocialScreen}/>
+          <Stack.Screen name="CreateGroup" options={{ headerShown: false}} component={CreateGroupScreen} />
+          <Stack.Screen name="JoinGroup" options={{ headerShown: false}} component={JoinGroupScreen} />
+          <Stack.Screen name="GroupMembersSettings" options={{ headerShown: false}} component={GroupMembersSettingsScreen} initialParams={{ group: "" }}/>
+          <Stack.Screen name="GroupSettings" options={{ headerShown: false}} component={GroupSettingsScreen} initialParams={{ group: "" }}/>
+          <Stack.Screen name="Group" options={{ headerShown: false}} component={GroupScreen} initialParams={{ group: "" }}/>
+          <Stack.Screen name="WorkoutDisplay" options={{ headerShown: false}} component={WorkoutDisplayScreen} initialParams={{ data: "", dataType: "" }}/>
+          <Stack.Screen name="History" options={{ headerShown: false}} component={HistoryScreen} initialParams={{ group: "" }}/>
+          <Stack.Screen name="ProfileScreen" options={{ headerShown: false}} component={ProfileScreen} initialParams={{ userId: "", restrictedView: true}}/>
+      </Stack.Navigator>
+    )
   }
 
   const LogWorkoutStack = () => {
@@ -83,6 +115,8 @@ export const App = () => {
         <Stack.Screen name="LogWorkoutResistance" component={LogWorkoutResistanceScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}}/>
         <Stack.Screen name="AddExercise" component={AddExerciseScreen} options={{ headerShown: false}}/>
         <Stack.Screen name="SubmitCompletion" component={SubmitCompletion} initialParams={{ levelUp: false, gainedXp: 0 }} options={{ headerShown: false}}/>
+        <Stack.Screen name="EditResistanceExercise" component={EditResistanceExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
+        <Stack.Screen name="EditCardioExercise" component={EditCardioExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
         
       </Stack.Navigator>
       )
@@ -101,14 +135,22 @@ export const App = () => {
               <Tab.Screen 
                   name="Dashboard"
                   component={LogWorkoutStack}
-                  options={{
+                  options={({ route }) => ({
                     headerStyle: {
                       height: 0,
                     },
                     tabBarIcon: ({ color }) => (
                       <MaterialCommunityIcons name="view-dashboard" color={color} size={40} />
                     ),
-                  }} 
+                    tabBarStyle: ((route) => {
+                      const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+                      if(routeName === "LogWorkoutCardio" || routeName === "LogWorkoutResistance" || routeName === "AddExercise" || routeName === "EditResistanceExercise" || routeName === "EditCardioExercise")
+                        {
+                          return {display: "none"}
+                        }
+                        return
+                    })(route),
+                  })} 
                 >
               </Tab.Screen>
               <Tab.Screen 
@@ -125,16 +167,36 @@ export const App = () => {
                 >
               </Tab.Screen>
               <Tab.Screen 
+                  name="Social"
+                  component={SocialStack}
+                  options={{
+                    headerStyle: {
+                      height: 0,
+                    },
+                    tabBarIcon: ({ color }) => (
+                      <MaterialCommunityIcons name="account-group" color={color} size={40} />
+                    ),
+                  }} 
+                >
+              </Tab.Screen>
+              <Tab.Screen 
                   name="Profile"
                   component={ProfileStack}
-                  options={{
+                  options={({ route }) => ({
                     headerStyle: {
                       height: 0,
                     },
                     tabBarIcon: ({ color }) => (
                       <MaterialCommunityIcons name="account" color={color} size={40} />
                     ),
-                  }} 
+                    tabBarStyle: ((route) => {
+                      const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+                      if(routeName === 'Account' || routeName === "AppSettings" || routeName === "ProfileSettings" || routeName === "Feedback"){
+                        return {display: "none"}
+                      }
+                      return
+                    })(route),
+                  })} 
                 >
               </Tab.Screen>
           </Tab.Navigator>
