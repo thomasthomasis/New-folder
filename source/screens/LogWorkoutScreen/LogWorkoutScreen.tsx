@@ -20,7 +20,7 @@ import { BSON } from 'realm';
 import { UserStatistics } from '../../schemas/UserStatisticsSchema';
 import { CardioWorkout } from '../../schemas/CardioWorkoutSchema';
 import { ResistanceWorkout } from '../../schemas/ResistanceWorkoutSchema';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 
 type LogWorkoutProps = {
     navigation: StackNavigationProp<RootStackParamList, 'LogWorkout'>;
@@ -145,6 +145,14 @@ type BarChartProps = {
 }
 
 const BarChartExample = (props:BarChartProps) => {
+  console.log(props)
+  if(props.data.length == 0)
+    {
+      return (
+        <>
+        </>
+      )
+    }
   const screenHeight = Dimensions.get('window').height;
   const screenWidth = Dimensions.get('window').width;
 
@@ -172,6 +180,7 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
 
   const realm = useRealm()
   const user = useUser()
+  const isFocused = useIsFocused()
 
   const logResitanceWorkout = () => {
     navigation.navigate("LogWorkoutResistance", {continuingWorkout: false})
@@ -191,6 +200,8 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
   let CardioObjectsOfWeek = realm.objects(CardioWorkout).filtered("user_id == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
   let ResistanceObjectsOfWeek = realm.objects(ResistanceWorkout).filtered("userId == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
 
+  console.log(CardioObjectsOfWeek)
+
   const userStatsWeek = [
     {
       numCardioWorkouts: CardioObjectsOfWeek.length,
@@ -201,9 +212,16 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
   ]
 
   useEffect(() => {
-    CardioObjectsOfWeek = realm.objects(CardioWorkout).filtered("user_id == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
-    ResistanceObjectsOfWeek = realm.objects(ResistanceWorkout).filtered("userId == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
+    
   }, [userStats])
+
+  useEffect(() => {
+    if(isFocused)
+    {
+      CardioObjectsOfWeek = realm.objects(CardioWorkout).filtered("user_id == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
+      ResistanceObjectsOfWeek = realm.objects(ResistanceWorkout).filtered("userId == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
+    }
+  })
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [imageSource, setImageSource] = useState()
@@ -247,7 +265,12 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
   //set profile picture
   useEffect(() => {
     //console.log(userData)
-    let profilePicture:string = userData[0].profilePicture as string;
+    let profilePicture;
+    if(userData[0])
+      {
+        profilePicture = userData[0].profilePicture as string;
+      }
+    
 
     if(profilePicture)
     {

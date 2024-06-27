@@ -21,6 +21,7 @@ import styles from "./GroupScreen.style";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 import { RouteProp, useNavigation } from '@react-navigation/native'
+import { GroupEventsScreen } from "../GroupEventsScreen/GroupEventsScreen";
 
 type GroupScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Group'>; // Adjust according to your navigation stack
@@ -33,7 +34,7 @@ export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
     const user = useUser()
 
     const { group } = route.params
-    let groupName = group;
+    let groupId = group;
 
     const goBack = () => {
         navigation.goBack()
@@ -43,7 +44,8 @@ export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
         navigation.navigate("ProfileScreen", { userId: userId, restrictedView: restrictedView})
     }
 
-    let selectedGroup = useQuery(Groups).filtered("name == $0", group)
+    let selectedGroup = useQuery(Groups).filtered("groupId == $0", group)
+    console.log(selectedGroup)
     const groupJoinRequests = useQuery(JoinGroupRequests).filtered('groupName == $0', group)
 
     const stringIds = selectedGroup[0].members.map(member => member)
@@ -58,6 +60,10 @@ export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
         <LeaderboardScreen group={group}/>
     )
 
+    const Events = () => (
+        <GroupEventsScreen navigation={navigation as StackNavigationProp<RootStackParamList, 'GroupEvents'>} route={{ key: 'GroupEvents', name: 'GroupEvents', params: { group: group } }} />
+    )
+
     const [modalPendingRequestsVisible, setModalPendingRequestsVisible] = useState<boolean>(false)
 
     const closePendingRequestsModal = () => {
@@ -69,8 +75,8 @@ export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
         setModalUsersVisible(false)
     }
 
-    const isOwner = (groupName:string, user:string) => {
-        const group = realm.objects(Groups).filtered("name == $0", groupName)
+    const isOwner = (groupId:string, user:string) => {
+        const group = realm.objects(Groups).filtered("groupId == $0", groupId)
 
         if(user == group[0].owner)
             {
@@ -169,7 +175,7 @@ export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
         }
     }
        
-    const [selectedPage, setSelectedPage] = useState(0)
+    const [selectedPage, setSelectedPage] = useState(1)
     const pagerRef = React.useRef<PagerView>(null)
 
     const handlePageChange = (pageNumber:any) => {
@@ -211,7 +217,7 @@ export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
         <> 
             <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                 <TouchableOpacity onPress={goBack} style={styles.closeButton}>
-                    <MaterialCommunityIcons name="close" size={40}/>
+                    <MaterialCommunityIcons name="arrow-left" size={40}/>
                     <Text style={styles.headerTitle}>{truncateText(selectedGroup[0].name, 15)}</Text>
                 </TouchableOpacity>
                 
@@ -239,12 +245,14 @@ export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
 
         <>
             <View style={styles.pageVisualiser}>
-                <TouchableOpacity onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 0) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 0 && {color: 'white', fontWeight: '800'}}>History</Text></TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 1) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 1 && {color: 'white', fontWeight: '800'}}>Leaderboard</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 0) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 0 && {color: 'white', fontWeight: '800'}}>Events</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 1) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 1 && {color: 'white', fontWeight: '800'}}>History</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => handlePageChange(2)} style={[styles.bar, selectedPage == 2 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 2) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 2 && {color: 'white', fontWeight: '800'}}>Leaderboard</Text></TouchableOpacity>
             </View>
             <PagerView style={styles.pagerView} initialPage={selectedPage} onPageSelected={(event) => {setSelectedPage(event.nativeEvent.position)}} scrollEnabled={true} ref={pagerRef}>
-                <History key="1"/>
-                <Leaderboard key="2"/>
+                <Events key="1"/>
+                <History key="2"/>
+                <Leaderboard key="3"/>
             </PagerView>
         </>
 
@@ -312,7 +320,7 @@ export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
                                         <Text style={styles.username}>{getUserName(item)}</Text>
                                         <Text style={styles.role}>{getUserRole(item)}</Text>
                                         {
-                                            isOwner(groupName, item) &&
+                                            isOwner(groupId, item) &&
                                             <Text style={styles.role}>owner</Text>
                                         }
                                     </View>

@@ -33,6 +33,10 @@ import { ProfileSettingsScreen } from './screens/ProfileSettingsScreen/ProfileSe
 import { FeedbackScreen } from './screens/FeedbackScreen/FeedbackScreen';
 import { EditResistanceExerciseScreen } from './screens/EditResistanceExerciseScreen/EditResistanceExerciseScreen';
 import { EditCardioExerciseScreen } from './screens/EditCardioExerciseScreen/EditCardioExerciseScreen';
+import { GroupEventsScreen } from './screens/GroupEventsScreen/GroupEventsScreen';
+import { GroupEventScreen } from './screens/GroupEventScreen/GroupEventScreen';
+import { CreateGroupEventScreen } from './screens/CreateGroupEventScreen/CreateGroupEventScreen';
+import { EditGroupEventScreen } from './screens/EditGroupEventScreen/EditGroupEventScreen';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -98,6 +102,10 @@ export const App = () => {
           <Stack.Screen name="WorkoutDisplay" options={{ headerShown: false}} component={WorkoutDisplayScreen} initialParams={{ data: "", dataType: "" }}/>
           <Stack.Screen name="History" options={{ headerShown: false}} component={HistoryScreen} initialParams={{ group: "" }}/>
           <Stack.Screen name="ProfileScreen" options={{ headerShown: false}} component={ProfileScreen} initialParams={{ userId: "", restrictedView: true}}/>
+          <Stack.Screen name="GroupEvents" options={{ headerShown: false}} component={GroupEventsScreen} initialParams={{ group: "" }}/>
+          <Stack.Screen name="GroupEvent" options={{ headerShown: false}} component={GroupEventScreen} initialParams={{ event: "" }}/>
+          <Stack.Screen name="CreateGroupEvent" options={{ headerShown: false}} component={CreateGroupEventScreen} initialParams={{ group: "" }}/>
+          <Stack.Screen name="EditGroupEvent" options={{ headerShown: false}} component={EditGroupEventScreen} initialParams={{ event: "" }}/>
       </Stack.Navigator>
     )
   }
@@ -169,14 +177,22 @@ export const App = () => {
               <Tab.Screen 
                   name="Social"
                   component={SocialStack}
-                  options={{
+                  options={({route}) => ({
                     headerStyle: {
                       height: 0,
                     },
                     tabBarIcon: ({ color }) => (
                       <MaterialCommunityIcons name="account-group" color={color} size={40} />
                     ),
-                  }} 
+                    tabBarStyle: ((route) => {
+                      const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+                      if(routeName === "WorkoutDisplay" || routeName === "ProfileScreen" || routeName === "GroupEvent")
+                        {
+                          return {display: "none"}
+                        }
+                        return
+                    })(route),
+                  })} 
                 >
               </Tab.Screen>
               <Tab.Screen 

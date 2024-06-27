@@ -5,6 +5,7 @@ export class Groups extends Realm.Object<Groups> {
     color?: string;
     dateCreated?: Date;
     description?: string;
+    groupId!: string;
     image?: string;
     memberRoles!: Realm.List<string>;
     members!: Realm.List<string>;
@@ -20,6 +21,7 @@ export class Groups extends Realm.Object<Groups> {
         color: 'string?',
         dateCreated: 'date?',
         description: 'string?',
+        groupId: 'string',
         image: 'string?',
         memberRoles: 'string[]',
         members: 'string[]',

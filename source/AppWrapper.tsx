@@ -16,6 +16,7 @@ import { Groups } from './schemas/GroupsSchema';
 import { JoinGroupRequests } from './schemas/JoinGroupRequestsSchema';
 import { ExtraExercises } from './schemas/ExtraExercisesSchema';
 import { Feedback } from './schemas/FeedbackSchema';
+import { GroupEvents } from './schemas/GroupEventsScehma';
 
 const LoadingIndicator = () => {
   return (
@@ -30,7 +31,7 @@ export const AppWrapper = () => {
     <AppProvider id={appId} baseUrl={baseUrl}>
       <UserProvider fallback={WelcomeScreen}>
         <RealmProvider
-          schema={[Item, CardioWorkout, Users, ResistanceWorkout, Workouts, UserStatistics, Groups, JoinGroupRequests, ExtraExercises, Feedback]}
+          schema={[Item, CardioWorkout, Users, ResistanceWorkout, Workouts, UserStatistics, Groups, JoinGroupRequests, ExtraExercises, Feedback, GroupEvents]}
           sync={{
             flexible: true,
             initialSubscriptions: {

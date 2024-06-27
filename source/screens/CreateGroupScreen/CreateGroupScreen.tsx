@@ -33,16 +33,9 @@ export const CreateGroupScreen = ({ navigation }: CreateGroupScreenProps) => {
     const groups = useQuery(Groups);
 
     function handleSubmit() {
-        // Validate form fields
-        const groupsWithNameUsed = groups.filtered("name == $0", groupName);
-
+     
         if (!groupName.trim()) {
             Alert.alert("Please enter a name");
-            return;
-        }
-        else if(groupsWithNameUsed.length > 0)
-        {
-            Alert.alert("This name is already in use");
             return;
         }
         else if(image.trim().length == 0)
@@ -69,6 +62,7 @@ export const CreateGroupScreen = ({ navigation }: CreateGroupScreenProps) => {
               _id: new BSON.ObjectID,
               dateCreated: new Date(),
               description: groupDescription,
+              groupId: new BSON.ObjectID().toString(),
               memberRoles: ["captain"],
               members: [user.id],
               membersDateJoined: [new Date()],

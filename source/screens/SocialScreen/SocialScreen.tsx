@@ -52,8 +52,6 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
   
   const [selectedGroup, setSelectedGroup] = useState<string>('')
 
-  const [group, setGroup] = useState<string>('')
-
   const [showingModal, setShowingModal] = useState<boolean>(false)
   const [showingModalOptions, setShowingModalOptions] = useState<boolean>(false)
 
@@ -69,7 +67,7 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
       return false;
     }
 
-    const group = groups.filtered("name == $0", selectedGroup)
+    const group = groups.filtered("groupId == $0", selectedGroup)
 
     if(user.id == group[0].owner)
     {
@@ -81,11 +79,11 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
     }
   }
 
-  const leaveGroup = (groupName:string) => {
+  const leaveGroup = (groupId:string) => {
 
-    console.log(groupName)
+    console.log(groupId)
 
-    const group = groups.filtered("name == $0", groupName)
+    const group = groups.filtered("groupId == $0", groupId)
     const stringIds = group[0].members.map(member => member)
 
     const index = stringIds.indexOf(user.id)
@@ -105,7 +103,7 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
         group[0].members.splice(index, 1)
       })
 
-      setNewOwner(groupName)
+      setNewOwner(groupId)
     }
     else
     {
@@ -120,8 +118,8 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
    
   }
 
-  const setNewOwner = (groupName:string) => {
-    const group = realm.objects(Groups).filtered("name == $0", groupName)
+  const setNewOwner = (groupId:string) => {
+    const group = realm.objects(Groups).filtered("groupId == $0", groupId)
 
     console.log(group)
 
@@ -132,10 +130,10 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
     })
   }
 
-  const deleteGroup = (group:any) => {
+  const deleteGroup = (groupId:any) => {
     setSelectedGroup("")
 
-    const groupToBeDeleted = groups.filtered("name == $0", group)
+    const groupToBeDeleted = groups.filtered("groupId == $0", groupId)
 
     realm.write(() => {
       realm.delete(groupToBeDeleted)
@@ -218,22 +216,25 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
             contentContainerStyle={styles.flatList}
             data={groups}
             renderItem={({ item, index }) => (
-              <TouchableOpacity style={[styles.groupButton, shadow.shadow, {marginTop: 20}, item.color != null && {backgroundColor: item.color}]} onPress={() => {goToGroupScreen(item.name)}}>
+              <TouchableOpacity style={[styles.groupButton, shadow.shadow, {marginTop: 20}, item.color != null && {backgroundColor: item.color}]} onPress={() => {goToGroupScreen(item.groupId)}}>
                 {
                   item.image &&
                   <MaterialCommunityIcons name={item.image} color={"black"} size={50} /> 
                 }
                 <Text style={styles.buttonText}>{item.name}</Text>
-                <TouchableOpacity onPress={() => {setShowingModal(true); setSelectedGroup(item.name)}}>
+                <TouchableOpacity onPress={() => {setShowingModal(true); setSelectedGroup(item.groupId)}}>
                   <MaterialCommunityIcons name="dots-vertical" color={'white'} size={40} />
                 </TouchableOpacity>
               </TouchableOpacity>
             )}
           />
 
-        <TouchableOpacity onPress={() => setShowingModalOptions(true)} style={[styles.button, {width: 80, height: 80, borderRadius: 80, marginTop: 10,}, shadow.shadow]}>
-          <MaterialCommunityIcons name="plus" color={'white'} size={70} />
-        </TouchableOpacity>
+        <View style={[styles.addButtonContainer, shadow.shadow]}>
+          <TouchableOpacity onPress={() => setShowingModalOptions(true)} style={[styles.button, {width: 60, height: 60, borderRadius: 80, marginTop: 10,}, shadow.shadow]}>
+            <MaterialCommunityIcons name="plus" color={'white'} size={50} />
+          </TouchableOpacity>
+        </View>
+        
       </View>
 
     <Modal

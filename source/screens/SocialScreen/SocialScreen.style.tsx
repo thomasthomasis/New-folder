@@ -37,6 +37,17 @@ const styles = StyleSheet.create({
       marginBottom: 10,
       borderRadius: 10,
     },
+
+    addButtonContainer: {
+      width: screenWidth,
+      height: 70,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'white',
+      borderTopRightRadius: 15,
+      borderTopLeftRadius: 15,
+    },
   
     groupButton: {
       width: screenWidth - 30,

@@ -20,5 +20,9 @@ export type RootStackParamList = {
     Feedback: undefined;
     EditResistanceExercise: { exercise:string };
     EditCardioExercise: { exercise:string };
+    GroupEvents: { group:string };
+    GroupEvent: { event:string };
+    CreateGroupEvent: { group:string };
+    EditGroupEvent: { event:string };
     // Add more screens as needed
   };

@@ -28,7 +28,7 @@ export const HistoryScreen = ({ navigation, route }:HistoryScreenProps) => {
         console.log("navigating")
     }
 
-    const groupData = useQuery(Groups).filtered('name == $0', group);
+    const groupData = useQuery(Groups).filtered('groupId == $0', group);
     const stringIds = groupData[0].members.map(member => member)
     const datesJoined = groupData[0].membersDateJoined.map(date => date)
 

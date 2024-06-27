@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
       },
     
       bar: {
-        width: '50%',
+        width: '33.33%',
         backgroundColor: 'white',
         height: 40,
         borderRadius: 40,

@@ -24,7 +24,7 @@ export const LeaderboardScreen = (props:LeaderboardScreenProps) => {
     const realm = useRealm()
     const user = useUser()
 
-    const group = useQuery(Groups).filtered('name == $0', props.group);
+    const group = useQuery(Groups).filtered('groupId == $0', props.group);
     const stringIds = group[0].members.map(member => member)
 
     const [data, setData] = useState<any[]>([])
