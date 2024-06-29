@@ -224,7 +224,7 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
   })
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [imageSource, setImageSource] = useState()
+  const [imageSource, setImageSource] = useState(require("../../assets/3.png"))
 
   const [currentWorkout, setCurrentWorkout] = useState<any>([]);
   const [currentWorkoutType, setCurrentWorkoutType] = useState<string>('')
@@ -331,7 +331,7 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
         <View style={styles.header}>
             <Text style={styles.headerText}>UltiTracker</Text>
             <View style={[{marginRight: 10,}, shadow.shadow]}>
-              <Image source={require("../../assets/3.png")} style={styles.headerImage}/>
+              <Image source={imageSource} style={styles.headerImage}/>
             </View>
         </View>
 
