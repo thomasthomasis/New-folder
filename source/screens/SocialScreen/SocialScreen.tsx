@@ -212,6 +212,10 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
   return (
     <> 
       <View style={styles.container}>
+            {
+              groups.length == 0 &&
+              <Text style={{fontSize: 25, fontWeight: '800', color: colors.black, marginTop: 15}}>Join or Create a Group!!</Text>
+            }
             <FlatList
             contentContainerStyle={styles.flatList}
             data={groups}

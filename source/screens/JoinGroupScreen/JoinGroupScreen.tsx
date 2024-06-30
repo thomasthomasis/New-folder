@@ -31,13 +31,12 @@ export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
     const groupsApartOfList = useQuery(Groups).filtered('ANY members == $0', user.id);
     const groupJoinRequests = useQuery(JoinGroupRequests).filtered('userId == $0', user.id.toString())
     const reqeustedGroups = groupJoinRequests.map(item => item.groupName)
-    const groupsApartOf = groupsApartOfList.map(item => item.name)
+    const groupsApartOf = groupsApartOfList.map(item => item.groupId)
 
     const [modalGroupInfoVisible, setModalGroupInfoVisible] = useState<boolean>(false)
     const [modalPendingRequestsVisible, setModalPendingRequestsVisible] = useState<boolean>(false)
 
     const [modalGroupName, setModalGroupName] = useState<string>('')
-    const [modalGroupNumMembers, setModalGroupNumMembers] = useState<number>(0)
 
     const closeModal = () => {
         setModalGroupInfoVisible(false)
@@ -68,6 +67,52 @@ export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
         },
         [realm, user],
       );
+
+    const getGroupName = (groupId:string) => {
+        const group = realm.objects(Groups).filtered("groupId == $0", groupId)
+
+        if(group.length > 0)
+        {
+            return group[0].name
+        }
+        else
+        {
+            return ""
+        }
+        
+    }
+
+    const getNumGroupMembers = (groupId:string) => {
+        const group = realm.objects(Groups).filtered("groupId == $0", groupId)
+
+        if(group.length > 0)
+        {
+            return group[0].members.length;
+        }
+        else
+        {
+            return 0;
+        }
+        
+    }
+
+    const calculateLength = (array:any) => {
+
+        console.log(array)
+
+        let amount = 0;
+
+        for(let i = 0; i < array.length; i++)
+        {
+            if(array[i] == "")
+            {
+                continue
+            }
+            amount++;
+        }
+
+        return amount;
+    }
 
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
@@ -114,9 +159,9 @@ export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
                 {
                     groups.map((group:any, index:any) => {
                         return (
-                            <TouchableOpacity key={index} style={[styles.group, shadow.shadow, group.color && {backgroundColor: group.color}]} onPress={() => {setModalGroupName(group.name); setModalGroupNumMembers(group.members.length); setModalGroupInfoVisible(true)}}>
+                            <TouchableOpacity key={index} style={[styles.group, shadow.shadow, group.color && {backgroundColor: group.color}]} onPress={() => {setModalGroupName(group.groupId); setModalGroupInfoVisible(true)}}>
                                 <MaterialCommunityIcons name={group.image} size={35} style={{position: 'absolute', left: 10,}}/>
-                                <Text style={{fontSize: 20, color: 'white', fontWeight: '800',}}>{group.name}</Text>
+                                <Text style={{fontSize: 20, color: 'white', fontWeight: '800',}}>{getGroupName(group.groupId)}</Text>
                                 {
                                     reqeustedGroups.includes(group.name) &&
                                     <MaterialCommunityIcons name="clock-alert-outline" size={35} style={styles.icon}/>
@@ -138,9 +183,9 @@ export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
                 style={styles.modalView}
             >
                 <View style={styles.modalContent}>
-                    <Text style={styles.title}>{modalGroupName}</Text>
+                    <Text style={styles.title}>{getGroupName(modalGroupName)}</Text>
                     <View style={styles.smallBorder}></View>
-                    <Text style={styles.text}>Members: {modalGroupNumMembers}</Text>
+                    <Text style={styles.text}>Members: {getNumGroupMembers(modalGroupName)}</Text>
                     {
                         reqeustedGroups.includes(modalGroupName) &&
                         <View style={styles.notice}>
@@ -172,16 +217,20 @@ export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
                 style={styles.modalView}
             >
                 <View style={styles.modalContent}>
-                    <Text style={styles.title}>{groupJoinRequests.length} pending request(s)</Text>
+                    <Text style={styles.title}>{calculateLength(groupJoinRequests)} pending request(s)</Text>
                     <View style={[styles.smallBorder, {width: 250, marginBottom: 20}]}></View>
                     {
-                        groupJoinRequests.map((group:any, index:any) => {
-                            return (
+                        groupJoinRequests.map((group:any, index:any) => (
+                            group == "" ?
+                            (
                                 <View key={index} style={styles.group}>
-                                    <Text style={{fontSize: 20, color: 'white', fontWeight: '800',}}>{group.groupName}</Text>
+                                    <Text style={{fontSize: 20, color: 'white', fontWeight: '800',}}>{getGroupName(group.groupId)}</Text>
                                 </View>
+                            ):
+                            (
+                                null
                             )
-                        })
+                        ))
                     }
                 </View>
             </Modal>

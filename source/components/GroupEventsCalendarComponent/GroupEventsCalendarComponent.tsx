@@ -5,14 +5,15 @@ import { useQuery, useRealm, useUser } from '@realm/react';
 import { Workouts } from '../../schemas/WorkoutSchema';
 import { TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import styles from './CalendarComponent.style';
+import styles from './GroupEventsCalendarComponent.style';
+import { GroupEvents } from '../../schemas/GroupEventsScehma';
 
 type CalendarProps = {
-    onPress:any,
-    changeMonth:any,
+    group:string,
+    selectDay:any,
 }
 
-export const CalendarComponent = (props: CalendarProps) => {
+export const GroupEventsCalendarComponent = (props: CalendarProps) => {
 
     const realm = useRealm();
     const user = useUser();
@@ -32,7 +33,9 @@ export const CalendarComponent = (props: CalendarProps) => {
     const startOfMonth = new Date(year, month, 1)
     const endOfMonth = new Date(year, month + 1, 0)
 
-    const workouts = useQuery(Workouts).sorted('dateCreated').filtered('dateCreated >= $0 AND dateCreated < $1', startOfMonth, endOfMonth);
+    const events = useQuery(GroupEvents).sorted('startDate').filtered('groupId == $0 AND startDate >= $1 AND startDate < $2', props.group, startOfMonth, endOfMonth);
+    const [eventArray, setEventsArray] = useState<any>(events)
+
 
     const getDaysOfCurrentWeek = () => {
       const weekDates = []
@@ -53,24 +56,42 @@ export const CalendarComponent = (props: CalendarProps) => {
 
     const selectMonth = (month:number) => {
 
-      if(month == -1)
-      {
-        getCalendarDays(1, year - 1)
-        setYear(year - 1)
-        setMonth(11)
-      }
-      else if(month == 12)
-      {
-        getCalendarDays(0, year + 1)
-        setYear(year + 1)
-        setMonth(0)
-      }
-      else
-      {
-        getCalendarDays(month, year)
-        setMonth(month)
-      }
-      
+        let currentYear = year;
+        let startOfMonth = new Date(year, month, 1)
+        let endOfMonth = new Date(year, month + 1, 0)
+
+        if(month == -1)
+        {
+            getCalendarDays(1, year - 1)
+            setYear(year - 1)
+            setMonth(11)
+            startOfMonth = new Date(currentYear - 1, 11, 1)
+            endOfMonth = new Date(currentYear, 0, 0)
+        }
+        else if(month == 12)
+        {
+            getCalendarDays(0, year + 1)
+            setYear(year + 1)
+            setMonth(0)
+            startOfMonth = new Date(currentYear + 1, 0, 1)
+            endOfMonth = new Date(currentYear + 1,  1, 0)
+        }
+        else
+        {
+            getCalendarDays(month, year)
+            setMonth(month)
+            startOfMonth = new Date(currentYear, month, 1)
+            endOfMonth = new Date(currentYear, month + 1, 0)
+        }
+
+        const events = realm.objects(GroupEvents).sorted('startDate').filtered('groupId == $0 AND startDate >= $1 AND startDate < $2', props.group, startOfMonth, endOfMonth);
+        setEventsArray(events)
+  
+
+      //let result = extractDayAndWorkoutType(eventArray)
+      //console.log("new result: ", result)
+      //generateMergedData(result)
+      console.log("Event: ", eventArray)
     }
 
 
@@ -79,8 +100,8 @@ export const CalendarComponent = (props: CalendarProps) => {
       let numDaysInMonth = new Date(year, month + 1, 0).getDate();
       let firstDayOfWeek = new Date(year, month, 0).getDay();
 
-      console.log("Days in Month: ", numDaysInMonth)
-      console.log("First Day of Week: ", firstDayOfWeek)
+      //console.log("Days in Month: ", numDaysInMonth)
+      //console.log("First Day of Week: ", firstDayOfWeek)
 
       let days:string[] = []
 
@@ -119,23 +140,23 @@ export const CalendarComponent = (props: CalendarProps) => {
     const getCalendarDays = (month:number, year:number) => {
 
       const date = new Date(year, month, 1)
-      console.log("month: ", date.toLocaleString())
+      //console.log("month: ", date.toLocaleString())
 
       let numDaysInMonth = new Date(year, month + 1, 0).getDate();
       let firstDayOfWeek = new Date(year, month, 0).getDay();
       
 
-      console.log("------")
-      console.log("Month: ", month)
+      //console.log("------")
+      //console.log("Month: ", month)
 
 
-      console.log("Days in Month: ", numDaysInMonth)
-      console.log("First Day of Week: ", firstDayOfWeek)
+      //console.log("Days in Month: ", numDaysInMonth)
+      //console.log("First Day of Week: ", firstDayOfWeek)
 
       let days:string[] = []
 
       let numDaysOfPreviousMonth = new Date(year, month - 1, 0).getDate()
-      console.log(numDaysOfPreviousMonth)
+      //console.log(numDaysOfPreviousMonth)
 
       for (let i = 0; i < firstDayOfWeek; i++) {
         days.push((numDaysOfPreviousMonth - (firstDayOfWeek - 1) + i).toString() + " ")
@@ -171,35 +192,37 @@ export const CalendarComponent = (props: CalendarProps) => {
 
     const extractDayAndWorkoutType = (data: any): any[] => {
         return data.map((item: any) => {
-          const dayNumber = new Date(item.dateCreated).getDate(); // Extract day number from the date
-          return { dayNumber, workoutType: item.workoutType };
+          const dayNumber = new Date(item.startDate).getDate(); // Extract day number from the date
+          return { dayNumber, colors: item.color };
         });
     };
 
-    const result = extractDayAndWorkoutType(workouts)
-
-    const dayNumbers = result.map(item => item.dayNumber);
-    const workoutTypes = result.map(item => item.workoutType);
+    const result = extractDayAndWorkoutType(eventArray)
+    console.log(result)
 
     const mergedData:any = {};
-
-    for (let i = 0; i < dayNumbers.length; i++) {
-        const dayNumber = dayNumbers[i];
-        const workoutType = workoutTypes[i];
-      
-        if (!mergedData[dayNumber]) {
-          mergedData[dayNumber] = new Set([workoutType]); // Use a Set to store unique workout types
-        } else {
-          mergedData[dayNumber].add(workoutType); // Add workout type to the Set
+    const generateMergedData = (result:any) => {
+        const dayNumbers = result.map((item:any) => item.dayNumber);
+        const colorsData = result.map((item:any) => item.colors);
+    
+        for (let i = 0; i < dayNumbers.length; i++) {
+            const dayNumber = dayNumbers[i];
+            const color = colorsData[i];
+          
+            if (!mergedData[dayNumber]) {
+              mergedData[dayNumber] = new Set([color]); // Use a Set to store colour
+            } else {
+              mergedData[dayNumber].add(color); // Add colour to the Set
+            }
+          }
+    
+        // Convert Sets to arrays
+        for (const dayNumber in mergedData) {
+            mergedData[dayNumber] = Array.from(mergedData[dayNumber]);
         }
-      }
-
-    // Convert Sets to arrays
-    for (const dayNumber in mergedData) {
-        mergedData[dayNumber] = Array.from(mergedData[dayNumber]);
     }
-
-    //console.log(mergedData)
+    generateMergedData(result)
+    console.log(mergedData)
       
     //----------------------------------------------------------
     const [selectedDay, setSelectedDay] = useState<string>('none')
@@ -246,19 +269,12 @@ export const CalendarComponent = (props: CalendarProps) => {
             <TouchableOpacity key={index} 
             style={[ styles.day,  ((currentWeekDays.includes(day.toString()) && currentMonth == month && year == currentYear) && styles.currentWeekDay), day.includes(" ") && {pointerEvents: 'none'}, (selectedDay == day.toString() && styles.selectedDay),
               ]}   
-            onPress={() => {props.onPress(day.toString()), selectDay(day.toString())}}>
+            onPress={() => {props.selectDay(day.toString(), month, year), selectDay(day.toString())}}>
             <Text style={[styles.dayText, ((currentDay == day && month == currentMonth) && styles.currentDayText), day.includes(" ") && {color: 'lightgray'}]}>{day || ' '}</Text>
             {
                 mergedData[day] &&
                 <View style={styles.dots}>
-                    {
-                        mergedData[day].includes("Cardio") &&
-                        <View style={[styles.dot, {backgroundColor: colors.red}]}></View>
-                    }
-                    {
-                        mergedData[day].includes("Resistance") &&
-                        <View style={[styles.dot, {backgroundColor: colors.black}]}></View>
-                    }
+                    <View style={[styles.dot, {backgroundColor: mergedData[day][0]}]}></View>
                 </View>
             }
             

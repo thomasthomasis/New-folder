@@ -13,6 +13,7 @@ import { GroupEvents } from '../../schemas/GroupEventsScehma';
 import { BSON } from 'realm';
 import { shadow } from '../../sharedStyling/Shadow';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 
 
 type CreateGroupEventScreenProps = {
@@ -32,20 +33,173 @@ export const CreateGroupEventScreen = ({ navigation, route}: CreateGroupEventScr
     }
 
     const [name, setName] = useState('');
-    const [date, setDate] = useState(new Date());
-    const [showDatePicker, setShowDatePicker] = useState<boolean>(false)
+    const [startDate, setStartDate] = useState(new Date());
+    const [startTime, setStartTime] = useState(new Date())
+    const [endDate, setEndDate] = useState(new Date())
+    const [endTime, setEndTime] = useState(new Date())
     const [selectedColor, setSelectedColor] = useState<string>(colors.purple)
+    const [isTraining, setisTraining] = useState<boolean>(true)
+    const [isRecurring, setIsRecurring] = useState<boolean>(false)
+    const [repeatingAmount, setRepeatingAmount] = useState<string>("1")
+    const [repeatingFrequency, setRepeatingFrequency] = useState<string>("Weekly")
 
-    const onChange = (event:any, selectedDate:any) => {
-        const currentDate = selectedDate || date;
-        setShowDatePicker(Platform.OS === 'ios');
-        setDate(currentDate);
+    const [showDatePickerStartDate, setShowDatePickerStartDate] = useState<boolean>(false)
+    const [showDatePickerStartTime, setShowDatePickerStartTime] = useState<boolean>(false)
+
+    const [showDatePickerEndDate, setShowDatePickerEndDate] = useState<boolean>(false)
+    const [showDatePickerEndTime, setShowDatePickerEndTime] = useState<boolean>(false)
+
+
+
+    const onChangeStartDate = (event:any, selectedDate:any) => {
+        const currentDate = selectedDate;
+        
+        // Run your function here based on event.type === "set" (OK button pressed)
+        if (event.type === "set") {
+
+        // Call your function here
+            console.log("Selected date:", currentDate);
+            setShowDatePickerStartDate(false);
+            setShowDatePickerStartTime(true)
+            setStartDate(currentDate);
+            setEndDate(currentDate)
+        }
+
+        if(event.type === "dismissed")
+        {
+            setShowDatePickerStartDate(false);
+            setShowDatePickerStartTime(false)
+        }
+
+        console.log(currentDate)
+        console.log(event)
     };
+
+    const onChangeStartTime = (event:any, selectedTime:any) => {
+        const currentDate = selectedTime;
+        
+        // Run your function here based on event.type === "set" (OK button pressed)
+        if (event.type === "set") {
+
+        // Call your function here
+            console.log("Selected time:", currentDate);
+            setShowDatePickerStartTime(false);
+            setStartTime(currentDate);
+            setEndTime(currentDate)
+        }
+
+        if(event.type === "dismissed")
+        {
+            setShowDatePickerStartDate(false);
+            setShowDatePickerStartTime(false)
+        }
+
+        console.log(currentDate)
+    }
+
+    const onChangeEndDate = (event:any, selectedDate:any) => {
+        const currentDate = selectedDate;
+        
+        // Run your function here based on event.type === "set" (OK button pressed)
+        if (event.type === "set") {
+
+        // Call your function here
+            console.log("Selected date:", currentDate);
+            setShowDatePickerEndDate(false);
+            setShowDatePickerEndTime(true)
+            setEndDate(currentDate);
+        }
+
+        if(event.type === "dismissed")
+        {
+            setShowDatePickerEndDate(false);
+            setShowDatePickerEndTime(false)
+        }
+
+        console.log(currentDate)
+        console.log(event)
+    };
+
+    const onChangeEndTime = (event:any, selectedTime:any) => {
+        const currentDate = selectedTime;
+        
+        // Run your function here based on event.type === "set" (OK button pressed)
+        if (event.type === "set") {
+
+        // Call your function here
+            console.log("Selected time:", currentDate);
+            setShowDatePickerEndTime(false);
+            setEndTime(currentDate);
+        }
+
+        if(event.type === "dismissed")
+        {
+            setShowDatePickerEndDate(false);
+            setShowDatePickerEndTime(false)
+        }
+
+        console.log(currentDate)
+    }
 
     type InputPair = {
         input1:string;
         input2:string;
     }
+
+    const calculateStartDateAndTime = (date:Date, time:Date) => {
+        // Extract date parts from date1
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const day = date.getDate();
+
+        // Extract time parts from timeDate
+        const hours = time.getHours();
+        const minutes = time.getMinutes();
+        const seconds = time.getSeconds();
+        const milliseconds = time.getMilliseconds();
+
+        // Create a new Date object with combined date and time
+        const combinedDateTime = new Date(year, month, day, hours, minutes, seconds, milliseconds);
+
+        return combinedDateTime;
+    }
+
+    const formatDateTime = (date:Date) => {
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const monthsOfYear = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      
+        const dayOfWeek = daysOfWeek[date.getDay()];
+        const dayOfMonth = date.getDate();
+        const month = monthsOfYear[date.getMonth()];
+        const year = date.getFullYear();
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
+        const period = hours >= 12 ? 'PM' : 'AM';
+      
+        // Convert hours from 24-hour to 12-hour format
+        if (hours > 12) {
+          hours -= 12;
+        } else if (hours === 0) {
+          hours = 12;
+        }
+      
+        // Format the day of the month with "st", "nd", "rd", or "th"
+        let daySuffix;
+        if (dayOfMonth % 10 === 1 && dayOfMonth !== 11) {
+          daySuffix = 'st';
+        } else if (dayOfMonth % 10 === 2 && dayOfMonth !== 12) {
+          daySuffix = 'nd';
+        } else if (dayOfMonth % 10 === 3 && dayOfMonth !== 13) {
+          daySuffix = 'rd';
+        } else {
+          daySuffix = 'th';
+        }
+      
+        // Construct the formatted date string
+        const formattedDate = `${dayOfWeek} ${dayOfMonth}${daySuffix} ${month} ${hours}:${minutes.toString().padStart(2, '0')}${period}`;
+      
+        return formattedDate;
+      }
 
     // State to hold the list of text input values
     const [inputPairs, setInputPairs] = useState<InputPair[]>([]);
@@ -84,31 +238,97 @@ export const CreateGroupEventScreen = ({ navigation, route}: CreateGroupEventScr
         setModalVisible(false)
     }
 
-    const createGroupEvent = (name:string, date:Date, color:string) => {
+    const createGroupEvent = (name:string, startDate:Date, endDate:Date, color:string, recurrringAmount:string, recurringFrequency:string, isTraining:boolean) => {
 
-        const linkTitles:string[] = []
-        const links:string[] = []
+        if(startDate > endDate)
+        {
+            Alert.alert("The end date cannot be before the start date!")
+            return;
+        }
+
+
+        const linkTitles:string[] = [""]
+        const links:string[] = [""]
 
         inputPairs.forEach(pair => {
             linkTitles.push(pair.input1);
             links.push(pair.input2);
           });
 
-        realm.write(() => {
+        let recurringId = "";
+        if(parseInt(recurrringAmount) > 1)
+        {
+            let startDateIncremented = startDate;
+            let endDateIncremented = endDate;
+
+            for(let i = 0; i < parseInt(recurrringAmount); i++)
+            {
+                realm.write(() => {
       
-            return new GroupEvents(realm, {
-                _id: new BSON.ObjectID,
-                groupId: group,
-                eventId: new BSON.ObjectID().toString(),
-                name:name,
-                date:date,
-                color:color,
-                reactions: [],
-                usersReacted: [],
-                links: links,
-                linkTitles: linkTitles,
-            });
-          });
+                    return new GroupEvents(realm, {
+                        _id: new BSON.ObjectID,
+                        groupId: group,
+                        eventId: new BSON.ObjectID().toString(),
+                        name:name,
+                        startDate: startDateIncremented,
+                        endDate: endDateIncremented,
+                        color: color,
+                        reactions: [""],
+                        usersReacted: [""],
+                        links: links,
+                        linkTitles: linkTitles,
+                        isTraining: isTraining
+                    });
+                  });  
+
+                if(recurringFrequency == "Daily")
+                {
+                    startDateIncremented.setDate(startDateIncremented.getDate() + 1)
+                    endDateIncremented.setDate(endDateIncremented.getDate() + 1)
+                }
+                else if(recurringFrequency == "Weekly")
+                {
+                    startDateIncremented.setDate(startDateIncremented.getDate() + 7)
+                    endDateIncremented.setDate(endDateIncremented.getDate() + 7)
+                }
+                else if(recurringFrequency == "Monthly")
+                {
+                    startDateIncremented.setMonth(startDateIncremented.getMonth() + 1)
+                    endDateIncremented.setMonth(endDateIncremented.getMonth() + 1)
+                }
+                else if(recurringFrequency == "Yearly")
+                {
+                    startDateIncremented.setFullYear(startDateIncremented.getFullYear() + 1)
+                    endDateIncremented.setFullYear(endDateIncremented.getFullYear() + 1)
+                }
+            }
+        }
+        else
+        {
+            realm.write(() => {
+      
+                return new GroupEvents(realm, {
+                    _id: new BSON.ObjectID,
+                    groupId: group,
+                    eventId: new BSON.ObjectID().toString(),
+                    name:name,
+                    startDate: startDate,
+                    endDate: endDate,
+                    color: color,
+                    reactions: [""],
+                    usersReacted: [""],
+                    links: links,
+                    linkTitles: linkTitles,
+                    isTraining: isTraining
+                });
+              });
+        }
+
+        // Show success message or navigate to another screen
+        Alert.alert("Successfully created group");
+        goBack()
+
+        
     }
 
     useEffect(() => {
@@ -122,12 +342,12 @@ export const CreateGroupEventScreen = ({ navigation, route}: CreateGroupEventScr
     const handleSubmit = () => {
      
         // Create the group (implement this logic as needed)
-        createGroupEvent(name, date, selectedColor);
-        
-        // Show success message or navigate to another screen
-        Alert.alert("Successfully created group");
-        goBack()
+        createGroupEvent(name, calculateStartDateAndTime(startDate, startTime), calculateStartDateAndTime(endDate, endTime), selectedColor, repeatingAmount, repeatingFrequency, isTraining);
     }
+
+    useEffect(() => {
+        console.log(showDatePickerStartDate)
+    }, [showDatePickerStartDate])
 
     return (
         <ScrollView contentContainerStyle={styles.scrollView}>
@@ -145,14 +365,48 @@ export const CreateGroupEventScreen = ({ navigation, route}: CreateGroupEventScr
             </View>
 
             {
-                showDatePicker && (
+                showDatePickerStartDate && (
                     <DateTimePicker
-                        testID="dateTimePicker"
-                        value={date}
+                        testID="datePicker"
+                        value={startDate}
                         mode="date" // Change this to 'time' for a time picker
-                        is24Hour={true}
                         display="default"
-                        onChange={onChange}
+                        onChange={onChangeStartDate}
+                    />
+                )
+            }
+            {
+                showDatePickerStartTime && (
+                    <DateTimePicker
+                        testID="timePicker"
+                        value={startTime}
+                        mode="time" // Change this to 'time' for a time picker
+                        display="default"
+                        is24Hour={true}
+                        onChange={onChangeStartTime}
+                    />
+                )
+            }
+            {
+                showDatePickerEndDate && (
+                    <DateTimePicker
+                        testID="datePicker"
+                        value={endDate}
+                        mode="date" // Change this to 'time' for a time picker
+                        display="default"
+                        onChange={onChangeEndDate}
+                    />
+                )
+            }
+            {
+                showDatePickerEndTime && (
+                    <DateTimePicker
+                        testID="timePicker"
+                        value={endTime}
+                        mode="time" // Change this to 'time' for a time picker
+                        display="default"
+                        is24Hour={true}
+                        onChange={onChangeEndTime}
                     />
                 )
             }
@@ -169,12 +423,77 @@ export const CreateGroupEventScreen = ({ navigation, route}: CreateGroupEventScr
                     />
                 </View>
 
-                <View style={styles.containerInput}>
-                    <Text style={styles.inputTitle}>Date</Text>
-                    <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-                        <Text>{date.toDateString()}</Text>
+                <View style={styles.border}></View>
+
+                <View style={[styles.containerInput, {display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15,}]}>
+                    <TouchableOpacity onPress={() => setisTraining(true)} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                        <View style={[styles.option, isTraining && {backgroundColor: colors.black}, {marginRight: 5,}]}></View>
+                        <Text style={styles.optionText}>Training</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setisTraining(false)} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                        <View style={[styles.option, !isTraining && {backgroundColor: colors.black}, {marginRight: 5,}]}></View>
+                        <Text style={styles.optionText}>Tournament</Text>
                     </TouchableOpacity>
                 </View>
+
+                <View style={styles.border}></View>
+
+                <View style={styles.containerInput}>
+                    <Text style={styles.inputTitle}>Start Date</Text>
+                    <TouchableOpacity style={styles.input} onPress={() => {setShowDatePickerStartDate(true); console.log("showing date picker")}}>
+                        <Text>{formatDateTime(calculateStartDateAndTime(startDate, startTime))}</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.containerInput}>
+                    <Text style={styles.inputTitle}>End Date</Text>
+                    <TouchableOpacity style={styles.input} onPress={() => setShowDatePickerEndDate(true)}>
+                        <Text>{formatDateTime(calculateStartDateAndTime(endDate, endTime))}</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.border}></View>
+
+                <View style={[styles.containerInput, {marginBottom: 5,}]}>
+                    <TouchableOpacity onPress={() => setIsRecurring(!isRecurring)} style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                        <View style={[styles.option, isRecurring && {backgroundColor: colors.black}, {marginRight: 5,}]}></View>
+                        <Text style={styles.optionText}>Recurring Event</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {
+                    isRecurring &&
+                    <>
+                    <View style={styles.containerInput}>
+                            <Text style={styles.inputTitle}>Frequency</Text>
+                            <View style={styles.containerFrequency}>
+                                <TouchableOpacity onPress={() => setRepeatingFrequency("Daily")} style={[styles.frequencyOption, repeatingFrequency == "Daily" && {backgroundColor: colors.blue}]}>
+                                    <Text style={styles.frequencyOptionText}>Daily</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setRepeatingFrequency("Weekly")} style={[styles.frequencyOption, repeatingFrequency == "Weekly" && {backgroundColor: colors.blue}]}>
+                                    <Text style={styles.frequencyOptionText}>Weekly</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setRepeatingFrequency("Monthly")} style={[styles.frequencyOption, repeatingFrequency == "Monthly" && {backgroundColor: colors.blue}]}>
+                                    <Text style={styles.frequencyOptionText}>Monthly</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setRepeatingFrequency("Yearly")} style={[styles.frequencyOption, repeatingFrequency == "Yearly" && {backgroundColor: colors.blue}]}>
+                                    <Text style={styles.frequencyOptionText}>Yearly</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        <View style={styles.containerInput}>
+                            <Text style={styles.inputTitle}>How many times to repeat?</Text>
+                            <TextInput
+                                value={repeatingAmount}
+                                keyboardType='numeric'
+                                onChangeText={text => setRepeatingAmount(text)}
+                                placeholder="1"
+                                style={styles.input}
+                            />
+                        </View>
+                        
+                    </>
+                }
 
                 <View style={styles.border}></View>
 

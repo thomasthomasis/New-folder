@@ -59,6 +59,47 @@ textarea: {
   padding: 10,
 },
 
+option: {
+  width: 25,
+  height: 25,
+  borderRadius: 25,
+  borderWidth: 3,
+  borderColor: colors.black,
+
+},
+
+optionText: {
+  fontSize: 18,
+  fontWeight: '800',
+  color: colors.black,
+},
+
+containerFrequency: {
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'center',
+  marginBottom: 10,
+},
+
+frequencyOption: {
+  width: '25%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: 30,
+  backgroundColor: 'lightgray',
+  borderRadius: 10,
+  marginLeft: 3,
+  marginRight: 3,
+},
+
+frequencyOptionText: {
+  fontWeight: '800',
+  fontSize: 16,
+  color: 'white',
+},
+
 button: {
   width: 160,
   height: 45,

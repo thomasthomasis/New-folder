@@ -13,6 +13,11 @@ const styles = StyleSheet.create({
       marginTop: 10,
     }, 
 
+    scrollView: {
+      minHeight: screenHeight - 150,
+
+    },
+
     button: {
         marginTop: 20, 
         backgroundColor: colors.blue, 
@@ -25,7 +30,10 @@ const styles = StyleSheet.create({
     },
 
     addButton: {
-        marginTop: 20, 
+        marginTop: 10, 
+        marginBottom: 10,
+        marginRight: 'auto',
+        marginLeft: 'auto',
         backgroundColor: colors.blue, 
         width: 70, 
         height: 70, 
@@ -33,10 +41,6 @@ const styles = StyleSheet.create({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-
-        position: 'absolute',
-        bottom: 20,
-        right: 20,
     },
 
     buttonText: {
@@ -53,6 +57,8 @@ const styles = StyleSheet.create({
       display: 'flex',
       justifyContent: 'center',
       marginBottom: 15,
+      marginRight: 'auto',
+      marginLeft: 'auto',
     },
 
     eventText: {
@@ -77,6 +83,36 @@ const styles = StyleSheet.create({
       marginTop: 5,
       marginBottom: 10,
     },
+
+    filters: {
+      marginTop: 0,
+      marginBottom: 10,
+      marginRight: 'auto',
+      marginLeft: 'auto',
+      width: screenWidth - 30,
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
+      alignItems: 'center',
+    },
+
+    filterButton: {
+      width: '25%',
+      height: 30,
+      marginLeft: 5,
+      marginRight: 5,
+      borderRadius: 15,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'lightgray'
+    },
+
+    filterButtonText: {
+      fontSize: 15,
+      fontWeight: '800',
+      color: 'white',
+    }
 
    
   });
