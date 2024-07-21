@@ -13,24 +13,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     justifyContent: 'space-between', 
-    backgroundColor: 'lightgray',
-    paddingBottom: 10,
+    backgroundColor: colors.background,
   },
 
   headerText: {
     fontWeight: '900',
     fontSize: 25,
     marginLeft: 15,
+    color: colors.text,
   },
 
   headerImage: {
-    marginTop: 10,
-    width: 60,
-    height: 60,
+    width: 45,
+    height: 45,
     borderRadius: 60,
     borderWidth: 3,
     borderColor: 'white',
+    marginLeft: 10,
   },
+
 
   container: {
     width: '100%',
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
 
-    backgroundColor: 'lightgray',
+    backgroundColor: colors.background,
    
   },
 
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     width: screenWidth - 30,
   },
 

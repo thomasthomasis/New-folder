@@ -1,22 +1,52 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { colors } from "../../sharedStyling/Colors";
+
+const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
 
     container: {
-        width: '100%',
+        width: screenWidth,
+        height: screenHeight,
         flex: 1,
+        marginTop: -70,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: -70,
+    },
+
+    header: {
+      display: 'flex', 
+      flexDirection: 'row', 
+      justifyContent: 'space-between', 
+      alignItems: 'center',
+      width: '100%', marginTop: 10, 
+      height: 60,
     },
 
     information: {
-        width: '90%', 
+        width: screenWidth, 
         padding: 20, 
         backgroundColor: '#f2f2f2', 
-        marginTop: 20, 
         borderRadius: 20,
+    },
+
+    headerTitle: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    closeButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 40,
+      marginLeft: 10,
+    
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
 
     smallBorder: {
@@ -30,10 +60,30 @@ const styles = StyleSheet.create({
 
     row: {
         display: 'flex', 
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
+        flexDirection: 'column', 
+        justifyContent: 'flex-start', 
+        alignItems: 'flex-start',
         marginBottom: 10,
+    },
+
+    input: {
+      fontSize: 18, 
+      fontWeight: '600', 
+      borderWidth: 2, 
+      borderColor: 'lightgray', 
+      padding: 10,
+      borderRadius: 15,
+      width: '95%',
+      marginBottom: 10,
+      color: colors.black,
+    },
+
+    inputTitle: {
+      fontSize: 18, 
+      fontWeight: '600', 
+      color: '#bfc0be',
+      marginBottom: 5,
+      marginLeft: 3,
     },
 
     title: {
@@ -41,8 +91,11 @@ const styles = StyleSheet.create({
     },
 
     image: {
-        width: 150,
-        height: 100,
+      width: 100, 
+      height: 100, 
+      borderRadius: 100, 
+      padding: 15,
+      marginBottom: 10,
     },
 
     modalView: {

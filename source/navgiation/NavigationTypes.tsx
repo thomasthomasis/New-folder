@@ -8,7 +8,7 @@ export type RootStackParamList = {
     LogWorkoutResistance: { continuingWorkout:boolean };
     SubmitCompletion: {  levelUp:boolean, gainedXp:number };
     SocialScreen: undefined;
-    CreateGroup: undefined;
+    CreateGroup: { isClub:boolean };
     JoinGroup: undefined;
     GroupMembersSettings: { group:string };
     GroupSettings: { group:string };
@@ -17,6 +17,7 @@ export type RootStackParamList = {
     History: { group:string };
     AppSettings: undefined;
     ProfileSettings: undefined;
+    AccountSettings: undefined;
     Feedback: undefined;
     EditResistanceExercise: { exercise:string };
     EditCardioExercise: { exercise:string };
@@ -24,5 +25,14 @@ export type RootStackParamList = {
     GroupEvent: { event:string };
     CreateGroupEvent: { group:string };
     EditGroupEvent: { event:string };
+    PrivacyPolicy: undefined;
+    TermsOfService: undefined;
+    Subscription: undefined;
+    Preferences: undefined;
+    Statistics: { userId:string };
+    ResistanceStats: { userId:string };
+    CardioStats: { userId:string };
+    ResistanceExerciseStats: { userId:string, exerciseId:string };
+    CardioExerciseStats: { userId:string, exerciseId:string };
     // Add more screens as needed
   };

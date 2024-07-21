@@ -191,73 +191,63 @@ export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
             {
                 !isLoading &&
                 <>
-
-                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 10, position: 'absolute', zIndex: 2}}>
-                    <TouchableOpacity onPress={goBack}>
-                        <MaterialCommunityIcons name="arrow-left" color={'black'} size={40} style={{marginLeft: 10,}}/>
-                    </TouchableOpacity>
+                <View style={styles.header}>
+                    <View style={styles.headerTitle}>
+                        <TouchableOpacity onPress={goBack} style={styles.closeButton}>
+                            <MaterialCommunityIcons name="arrow-left" size={40}/>
+                        </TouchableOpacity> 
+                        <Text style={{fontSize: 20, fontWeight: '800', marginLeft: 20,}}>Edit Profile</Text>
+                    </View>
                     <TouchableOpacity onPress={handleConfirm}>
                         <MaterialCommunityIcons name="check" color={'black'} size={40} style={{marginRight: 10,}}/>
                     </TouchableOpacity>
                 </View>
             
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View style={styles.container}>
-                        <TouchableOpacity onPress={() => setSelectingProfilePicture(true)}>
-                            <Image source={imageSource} style={{width: 150, height: 150, borderRadius: 100,}}/>
-                            <MaterialCommunityIcons name="image-edit-outline" color={'black'} size={40} style={{backgroundColor: 'white', borderRadius: 40, position: 'absolute', bottom: 0, right: 10, padding: 5,}}/>
-                        </TouchableOpacity>
+                <View style={styles.container}>
+                    <TouchableOpacity onPress={() => setSelectingProfilePicture(true)}>
+                        <Image source={imageSource} style={styles.image}/>
+                        <MaterialCommunityIcons name="image-edit-outline" color={'black'} size={25} style={{backgroundColor: 'white', borderRadius: 40, position: 'absolute', bottom: -10, right: 5, padding: 5,}}/>
+                    </TouchableOpacity>
 
-                        <View style={[styles.information, shadow.shadow]}>
-                            <Text style={{fontSize: 25, fontWeight: '900', marginBottom: 5,}}>Information</Text>
-                            <View style={styles.smallBorder}></View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Email</Text>
-                                <Text style={{fontSize: 18, fontWeight: '600'}}>{user.profile.email}</Text>
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Username</Text>
-                                <TextInput
-                                    style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
-                                    onChangeText={handleUsernameChange}
-                                    value={username}
-                                />
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>First Name</Text>
-                                <TextInput
-                                    style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
-                                    onChangeText={handlefirstNameChange}
-                                    value={firstName}
-                                />
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Surname</Text>
-                                <TextInput
-                                    style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
-                                    onChangeText={handleSurnameChange}
-                                    value={surname}
-                                />
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Title</Text>
-                                <TouchableOpacity style={{borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}} onPress={() => setShowModal(true)}>
-                                <Text style={{fontSize: 18, fontWeight: '600', }}>{title}</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Status</Text>
-                                <TouchableOpacity style={{borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}} onPress={() => setShowModalStatus(true)}>
-                                <Text style={{fontSize: 18, fontWeight: '600', }}>{status}</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Joined</Text>
-                                <Text style={{fontSize: 18, fontWeight: '600'}}>{userData[0].dateCreated?.toLocaleString()}</Text>
-                            </View>
+                    <View style={styles.information}>
+                        <View style={styles.row}>
+                            <Text style={styles.inputTitle}>Username</Text>
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={handleUsernameChange}
+                                value={username}
+                            />
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.inputTitle}>First Name</Text>
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={handlefirstNameChange}
+                                value={firstName}
+                            />
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.inputTitle}>Surname</Text>
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={handleSurnameChange}
+                                value={surname}
+                            />
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.inputTitle}>Title</Text>
+                            <TouchableOpacity style={styles.input} onPress={() => setShowModal(true)}>
+                            <Text style={{fontSize: 18, fontWeight: '600', color: colors.black}}>{title}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.row}>
+                            <Text style={styles.inputTitle}>Status</Text>
+                            <TouchableOpacity style={styles.input} onPress={() => setShowModalStatus(true)}>
+                            <Text style={{fontSize: 18, fontWeight: '600', color: colors.black}}>{status}</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
-                </TouchableWithoutFeedback>
+                </View>
             
 
                 <Modal
@@ -316,12 +306,17 @@ export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
 
             {
           selectingProfilePicture &&
-          <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%',}}>
-            <TouchableOpacity onPress={returnToMainMenu} style={{width: 40, height: 40, borderRadius: 40, borderWidth: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-              <MaterialCommunityIcons name="arrow-left-thick" color={'black'} size={30}/>
-            </TouchableOpacity>
-            <Text style={styles.title}>Select Option</Text>
-            <View style={[styles.smallBorder, {backgroundColor: 'black'}]}></View>
+          <>
+            <View style={styles.header}>
+                <View style={styles.headerTitle}>
+                    <TouchableOpacity onPress={returnToMainMenu} style={styles.closeButton}>
+                        <MaterialCommunityIcons name="arrow-left" size={40}/>
+                    </TouchableOpacity> 
+                    <Text style={{fontSize: 20, fontWeight: '800', marginLeft: 20,}}>Select Image</Text>
+                </View>
+            </View>
+
+          <View style={[styles.information, {alignItems: 'center',}]}>
             <TouchableOpacity onPress={() => updateImageSource("../../assets/1.png")}>
               <Image style={styles.image} source={require("../../assets/1.png")} />
             </TouchableOpacity>
@@ -335,6 +330,7 @@ export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
               <Image style={styles.image} source={require("../../assets/4.png")} />
             </TouchableOpacity>
           </View>
+          </>
         }
         </>
 

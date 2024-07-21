@@ -27,7 +27,8 @@ export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
     }
 
     const [groupName, setGroupName] = useState('');
-    const groups = useQuery(Groups).filtered('name BEGINSWITH[c] $0', groupName);
+    const groups = useQuery(Groups).filtered('name BEGINSWITH[c] $0 AND isPublic == $1', groupName, true);
+    const privateGroups = realm.objects(Groups).filtered('name == $0 AND groupTag == $1 AND isPublic == $2', groupName.split("#")[0], ('#' + groupName.split('#')[1]), false)
     const groupsApartOfList = useQuery(Groups).filtered('ANY members == $0', user.id);
     const groupJoinRequests = useQuery(JoinGroupRequests).filtered('userId == $0', user.id.toString())
     const reqeustedGroups = groupJoinRequests.map(item => item.groupName)
@@ -67,6 +68,17 @@ export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
         },
         [realm, user],
       );
+
+    const cancelRequest = useCallback(
+        (groupId:string) => {            
+            const joinRequest = realm.objects(JoinGroupRequests).filtered("groupName == $0 AND userId == $1", groupId, user.id)
+
+            realm.write(() => {
+                realm.delete(joinRequest)
+            })
+        },
+        [realm, user]
+    );
 
     const getGroupName = (groupId:string) => {
         const group = realm.objects(Groups).filtered("groupId == $0", groupId)
@@ -160,6 +172,24 @@ export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
                     groups.map((group:any, index:any) => {
                         return (
                             <TouchableOpacity key={index} style={[styles.group, shadow.shadow, group.color && {backgroundColor: group.color}]} onPress={() => {setModalGroupName(group.groupId); setModalGroupInfoVisible(true)}}>
+                                {
+                                    group.image.length > 0 &&
+                                    <MaterialCommunityIcons name={group.image} size={35} style={{position: 'absolute', left: 10,}}/>
+                                }
+                                
+                                <Text style={{fontSize: 20, color: 'white', fontWeight: '800',}}>{getGroupName(group.groupId)}</Text>
+                                {
+                                    reqeustedGroups.includes(group.groupId) &&
+                                    <MaterialCommunityIcons name="clock-alert-outline" size={35} style={styles.icon}/>
+                                }
+                            </TouchableOpacity>
+                        )
+                    })
+                }
+                {
+                    privateGroups.map((group:any, index:any) => {
+                        return (
+                            <TouchableOpacity key={index} style={[styles.group, shadow.shadow, group.color && {backgroundColor: group.color}]} onPress={() => {setModalGroupName(group.groupId); setModalGroupInfoVisible(true)}}>
                                 <MaterialCommunityIcons name={group.image} size={35} style={{position: 'absolute', left: 10,}}/>
                                 <Text style={{fontSize: 20, color: 'white', fontWeight: '800',}}>{getGroupName(group.groupId)}</Text>
                                 {
@@ -188,9 +218,15 @@ export const JoinGroupScreen = ({ navigation }: JoinGroupScreenProps) => {
                     <Text style={styles.text}>Members: {getNumGroupMembers(modalGroupName)}</Text>
                     {
                         reqeustedGroups.includes(modalGroupName) &&
+                        <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center',}}> 
                         <View style={styles.notice}>
                             <Text style={{color: 'white', fontWeight: '800'}}>Join request already sent</Text>
                         </View>
+                        <TouchableOpacity onPress={() => cancelRequest(modalGroupName)}>
+                            <MaterialCommunityIcons name="delete" size={35} color={colors.black}/>
+                        </TouchableOpacity>
+                        </View>
+                       
                     }
                     {
                         (!reqeustedGroups.includes(modalGroupName) && !groupsApartOf.includes(modalGroupName)) &&

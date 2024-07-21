@@ -11,7 +11,6 @@ type ResistanceWorkoutDisplayProps = {
     data:any,   
 }
 
-
 export const ResistanceWorkoutDisplayScreen = (props: ResistanceWorkoutDisplayProps) => {
 
     const realm = useRealm()

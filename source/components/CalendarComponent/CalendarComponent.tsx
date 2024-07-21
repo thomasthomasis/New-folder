@@ -6,10 +6,11 @@ import { Workouts } from '../../schemas/WorkoutSchema';
 import { TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './CalendarComponent.style';
+import { shadow } from '../../sharedStyling/Shadow';
 
 type CalendarProps = {
     onPress:any,
-    changeMonth:any,
+    setWorkouts:any,
 }
 
 export const CalendarComponent = (props: CalendarProps) => {
@@ -24,6 +25,8 @@ export const CalendarComponent = (props: CalendarProps) => {
      
     const [year, setYear] = useState<number>(currentDate.getFullYear())
     const [month, setMonth] = useState<number>(currentDate.getMonth())
+    const [daysStatus, setDaysStatus] = useState<any[]>([])
+    const [daysStatusDates, setDaysStatusDates] = useState<any[]>([])
 
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun','Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -32,7 +35,7 @@ export const CalendarComponent = (props: CalendarProps) => {
     const startOfMonth = new Date(year, month, 1)
     const endOfMonth = new Date(year, month + 1, 0)
 
-    const workouts = useQuery(Workouts).sorted('dateCreated').filtered('dateCreated >= $0 AND dateCreated < $1', startOfMonth, endOfMonth);
+    const [workouts, setWorkouts] = useState<any>(realm.objects(Workouts).sorted('dateCreated').filtered('dateCreated >= $0 AND dateCreated < $1', startOfMonth, endOfMonth));
 
     const getDaysOfCurrentWeek = () => {
       const weekDates = []
@@ -46,12 +49,14 @@ export const CalendarComponent = (props: CalendarProps) => {
         weekDates.push(date.getDate().toString())
       }
 
+      console.log(weekDates)
       return weekDates;
     }
 
-    let currentWeekDays = getDaysOfCurrentWeek()
+    const [currentWeekDates, setCurrentWeekDate] = useState(getDaysOfCurrentWeek())
 
-    const selectMonth = (month:number) => {
+    
+    const selectMonth = (month:number, year:number) => {
 
       if(month == -1)
       {
@@ -70,6 +75,8 @@ export const CalendarComponent = (props: CalendarProps) => {
         getCalendarDays(month, year)
         setMonth(month)
       }
+
+      setSelectedDay('')
       
     }
 
@@ -87,7 +94,7 @@ export const CalendarComponent = (props: CalendarProps) => {
       let numDaysOfPreviousMonth = new Date(year, month - 1, 0).getDate()
 
       for (let i = 0; i < firstDayOfWeek; i++) {
-        days.push((numDaysOfPreviousMonth - (firstDayOfWeek - 1) + i).toString() + " ")
+        days.push((numDaysOfPreviousMonth - (firstDayOfWeek - 1) + i).toString() + "+extraDay")
       }
       for (let i = 1; i <= numDaysInMonth; i++) {
         days.push(i.toString())
@@ -98,7 +105,7 @@ export const CalendarComponent = (props: CalendarProps) => {
         let counter = 1;
         for(let i = days.length; i < 35; i++)
         {
-          days.push(counter.toString() + " ")
+          days.push(counter.toString() + "+extraDay")
           counter++;
         }
       }
@@ -107,11 +114,12 @@ export const CalendarComponent = (props: CalendarProps) => {
         let counter = 1;
         for(let i = days.length; i < 42; i++)
         {
-          days.push(counter.toString() + " ")
+          days.push(counter.toString() + "+extraDay")
           counter++;
         }
       }
 
+      console.log(days)
       setCalendarDays(days)
     }, [])
     
@@ -120,6 +128,13 @@ export const CalendarComponent = (props: CalendarProps) => {
 
       const date = new Date(year, month, 1)
       console.log("month: ", date.toLocaleString())
+
+      let startOfMonth = date;
+      let endOfMonth = new Date(year, month + 1, 0)
+
+      let workouts = realm.objects(Workouts).sorted('dateCreated').filtered('dateCreated >= $0 AND dateCreated < $1 AND userId == $2', startOfMonth, endOfMonth, user.id)
+      setWorkouts(workouts)
+      props.setWorkouts(workouts)
 
       let numDaysInMonth = new Date(year, month + 1, 0).getDate();
       let firstDayOfWeek = new Date(year, month, 0).getDay();
@@ -138,7 +153,7 @@ export const CalendarComponent = (props: CalendarProps) => {
       console.log(numDaysOfPreviousMonth)
 
       for (let i = 0; i < firstDayOfWeek; i++) {
-        days.push((numDaysOfPreviousMonth - (firstDayOfWeek - 1) + i).toString() + " ")
+        days.push((numDaysOfPreviousMonth - (firstDayOfWeek - 1) + i).toString() + "+extraDays")
       }
       for (let i = 1; i <= numDaysInMonth; i++) {
         days.push(i.toString())
@@ -149,7 +164,7 @@ export const CalendarComponent = (props: CalendarProps) => {
           let counter = 1;
           for(let i = days.length; i < 35; i++)
           {
-            days.push(counter.toString() + " ")
+            days.push(counter.toString() + "+extraDay")
             counter++;
           }
         }
@@ -158,11 +173,12 @@ export const CalendarComponent = (props: CalendarProps) => {
           let counter = 1;
           for(let i = days.length; i < 42; i++)
           {
-            days.push(counter.toString() + " ")
+            days.push(counter.toString() + "+extraDay")
             counter++;
           }
         }
 
+      console.log(days)
       setCalendarDays(days)
 
       return days;
@@ -172,32 +188,39 @@ export const CalendarComponent = (props: CalendarProps) => {
     const extractDayAndWorkoutType = (data: any): any[] => {
         return data.map((item: any) => {
           const dayNumber = new Date(item.dateCreated).getDate(); // Extract day number from the date
-          return { dayNumber, workoutType: item.workoutType };
+          return { dayNumber, userStatus: item.userStatus };
         });
     };
 
-    const result = extractDayAndWorkoutType(workouts)
+    useEffect(() => {
 
-    const dayNumbers = result.map(item => item.dayNumber);
-    const workoutTypes = result.map(item => item.workoutType);
+      const result = extractDayAndWorkoutType(workouts)
 
-    const mergedData:any = {};
+      const dayNumbers = result.map(item => (item.dayNumber).toString());
+      const userStatuses = result.map(item => item.userStatus)
 
-    for (let i = 0; i < dayNumbers.length; i++) {
-        const dayNumber = dayNumbers[i];
-        const workoutType = workoutTypes[i];
-      
-        if (!mergedData[dayNumber]) {
-          mergedData[dayNumber] = new Set([workoutType]); // Use a Set to store unique workout types
-        } else {
-          mergedData[dayNumber].add(workoutType); // Add workout type to the Set
+      let newUserStatuses = []
+
+      for(let i = 1; i <= 31; i++)
+      {
+        if(dayNumbers.includes(i.toString()))
+        {
+          let index = dayNumbers.indexOf(i.toString())
+          newUserStatuses.push(userStatuses[index])
+        }
+        else
+        {
+          newUserStatuses.push("")
         }
       }
 
-    // Convert Sets to arrays
-    for (const dayNumber in mergedData) {
-        mergedData[dayNumber] = Array.from(mergedData[dayNumber]);
-    }
+      setDaysStatus(newUserStatuses)
+      setDaysStatusDates(dayNumbers)
+
+      //console.log(dayNumbers)
+      //console.log(newUserStatuses) 
+
+    }, [workouts])
 
     //console.log(mergedData)
       
@@ -221,46 +244,84 @@ export const CalendarComponent = (props: CalendarProps) => {
       }, [realm, user]);
 
     return (
-        <View>
+        <View style={[styles.mainContainer, shadow.shadow]}>
             <View style={styles.arrows}>
-              <TouchableOpacity onPress={() => selectMonth(month - 1)}>
-                <MaterialCommunityIcons name="arrow-left" color={colors.black} size={35} />
+              <TouchableOpacity onPress={() => selectMonth(month - 1, year)}>
+                <MaterialCommunityIcons name="chevron-left" color={colors.black} size={35} />
               </TouchableOpacity>
               <Text style={styles.month}>{monthWord} {year}</Text>
-              <TouchableOpacity onPress={() => selectMonth(month + 1)}>
-                <MaterialCommunityIcons name="arrow-right" color={colors.black} size={35} />
+              <TouchableOpacity onPress={() => selectMonth(month + 1, year)}>
+                <MaterialCommunityIcons name="chevron-right" color={colors.black} size={35} />
               </TouchableOpacity>
             </View>
             <View style={styles.weekdays}>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>M</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>T</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>W</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>T</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>F</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>S</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>S</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.text, fontWeight: '900', fontSize: 20,}}>M</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.text, fontWeight: '900', fontSize: 20,}}>T</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.text, fontWeight: '900', fontSize: 20,}}>W</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.text, fontWeight: '900', fontSize: 20,}}>T</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.text, fontWeight: '900', fontSize: 20,}}>F</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.text, fontWeight: '900', fontSize: 20,}}>S</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.text, fontWeight: '900', fontSize: 20,}}>S</Text></View>
             </View>
         <View style={styles.container}>
             
-            {calendarDays.map((day, index) => (
+            {
+            calendarDays.map((day, index) => (
             <TouchableOpacity key={index} 
-            style={[ styles.day,  ((currentWeekDays.includes(day.toString()) && currentMonth == month && year == currentYear) && styles.currentWeekDay), day.includes(" ") && {pointerEvents: 'none'}, (selectedDay == day.toString() && styles.selectedDay),
+            style={[ styles.day,  ((currentWeekDates.includes(day.toString()) && currentMonth == month && year == currentYear) && styles.currentWeekDay), day.includes("+extraDay") && {pointerEvents: 'none'}, currentWeekDates[0] == day && {borderBottomLeftRadius: 10, borderTopLeftRadius: 10}, currentWeekDates[currentWeekDates.length - 1] == day && {borderBottomRightRadius: 10, borderTopRightRadius: 10},
               ]}   
             onPress={() => {props.onPress(day.toString()), selectDay(day.toString())}}>
-            <Text style={[styles.dayText, ((currentDay == day && month == currentMonth) && styles.currentDayText), day.includes(" ") && {color: 'lightgray'}]}>{day || ' '}</Text>
-            {
-                mergedData[day] &&
-                <View style={styles.dots}>
-                    {
-                        mergedData[day].includes("Cardio") &&
-                        <View style={[styles.dot, {backgroundColor: colors.red}]}></View>
-                    }
-                    {
-                        mergedData[day].includes("Resistance") &&
-                        <View style={[styles.dot, {backgroundColor: colors.black}]}></View>
-                    }
-                </View>
-            }
+
+              <View style={styles.dots}>
+                {
+                  daysStatusDates.includes(day) &&
+                  <View style={styles.dot}>
+                  </View>
+                }
+              </View> 
+
+              <View style={styles.dotsUserStatus}>
+                {
+                  daysStatus[index] == "Injured" &&
+                  <View style={styles.dotUserStatusInjured}></View>
+                }
+                {
+                  daysStatus[index] == "Away" &&
+                  <View style={styles.dotUserStatusAway}></View>
+                }
+              </View>
+
+                {
+                  selectedDay == day.toString() && 
+                  <View style={styles.currentDayCircle}></View>
+                }
+
+                {
+                  currentDay == day && month == currentMonth && year == currentYear &&
+                  <View style={styles.currentDay}></View>
+                }
+              
+              
+              
+            <Text style={[styles.dayText, ((currentDay == day && month == currentMonth) && styles.currentDayText), day.includes("+extraDay") && {color: 'lightgray'}]}>
+              {
+                day.includes("+extraDay") && day.split("+")[0].length == 1 &&
+                "0" + day.split("+")[0]
+              }
+              {
+                day.includes("+extraDay") && day.split("+")[0].length > 1 &&
+                day.split("+")[0]
+              }
+              {
+                day.length == 1 &&
+                 "0" + day || ''
+              }
+              {
+                day.length == 2 &&
+                day || ''
+              }
+            </Text>
+           
             
           </TouchableOpacity>
         ))}

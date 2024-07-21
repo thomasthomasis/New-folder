@@ -29,7 +29,7 @@ export const GroupSettingsScreen = ({ navigation, route }: GroupSettingsScreenPr
         navigation.goBack()
     }
     
-    const groupData = useQuery(Groups).filtered("name == $0", group)
+    const groupData = useQuery(Groups).filtered("groupId == $0", group)
 
     const [groupName, setGroupName] = useState<string>(groupData[0].name)
     const [groupDescription, setGroupDescription] = useState<string>(groupData[0].description ?? "")

@@ -6,7 +6,10 @@ export class Groups extends Realm.Object<Groups> {
     dateCreated?: Date;
     description?: string;
     groupId!: string;
+    groupTag?: string;
     image?: string;
+    isClub?: boolean;
+    isPublic?: boolean;
     memberRoles!: Realm.List<string>;
     members!: Realm.List<string>;
     membersDateJoined!: Realm.List<Date>;
@@ -22,7 +25,10 @@ export class Groups extends Realm.Object<Groups> {
         dateCreated: 'date?',
         description: 'string?',
         groupId: 'string',
+        groupTag: 'string?',
         image: 'string?',
+        isClub: 'bool?',
+        isPublic: 'bool?',
         memberRoles: 'string[]',
         members: 'string[]',
         membersDateJoined: 'date[]',

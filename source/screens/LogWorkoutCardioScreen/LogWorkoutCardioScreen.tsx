@@ -43,70 +43,143 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
   }
 
   const [selectingExercise, setSelectingExercise] = useState(false)
+  const [userStatistics, setUserStatistics] = useState<any>(realm.objects("UserStatistics").filtered("userId == $0", user.id));
+  const [userData, setUserData] = useState<any>(realm.objects("Users").filtered("userId == $0", user.id));
 
-  const userStatistics = realm.objects("UserStatistics").filtered("userId == $0", user.id);
-  const userData = realm.objects("Users").filtered("userId == $0", user.id);
+  const [extraExercises, setExtraExercises] = useState<any>(realm.objects(ExtraExercises).filtered("userId == $0 && type == $1", user.id, "Cardio"));
+  
+  const [totalExercises, setTotalExercises] = useState<any>(null)
 
-  let extraExercises = useQuery(ExtraExercises).filtered("userId == $0 && type == $1", user.id, "Cardio");
+  const [searchText, setSearchText] = useState<string>('')
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+
+  const [visible, setVisible] = useState<boolean>(false)
+  const [modalInput, setModalInput] = useState<string>('')
+  const [noNameAlert, setNoNameAlert] = useState<boolean>(false)
+  const [visibleOptions, setVisibleOptions] = useState<boolean>(false)
+  const [selectedExercise, setSelectedExercise] = useState<string>('')
+
+  const [forms, setForms] = useState<any>([]);
+
   const normalExercises = [
-    "Treadmill", 
-    "Elliptical", 
-    "Indoor Bike", 
-    "Jump Rope", 
-    "Outdoor Bike", 
-    "Swimming", 
-    "Rowing Machine", 
-    "Outdoor Run", 
-    "Outdoor Walk", 
-    "Stair Machine", 
-    "Sprints"
+  { id: "0", name: 'Running' },
+  { id: "1", name: 'Cycling' },
+  { id: "2", name: 'Swimming' },
+  { id: "3", name: 'Jumping Rope' },
+  { id: "4", name: 'Rowing' },
+  { id: "5", name: 'Elliptical Training' },
+  { id: "6", name: 'Hiking' },
+  { id: "7", name: 'Dancing' },
+  { id: "8", name: 'Kickboxing' },
+  { id: "9", name: 'Stair Climbing' },
+  { id: "10", name: 'Pilates' },
+  { id: "11", name: 'Zumba' },
+  { id: "12", name: 'Yoga' },
+  { id: "13", name: 'High Knees' },
+  { id: "14", name: 'Butt Kicks' },
+  { id: "15", name: 'Mountain Climbers' },
+  { id: "16", name: 'Burpees' },
+  { id: "17", name: 'Side Shuffles' },
+  { id: "18", name: 'Box Jumps' },
+  { id: "19", name: 'Skipping' },
+  { id: "20", name: 'Speed Skating' },
+  { id: "21", name: 'Shadow Boxing' },
+  { id: "22", name: 'Treadmill Running' },
+  { id: "23", name: 'Stationary Bike' },
+  { id: "24", name: 'Trampoline' },
+  { id: "25", name: 'Staircase Running' },
+  { id: "26", name: 'Speed Walking' },
+  { id: "27", name: 'Inline Skating' },
+  { id: "28", name: 'Plyometrics' },
+  { id: "29", name: 'Boot Camp' },
+  { id: "30", name: 'Circuit Training' },
+  { id: "31", name: 'HIIT' },
+  { id: "33", name: 'Sprints' },
+  { id: "34", name: 'CrossFit' },
+  { id: "35", name: 'Bodyweight Exercises' },
+  { id: "36", name: 'Cardio Kickboxing' },
+  { id: "37", name: 'Battle Ropes' },
+  { id: "41", name: 'Racquetball' },
+  { id: "42", name: 'Basketball' },
+  { id: "43", name: 'Soccer' },
+  { id: "44", name: 'Tennis' },
+  { id: "45", name: 'Squash' },
+  { id: "46", name: 'Badminton' },
+  { id: "47", name: 'Frisbee' },
+  { id: "48", name: 'Ultimate Frisbee' },
+  { id: "49", name: 'Touch Football' },
+  { id: "50", name: 'Beach Volleyball' },
+  { id: "51", name: 'Paddleboarding' },
+  { id: "52", name: 'Surfing' },
+  { id: "53", name: 'Kayaking' },
+  { id: "54", name: 'Canoeing' },
+  { id: "55", name: 'Rowboat' },
+  { id: "56", name: 'Stand-up Paddleboarding' },
+  { id: "57", name: 'Rock Climbing' },
+  { id: "60", name: 'Cross-country Skiing' },
+  { id: "61", name: 'Downhill Skiing' },
+  { id: "62", name: 'Snowboarding' },
+  { id: "63", name: 'Snowshoeing' },
+  { id: "64", name: 'Hockey' },
+  { id: "65", name: 'Lacrosse' },
+  { id: "66", name: 'Field Hockey' },
+  { id: "67", name: 'Rugby' },
+  { id: "68", name: 'Handball' },
+  { id: "69", name: 'Water Polo' },
+  { id: "70", name: 'Swimming Laps' },
+  { id: "88", name: 'Rowing Machine' },
+  { id: "89", name: 'Elliptical Machine' },
+  { id: "90", name: 'Treadmill Walking' },
+  { id: "91", name: 'Treadmill Jogging' },
+  { id: "92", name: 'Outdoor Running' },
+  { id: "93", name: 'Outdoor Walking' },
+  { id: "95", name: 'Track Running' },
+  { id: "96", name: 'Field Running' },
+  { id: "97", name: 'Beach Running' },
+  { id: "98", name: 'Parkour' },
   ];
 
-  const getExerciseName = (id:string) => {
-    const exercise = extraExercises.filtered("userId == $0 AND exerciseId == $1", user.id, id)
-
-    if(exercise.length == 0)
-    {
-      for (let exercise of normalExercises) {
-        let exercise = normalExercises.find(ex => ex === id);
-        if (exercise) {
-          return exercise
-        }
-      }
-      return ""; // Return null if the exercise is not found
-    }
-  
-    else
-    {
-      return exercise[0].name ?? ""
-    }
-
-    
-  } 
-
-
   useEffect(() => {
-      realm.subscriptions.update(mutableSubs => {
-        mutableSubs.add(
-          realm.objects(CardioWorkout),
-        );
+    addExercisesToArray();
 
-        mutableSubs.add(
-          realm.objects(Workouts),
-        );
+    setFilteredData(normalExercises)
+  }, [extraExercises])
 
-        mutableSubs.add(
-          realm.objects(UserStatistics)
-        )
+  const addExercisesToArray = () => {
 
-        mutableSubs.add(
-          realm.objects(ExtraExercises)
-        )
-      });
-  }, [realm, user]);
+    for(let i = 0; i < extraExercises.length; i++)
+    {
+      let id = extraExercises[i].exerciseId;
+      let name = extraExercises[i].name; 
 
+
+      let object = {
+        id:id,
+        name:name ?? ""
+      }
+
+      normalExercises.push(object)
+    }
+
+    setTotalExercises(normalExercises);
+
+    console.log(totalExercises)
+  }
   
-  const [forms, setForms] = useState<any>([]);
+  const getExerciseName = (id:string) => {
+
+    console.log(id)
+
+    for(let i = 0; i < totalExercises.length; i++)
+    {
+      if(totalExercises[i].id == id)
+      {
+        return totalExercises[i].name;
+      }
+    }
+    
+    return id;
+  } 
 
   const handleAddForm = (exercise:string) => {
     const newForm = { id: forms.length + 1, exercise: {id: 1, value: exercise}, inputs: [{id: 1}], timeInputs: [{ id: 1, value: '' }], distanceInputs: [{ id: 1, value: ''}], extraNotes: {id: 1, value: ''} };
@@ -302,7 +375,8 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
           userId: user?.id,
           dateCreated: new Date(),
           workoutId: id,
-          workoutType: workoutType
+          workoutType: workoutType,
+          userStatus: userData[0].status as string
         })
       })
     }, [realm, user])
@@ -608,14 +682,7 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
       { cancelable: false }
     );
   };
-
-  const addedExercisesArray = extraExercises.map(item => (getExerciseName(item.exerciseId) + "+" + item.exerciseId));
-  let totalExercises = addedExercisesArray.concat(normalExercises);
-
-  console.log(totalExercises)
-
-  const [searchText, setSearchText] = useState<string>('')
-  const [filteredData, setFilteredData] = useState<string[]>(addedExercisesArray.concat(normalExercises));
+ 
 
   const handleSearch = (text:string) => {
     setSearchText(text);
@@ -625,17 +692,10 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
     }
     else
     {
-      const filtered = totalExercises.filter(item => item.toLowerCase().startsWith(text.toLowerCase()));
+      const filtered = totalExercises.filter((item:any) => item.name.toLowerCase().startsWith(text.toLowerCase()));
       setFilteredData(filtered);
     }
   };
-
-  const [visible, setVisible] = useState<boolean>(false)
-  const [modalInput, setModalInput] = useState<string>('')
-  const [noNameAlert, setNoNameAlert] = useState<boolean>(false)
-  
-  const [visibleOptions, setVisibleOptions] = useState<boolean>(false)
-  const [selectedExercise, setSelectedExercise] = useState<string>('')
 
   const onClose = () => {
 
@@ -644,7 +704,6 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
     setNoNameAlert(false)
     setVisibleOptions(false)
   }
-
 
   const addExercise = useCallback(
     (input:string) => {
@@ -671,13 +730,15 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
 
     const updateExerciseList = () => {
 
-      let newList = extraExercises.map(item => item.name ?? "");
+      let newList = extraExercises;
       console.log("Updated list: ", newList)
 
-      totalExercises = newList.concat(normalExercises)
-      console.log(totalExercises)
+      let newTotalExercises = newList.concat(normalExercises)
+
+      setTotalExercises(newTotalExercises)
 
       setFilteredData(totalExercises)
+      
     }
 
   const deleteExercise = (exerciseId:string) => {
@@ -688,6 +749,26 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
       realm.delete(exercise)
     })
   }
+
+  useEffect(() => {
+    realm.subscriptions.update(mutableSubs => {
+      mutableSubs.add(
+        realm.objects(CardioWorkout),
+      );
+
+      mutableSubs.add(
+        realm.objects(Workouts),
+      );
+
+      mutableSubs.add(
+        realm.objects(UserStatistics)
+      )
+
+      mutableSubs.add(
+        realm.objects(ExtraExercises)
+      )
+    });
+}, [realm, user]);
     
 
   return (
@@ -734,32 +815,14 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
           searchText.length > 0 && 
           filteredData.map((item) => (
             <TouchableOpacity key={new BSON.ObjectID().toString()} style={[{ backgroundColor: 'lightgray', borderRadius: 20, padding: 10, marginBottom: 10, width: '80%', marginRight: 'auto', marginLeft: 'auto'}, shadow.shadow]} onPress={() => {
-              if(item.includes("+"))
-              {
-                let id = item.split("+")[1]
+                let id = item.id;
                 handleAddForm(id)
                 setSelectingExercise(false)
-              }
-              else
-              {
-                handleAddForm(item)
-                setSelectingExercise(false)
-              }
               }} onLongPress={() => {
-                if(item.includes("+"))
-                {
-                  setSelectedExercise(item.split("+")[1])
-                  setVisibleOptions(true)
-                }
+                setSelectedExercise(item.id)
+                setVisibleOptions(true)
               }}>
-                {
-                  item.includes("+") &&
-                  <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item.split("+")[0]}</Text>
-                }
-                {
-                  !item.includes("+") &&
-                  <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item}</Text>
-                }
+                <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{getExerciseName(item.id)}</Text>
             </TouchableOpacity>
             
             
@@ -767,35 +830,17 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
           }
           {
             searchText.length == 0 &&
-            totalExercises.map((item) => (
+            totalExercises.map((item:any) => (
               <TouchableOpacity key={new BSON.ObjectID().toString()} style={[{ backgroundColor: 'lightgray', borderRadius: 20, padding: 10, marginBottom: 10, width: '80%', marginRight: 'auto', marginLeft: 'auto'}, shadow.shadow]} onPress={() => {
-                if(item.includes("+"))
-                {
-                  let id = item.split("+")[1]
-                  handleAddForm(id)
-                  setSelectingExercise(false)
-                }
-                else
-                {
-                  handleAddForm(item)
-                  setSelectingExercise(false)
-                }
-                }} onLongPress={() => {
-                  if(item.includes("+"))
-                  {
-                    setSelectedExercise(item.split("+")[1])
-                    setVisibleOptions(true)
-                  }
-                }}>
-                  {
-                    item.includes("+") &&
-                    <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item.split("+")[0]}</Text>
-                  }
-                  {
-                    !item.includes("+") &&
-                    <Text  style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{item}</Text>
-                  }
-              </TouchableOpacity>
+                let id = item.id;
+                handleAddForm(id)
+                setSelectingExercise(false)
+              }} onLongPress={() => {
+                setSelectedExercise(item.id)
+                setVisibleOptions(true)
+              }}>
+                <Text style={{fontSize: 20, fontWeight: '700', textAlign: 'center'}}>{getExerciseName(item.id)}</Text>
+            </TouchableOpacity>
               
               
               ))

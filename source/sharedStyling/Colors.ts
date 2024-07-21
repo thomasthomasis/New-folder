@@ -1,12 +1,15 @@
 export const colors = {
-  red: '#DA2543',
-  black: '#545557',
+  red: '#F05D5E',
+  black: '#5E4B56',
   orange: '#DE8621',
-  blue: '#3E90C1',
+  blue: '#9CCFFC',
   green: '#26B820', 
   purple: '#B946B8',
   pink: '#EB61DC',
   yellow: '#E7E764',
-  cyan: '#7AD7D4'
+  cyan: '#7AD7D4',
+  background: '#EBEBEB',
+  text: '#303030',
+  iconGray: '#D9D9D9'
 
 }

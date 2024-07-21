@@ -24,20 +24,16 @@ export const AppSettingsScreen = ({ navigation }: AppSettingsScreenProps) => {
         navigation.goBack()
     }
     
-    const goToAccountScreen = () => {
-        navigation.navigate("Account")
-    }
-
-    const goToProfileSettingsScreen = () => {
-        navigation.navigate("ProfileSettings")
+    const goToAccountSettingsScreen = () => {
+        navigation.navigate("AccountSettings")
     }
 
     const goToSubscriptionScreen = () => {
-
+        navigation.navigate("Subscription")
     }
 
     const goToPreferencesScreen = () => {
-
+        navigation.navigate("Preferences")
     }
 
     const goToFeedbackScreen = () => {
@@ -45,11 +41,11 @@ export const AppSettingsScreen = ({ navigation }: AppSettingsScreenProps) => {
     }
 
     const goToTermsOfServiceScreen = () => {
-
+        navigation.navigate("TermsOfService")
     }
 
     const goToPrivacyPolicyScreen = () => {
-
+        navigation.navigate("PrivacyPolicy")
     }
 
     const signOut = useCallback(() => {
@@ -88,15 +84,8 @@ export const AppSettingsScreen = ({ navigation }: AppSettingsScreenProps) => {
             </View>
 
             <View style={styles.cards}>
-                <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={goToProfileSettingsScreen}>
-                    <View style={styles.column}>
-                        <MaterialCommunityIcons name="account" color={'black'} size={40} style={[styles.icon, shadow.shadow]}/>
-                        <Text style={styles.cardTitle}>Profile</Text>
-                    </View>
-                    <MaterialCommunityIcons name="arrow-right" color={'black'} size={40} style={{marginLeft: 10,}}/>
-                </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={goToAccountScreen}>
+                <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={goToAccountSettingsScreen}>
                     <View style={styles.column}>
                         <MaterialCommunityIcons name="shield-account" color={'black'} size={40} style={[styles.icon, shadow.shadow]}/>
                         <Text style={[styles.cardTitle, {marginLeft: 10,}]}>Account</Text>
@@ -132,7 +121,7 @@ export const AppSettingsScreen = ({ navigation }: AppSettingsScreenProps) => {
 
                 <View style={styles.row}>
                     <TouchableOpacity onPress={goToTermsOfServiceScreen}>
-                        <Text style={{marginBottom: 15,}}>Terms of Service</Text>
+                        <Text style={{marginBottom: 15,}}>Terms and Conditions</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={goToPrivacyPolicyScreen}>
                         <Text>Privacy Policy</Text>

@@ -37,6 +37,17 @@ import { GroupEventsScreen } from './screens/GroupEventsScreen/GroupEventsScreen
 import { GroupEventScreen } from './screens/GroupEventScreen/GroupEventScreen';
 import { CreateGroupEventScreen } from './screens/CreateGroupEventScreen/CreateGroupEventScreen';
 import { EditGroupEventScreen } from './screens/EditGroupEventScreen/EditGroupEventScreen';
+import { AccountSettingsScreen } from './screens/AccountSettingsScreen/AccountSettingsScreen';
+import { PrivacyPolicyScreen } from './screens/PrivacyPolicyScreen/PrivacyPolicyScreen';
+import { TermsOfServiceScreen } from './screens/TermsOfServiceScreen/TermsOfServiceScreen';
+import { SubscriptionScreen } from './screens/SubscriptionScreen/SubscriptionScreen';
+import { PreferencesScreen } from './screens/PreferencesScreen/PreferencesScreen';
+import { ResistanceStatsScreen } from './screens/ResistanceStatsScreen/ResistanceStatsScreen';
+import { MenuProvider } from 'react-native-popup-menu';
+import { CardioStatsScreen } from './screens/CardioStatsScreen/CardioStatsScreen';
+import { ResistanceExerciseStatsScreen } from './screens/ResistanceExerciseStatsScreen/ResistanceExerciseStatsScreen';
+import { CardioExerciseStatsScreen } from './screens/CardioExerciseStatsScreen/CardioExerciseStatsScreen';
+import { StatisticsScreen } from './screens/StatisticsScreen/StatisticsScreen';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -53,7 +64,7 @@ export const App = () => {
   const realm = useRealm()
   const user = useUser()
 
-  const HomeStack = () => {
+  const HistoryStack = () => {
     return (
     <Stack.Navigator screenOptions={{
       transitionSpec: {
@@ -62,6 +73,14 @@ export const App = () => {
       },
     }}>
       <Stack.Screen name="Home" options={{ headerShown: false}} component={HomeScreen}/>
+      <Stack.Screen name="ProfileSettings" options={{ headerShown: false }} component={ProfileSettingsScreen} />
+      <Stack.Screen name="LogWorkoutCardio" component={LogWorkoutCardioScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}} />
+      <Stack.Screen name="LogWorkoutResistance" component={LogWorkoutResistanceScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}}/>
+      <Stack.Screen name="AddExercise" component={AddExerciseScreen} options={{ headerShown: false}}/>
+      <Stack.Screen name="SubmitCompletion" component={SubmitCompletion} initialParams={{ levelUp: false, gainedXp: 0 }} options={{ headerShown: false}}/>
+      <Stack.Screen name="EditResistanceExercise" component={EditResistanceExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
+      <Stack.Screen name="EditCardioExercise" component={EditCardioExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
+      <Stack.Screen name="WorkoutDisplay" options={{ headerShown: false}} component={WorkoutDisplayScreen} initialParams={{ data: "", dataType: "" }}/>
     </Stack.Navigator>
     )
   }
@@ -78,14 +97,31 @@ export const App = () => {
         <Stack.Screen name="Account" options={{ headerShown: false}} component={AccountScreen} />
         <Stack.Screen name="AppSettings" options={{ headerShown: false }} component={AppSettingsScreen} />
         <Stack.Screen name="ProfileSettings" options={{ headerShown: false }} component={ProfileSettingsScreen} />
+        <Stack.Screen name="AccountSettings" options={{ headerShown: false }} component={AccountSettingsScreen} />
         <Stack.Screen name="Feedback" options={{ headerShown: false }} component={FeedbackScreen} />
+        <Stack.Screen name="PrivacyPolicy" options={{ headerShown: false }} component={PrivacyPolicyScreen} />
+        <Stack.Screen name="TermsOfService" options={{ headerShown: false }} component={TermsOfServiceScreen} />
+        <Stack.Screen name="Subscription" options={{ headerShown: false }} component={SubscriptionScreen} />
+        <Stack.Screen name="Preferences" options={{ headerShown: false }} component={PreferencesScreen} />
+        <Stack.Screen name="SocialScreen" options={{ headerShown: false}} component={SocialScreen}/>
+        <Stack.Screen name="CreateGroup" options={{ headerShown: false}} component={CreateGroupScreen} />
+        <Stack.Screen name="JoinGroup" options={{ headerShown: false}} component={JoinGroupScreen} />
+        <Stack.Screen name="GroupMembersSettings" options={{ headerShown: false}} component={GroupMembersSettingsScreen} initialParams={{ group: "" }}/>
+        <Stack.Screen name="GroupSettings" options={{ headerShown: false}} component={GroupSettingsScreen} initialParams={{ group: "" }}/>
+        <Stack.Screen name="Group" options={{ headerShown: false}} component={GroupScreen} initialParams={{ group: "" }}/>
+        <Stack.Screen name="WorkoutDisplay" options={{ headerShown: false}} component={WorkoutDisplayScreen} initialParams={{ data: "", dataType: "" }}/>
+        <Stack.Screen name="History" options={{ headerShown: false}} component={HistoryScreen} initialParams={{ group: "" }}/>
+        <Stack.Screen name="GroupEvents" options={{ headerShown: false}} component={GroupEventsScreen} initialParams={{ group: "" }}/>
+        <Stack.Screen name="GroupEvent" options={{ headerShown: false}} component={GroupEventScreen} initialParams={{ event: "" }}/>
+        <Stack.Screen name="CreateGroupEvent" options={{ headerShown: false}} component={CreateGroupEventScreen} initialParams={{ group: "" }}/>
+        <Stack.Screen name="EditGroupEvent" options={{ headerShown: false}} component={EditGroupEventScreen} initialParams={{ event: "" }}/>
       </Stack.Navigator>
     )
   }
 
   
 
-  const SocialStack = () => {
+  const StatisticsStack = () => {
     return (
       <Stack.Navigator screenOptions={{
           transitionSpec: {
@@ -93,19 +129,13 @@ export const App = () => {
             close: { animation: 'timing', config: { duration: 100, easing: Easing.linear } },
           },
         }}>
-          <Stack.Screen name="SocialScreen" options={{ headerShown: false}} component={SocialScreen}/>
-          <Stack.Screen name="CreateGroup" options={{ headerShown: false}} component={CreateGroupScreen} />
-          <Stack.Screen name="JoinGroup" options={{ headerShown: false}} component={JoinGroupScreen} />
-          <Stack.Screen name="GroupMembersSettings" options={{ headerShown: false}} component={GroupMembersSettingsScreen} initialParams={{ group: "" }}/>
-          <Stack.Screen name="GroupSettings" options={{ headerShown: false}} component={GroupSettingsScreen} initialParams={{ group: "" }}/>
-          <Stack.Screen name="Group" options={{ headerShown: false}} component={GroupScreen} initialParams={{ group: "" }}/>
-          <Stack.Screen name="WorkoutDisplay" options={{ headerShown: false}} component={WorkoutDisplayScreen} initialParams={{ data: "", dataType: "" }}/>
-          <Stack.Screen name="History" options={{ headerShown: false}} component={HistoryScreen} initialParams={{ group: "" }}/>
-          <Stack.Screen name="ProfileScreen" options={{ headerShown: false}} component={ProfileScreen} initialParams={{ userId: "", restrictedView: true}}/>
-          <Stack.Screen name="GroupEvents" options={{ headerShown: false}} component={GroupEventsScreen} initialParams={{ group: "" }}/>
-          <Stack.Screen name="GroupEvent" options={{ headerShown: false}} component={GroupEventScreen} initialParams={{ event: "" }}/>
-          <Stack.Screen name="CreateGroupEvent" options={{ headerShown: false}} component={CreateGroupEventScreen} initialParams={{ group: "" }}/>
-          <Stack.Screen name="EditGroupEvent" options={{ headerShown: false}} component={EditGroupEventScreen} initialParams={{ event: "" }}/>
+          <Stack.Screen name="Statistics" options={{ headerShown: false }} component={StatisticsScreen} initialParams={{ userId: user.id }}/>
+          <Stack.Screen name="ResistanceStats" options={{ headerShown: false }} component={ResistanceStatsScreen} />
+          <Stack.Screen name="CardioStats" options={{ headerShown: false }} component={CardioStatsScreen} />
+          <Stack.Screen name="ResistanceExerciseStats" options={{ headerShown: false }} component={ResistanceExerciseStatsScreen} />
+          <Stack.Screen name="CardioExerciseStats" options={{ headerShown: false }} component={CardioExerciseStatsScreen} />
+          <Stack.Screen name="ProfileSettings" options={{ headerShown: false }} component={ProfileSettingsScreen} />
+          
       </Stack.Navigator>
     )
   }
@@ -125,6 +155,7 @@ export const App = () => {
         <Stack.Screen name="SubmitCompletion" component={SubmitCompletion} initialParams={{ levelUp: false, gainedXp: 0 }} options={{ headerShown: false}}/>
         <Stack.Screen name="EditResistanceExercise" component={EditResistanceExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
         <Stack.Screen name="EditCardioExercise" component={EditCardioExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
+        <Stack.Screen name="ProfileSettings" options={{ headerShown: false }} component={ProfileSettingsScreen} />
         
       </Stack.Navigator>
       )
@@ -135,8 +166,9 @@ export const App = () => {
     <>
       {/* All screens nested in RealmProvider have access
             to the configured realm's hooks. */}
-      <GestureHandlerRootView style={{flex: 1}}>
-      <SafeAreaProvider>
+      <MenuProvider>
+      <GestureHandlerRootView style={{flex: 1, backgroundColor: 'white'}}>
+      <SafeAreaProvider style={{backgroundColor: 'white'}}>
         <NavigationContainer>
           <Tab.Navigator>
             
@@ -162,31 +194,39 @@ export const App = () => {
                 >
               </Tab.Screen>
               <Tab.Screen 
-                  name="Statistics"
-                  component={HomeStack}
-                  options={{
+                  name="History"
+                  component={HistoryStack}
+                  options={({route}) => ({
+                    headerStyle: {
+                      height: 0,
+                    },
+                    tabBarIcon: ({ color }) => (
+                      <MaterialCommunityIcons name="calendar-blank" color={color} size={40} />
+                    ),
+                    tabBarStyle: ((route) => {
+                      const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+                      if(routeName === "ProfileSettings" || routeName == "LogWorkoutCardio" || routeName == "LogWorkoutResistance" || routeName == "AddExercise" || routeName == "SubmitCompletion" || routeName == "EditResistanceExercise" || routeName == "EditCardioExercise" || routeName == "WorkoutDisplay")
+                        {
+                          return {display: "none"}
+                        }
+                        return
+                    })(route),
+                  })} 
+                >
+              </Tab.Screen>
+              <Tab.Screen 
+                  name="Stats"
+                  component={StatisticsStack}
+                  options={({route}) => ({
                     headerStyle: {
                       height: 0,
                     },
                     tabBarIcon: ({ color }) => (
                       <MaterialCommunityIcons name="poll" color={color} size={40} />
                     ),
-                  }} 
-                >
-              </Tab.Screen>
-              <Tab.Screen 
-                  name="Social"
-                  component={SocialStack}
-                  options={({route}) => ({
-                    headerStyle: {
-                      height: 0,
-                    },
-                    tabBarIcon: ({ color }) => (
-                      <MaterialCommunityIcons name="account-group" color={color} size={40} />
-                    ),
                     tabBarStyle: ((route) => {
                       const routeName = getFocusedRouteNameFromRoute(route) ?? ""
-                      if(routeName === "WorkoutDisplay" || routeName === "ProfileScreen" || routeName === "GroupEvent")
+                      if(routeName == "ResistanceStats" || routeName == "CardioStats" || routeName == "ResistanceExerciseStats" || routeName == "CardioExerciseStats")
                         {
                           return {display: "none"}
                         }
@@ -207,7 +247,7 @@ export const App = () => {
                     ),
                     tabBarStyle: ((route) => {
                       const routeName = getFocusedRouteNameFromRoute(route) ?? ""
-                      if(routeName === 'Account' || routeName === "AppSettings" || routeName === "ProfileSettings" || routeName === "Feedback"){
+                      if(routeName === 'Account' || routeName === "AppSettings" || routeName === "ProfileSettings" || routeName === "Feedback" || routeName === "AccountSettings" || routeName === "PrivacyPolicy" || routeName === "TermsOfService" || routeName == "Subscription" || routeName == "Preferences" ){
                         return {display: "none"}
                       }
                       return
@@ -220,6 +260,7 @@ export const App = () => {
         </NavigationContainer>
       </SafeAreaProvider>
       </GestureHandlerRootView>
+      </MenuProvider>
     </>
   );
 };

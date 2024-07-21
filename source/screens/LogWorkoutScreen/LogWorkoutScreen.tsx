@@ -26,156 +26,6 @@ type LogWorkoutProps = {
     navigation: StackNavigationProp<RootStackParamList, 'LogWorkout'>;
 }
 
-type PieChartProps = {
-  data:any
-}
-
-const PieChartExample = (props:PieChartProps) => {
-
-  console.log("num cardio workout: ", props.data[0].numCardioWorkouts)
-  console.log(props.data)
-
-  let cardioWorkouts = props.data[0].numCardioWorkouts
-  let resistanceWorkouts = props.data[1].numResistanceWorkouts
-
-  console.log(resistanceWorkouts)
-
-  const data = [
-    { value: cardioWorkouts, label: 'Cardio', color: colors.red },
-    { value: resistanceWorkouts, label: 'Resistance', color: colors.black },
-  ];
-
-  const getFocusedWorkoutType = () => {
-
-    // Initialize variables to keep track of the maximum value and its corresponding label
-    let maxLabel = '';
-    let maxValue = -Infinity;
-
-    // Iterate over each object in the data array
-    data.forEach(item => {
-      // Update maxLabel and maxValue if the current item's value is higher
-      if (item.value > maxValue) {
-        maxValue = item.value;
-        maxLabel = item.label;
-      }
-    })
-
-    return maxLabel;
-  }
-
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: -100, }}>
-      <PieChart
-        data={data}
-        donut
-        innerRadius={85}
-      />
-      <View style={{position: 'absolute'}}>
-        {
-          (data[0].value == 0 && data[1].value == 0) &&
-          <Text style={{fontWeight: '800', fontSize: 20, textAlign: 'center'}}>No Workouts Logged {'\n'} This Week</Text>
-        }
-        {
-          (data[0].value > 0 || data[1].value > 0) &&
-          <Text style={{fontWeight: '800', fontSize: 20, textAlign: 'center'}}>You focused on {'\n'}{getFocusedWorkoutType()} {'\n'} most this week!</Text>
-        }
-        
-      </View>
-      {renderLegendComponent(data)}
-    </View>
-  )
-}
-
-const renderDot = (title:any, color:any) => {
-  return (
-    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-      <View style={{height: 30, width: 30, borderRadius: 10, backgroundColor: color, marginRight: 5,}}></View>
-      <Text style={{fontSize: 20, fontWeight: '800'}}>{title}</Text>
-    </View>
-  );
-};
-
-const renderLegendComponent = (data:any) => {
-
-  const screenHeight = Dimensions.get('window').height;
-  const screenWidth = Dimensions.get('window').width;
-
-  return (
-    <View style={{position: 'absolute', bottom: 20,}}>
-      <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-        {
-          data.map((item:any, index:any) => (
-            <View key={new BSON.ObjectID().toString()} style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: screenWidth - 220, }}>
-              {renderDot(item.label, item.color)}
-            </View>
-          ))
-        }
-      </View>
-    </View>
-  );
-};
-
-const getMondayAndSunday = () => {
-  const currentDate = new Date();
-  
-  // Get the current day of the week (0 is Sunday, 1 is Monday, etc.)
-  const currentDay = currentDate.getDay();
-  
-  // Calculate the difference between the current day and Monday
-  const diffToMonday = (currentDay === 0 ? 6 : currentDay - 1);
-  
-  // Calculate the difference between the current day and Sunday
-  const diffToSunday = (currentDay === 0 ? 0 : 7 - currentDay);
-
-  // Get the date for Monday
-  const monday = new Date(currentDate);
-  monday.setDate(currentDate.getDate() - diffToMonday);
-  monday.setHours(0, 0, 0, 0); // Set to start of the day
-
-  // Get the date for Sunday
-  const sunday = new Date(currentDate);
-  sunday.setDate(currentDate.getDate() + diffToSunday);
-  sunday.setHours(23, 59, 59, 999); // Set to end of the day
-
-  return { monday, sunday };
-}
-
-type BarChartProps = {
-  data:any
-}
-
-const BarChartExample = (props:BarChartProps) => {
-  console.log(props)
-  if(props.data.length == 0)
-    {
-      return (
-        <>
-        </>
-      )
-    }
-  const screenHeight = Dimensions.get('window').height;
-  const screenWidth = Dimensions.get('window').width;
-
-  const barData = [{value: props.data[0].numCardioWorkouts, frontColor: colors.red}, {value: props.data[0].numResistanceWorkouts, frontColor: colors.black}];
-    return (
-      <View style={{height: screenHeight - 200 - (screenHeight - 250), width: screenWidth - 140, display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 10}}>
-        <Text style={{textAlign: 'center', fontWeight: '800', fontSize: 20,}}>Lifetime Spread</Text>
-        <BarChart
-          frontColor={'#177AD5'}
-          barWidth={(screenWidth/2 - 10)/2 - 20 }
-          data={barData}
-          hideYAxisText={true}
-          yAxisThickness={0}
-          hideRules={true}
-          xAxisThickness={4}
-          width={screenWidth/2 - 10}
-          height={screenHeight - 150 - (screenHeight - 250)}
-        />
-      </View>
-        
-    );
-}
-
 export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
 
   const realm = useRealm()
@@ -190,38 +40,11 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
     navigation.navigate("LogWorkoutCardio", { continuingWorkout: false})
   }
 
+  const goToProfileSettings = () => {
+    navigation.navigate("ProfileSettings")
+  }
+
   let userData = realm.objects("Users").sorted('_id').filtered("userId == $0", user.id);
-  let userStats = realm.objects("UserStatistics").filtered("userId == $0", user.id)
-
-  const { monday, sunday } = getMondayAndSunday();
-
-  console.log(user.id)
-
-  let CardioObjectsOfWeek = realm.objects(CardioWorkout).filtered("user_id == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
-  let ResistanceObjectsOfWeek = realm.objects(ResistanceWorkout).filtered("userId == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
-
-  console.log(CardioObjectsOfWeek)
-
-  const userStatsWeek = [
-    {
-      numCardioWorkouts: CardioObjectsOfWeek.length,
-    },
-    {
-      numResistanceWorkouts: ResistanceObjectsOfWeek.length,
-    }
-  ]
-
-  useEffect(() => {
-    
-  }, [userStats])
-
-  useEffect(() => {
-    if(isFocused)
-    {
-      CardioObjectsOfWeek = realm.objects(CardioWorkout).filtered("user_id == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
-      ResistanceObjectsOfWeek = realm.objects(ResistanceWorkout).filtered("userId == $0 AND dateCreated >= $1 AND dateCreated <= $2", user.id, monday, sunday)
-    }
-  })
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [imageSource, setImageSource] = useState(require("../../assets/3.png"))
@@ -324,54 +147,24 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
         <ActivityIndicator size="large" color={colors.blue}/>
       ) :
       (
-        <View>
+        <>
 
       
 
         <View style={styles.header}>
             <Text style={styles.headerText}>UltiTracker</Text>
-            <View style={[{marginRight: 10,}, shadow.shadow]}>
-              <Image source={imageSource} style={styles.headerImage}/>
-            </View>
-        </View>
-
-        <View style={[styles.container, {height: screenHeight - 50}]}>
-
-          <View style={[styles.containerPieChart, shadow.shadow]}>
-            <View style={styles.rowPieChart}>
-              <TouchableOpacity onPress={() => console.log("back")}>
-                <MaterialCommunityIcons name="arrow-left" color={'black'} size={40}/>
-              </TouchableOpacity>
-              <Text style={{fontSize: 20, fontWeight: '800'}}>This Week</Text>
-              <TouchableOpacity onPress={() => console.log("pressed three dots")}>
-                <MaterialCommunityIcons name="dots-horizontal" color={'black'} size={40}/>
+            <View style={{marginRight: 15, display: 'flex', flexDirection: 'row',  alignItems: 'center'}} >
+              <MaterialCommunityIcons name={"bell-outline"} size={35}/>
+              <TouchableOpacity onPress={() => goToProfileSettings()}>
+                <Image source={imageSource} style={styles.headerImage}/>
               </TouchableOpacity>
             </View>
-            <View style={styles.pieChart}>
-              <PieChartExample data={userStatsWeek}/>
-            </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={[styles.containerBarChart, shadow.shadow]}>
-              <BarChartExample data={userStats}/>
-            </View>
-
-            <TouchableOpacity style={[styles.logWorkoutButton, shadow.shadow]} onPress={() => {setModalVisible(true)}}>
-              <MaterialCommunityIcons name="plus" color={'white'} size={50}/>
-            </TouchableOpacity>
-          </View>
-          
+            
         </View>
 
-      {
-        (currentWorkout.length > 0) &&
-        <View style={[styles.container, {height: screenHeight - 50, alignItems: 'center'}]}>
-          <TouchableOpacity style={styles.continueButton} onPress={() => {console.log("continue workout")}}>
-            <Text style={styles.buttonText}>Continue Workout</Text>
-          </TouchableOpacity>
-        </View>
-      }
+        <TouchableOpacity style={[{position: 'absolute', bottom: 20, right: 20, backgroundColor: colors.blue, width: 70, height: 70, borderRadius: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2}, shadow.shadow]} onPress={() => setModalVisible(true)}>
+          <MaterialCommunityIcons name={"plus"} size={50} color={'white'}/>
+        </TouchableOpacity>
 
       <Modal
           isVisible={modalVisible}
@@ -385,6 +178,14 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalHeaderText}>Log a Workout</Text> 
             </View>
+            {
+              currentWorkout &&
+              <View>
+                <TouchableOpacity style={styles.continueButton} onPress={() => {console.log("continue workout")}}>
+                  <Text style={styles.buttonText}>Continue Workout</Text>
+                </TouchableOpacity>
+              </View>
+            }
             <View style={styles.rowModal}>
               <TouchableOpacity style={[styles.gridOption, {backgroundColor: '#ED97A5'}, shadow.shadow]} onPress={() => {closeModal(); logCardioWorkout()}}>
                 <View style={[styles.circle, {backgroundColor: colors.red}]}>
@@ -405,7 +206,7 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
           </View>
       </Modal>
 
-    </View>
+    </>
       )
     }
     </>

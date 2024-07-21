@@ -312,7 +312,8 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           userId: user?.id,
           dateCreated: new Date(),
           workoutId: id,
-          workoutType: workoutType
+          workoutType: workoutType,
+          userStatus: userData[0].status as string
         })
       })
     }, [realm, user])
@@ -696,7 +697,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
 
       useEffect(() => {
         addExtraExercisesToSection()
-      })
+      }, [])
 
       const sections = [
         {

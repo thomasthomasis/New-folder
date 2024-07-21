@@ -30,8 +30,8 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
     navigation.navigate("Group", { group: group })
   }
 
-  const goToCreateGroupScreen = () => {
-    navigation.navigate("CreateGroup")
+  const goToCreateGroupScreen = (isClub:boolean) => {
+    navigation.navigate("CreateGroup", { isClub: isClub })
   }
 
   const goToJoinGroupScreen = () => {
@@ -58,6 +58,16 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
   const onClose = () => {
     setShowingModal(false)
     setShowingModalOptions(false)
+  }
+
+  const getGroupName = (groupId:string) => {
+    const group = realm.objects(Groups).filtered("groupId == $0", groupId)
+    
+    if(group.length > 0)
+    {
+      return group[0].name
+    }
+    return "";
   }
 
   const checkIfOwner = () => {
@@ -249,7 +259,7 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
           style={styles.modalView}
       >
           <View style={styles.modalContent}>
-            <Text style={{fontWeight: '800', fontSize: 25, marginBottom: 10, textDecorationLine: 'underline'}}>{selectedGroup}</Text>
+            <Text style={{fontWeight: '800', fontSize: 25, marginBottom: 10, textDecorationLine: 'underline'}}>{getGroupName(selectedGroup)}</Text>
             {
               checkIfOwner() && 
               <>
@@ -284,11 +294,14 @@ export const SocialScreen = ({ navigation }: SocialScreenProps) => {
           style={styles.modalView}
       >
           <View style={styles.modalContent}>
-            <TouchableOpacity onPress={() => {onClose(); goToCreateGroupScreen()}} style={[styles.button, shadow.shadow]}>
+            <TouchableOpacity onPress={() => {onClose(); goToCreateGroupScreen(false)}} style={[styles.button, shadow.shadow]}>
               <Text style={styles.buttonText}>Create a Group</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => {onClose(); goToJoinGroupScreen()}} style={[styles.button, shadow.shadow]}>
-              <Text style={styles.buttonText}>Join a Group</Text>
+            <TouchableOpacity onPress={() => {onClose(); goToCreateGroupScreen(true)}} style={[styles.button, shadow.shadow]}>
+              <Text style={styles.buttonText}>Create a Team</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {onClose(); goToJoinGroupScreen()}} style={[styles.button, shadow.shadow, { width: 250}]}>
+              <Text style={styles.buttonText}>Join a Group or Team</Text>
             </TouchableOpacity>
           </View>
       </Modal>

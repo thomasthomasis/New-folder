@@ -10,16 +10,20 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 import { shadow } from "../../sharedStyling/Shadow";
 import { colors } from "../../sharedStyling/Colors";
+import { RouteProp } from "@react-navigation/native";
 
 
 type CreateGroupScreenProps = {
     navigation: StackNavigationProp<RootStackParamList, 'CreateGroup'>;
+    route: RouteProp<RootStackParamList, 'CreateGroup'>;
 }
 
-export const CreateGroupScreen = ({ navigation }: CreateGroupScreenProps) => {
+export const CreateGroupScreen = ({ navigation, route }: CreateGroupScreenProps) => {
 
     const realm = useRealm()
     const user = useUser()
+
+    const { isClub } = route.params
 
     const goBack = () => {
         navigation.goBack()
@@ -30,6 +34,7 @@ export const CreateGroupScreen = ({ navigation }: CreateGroupScreenProps) => {
     const [selectedColor, setSelectedColor] = useState<string>(colors.purple)
     const [groupSport, setGroupSport] = useState('')
     const [image, setImage] = useState<string>('')
+    const [isPublic, setIsPublic] = useState<boolean>(true)
     const groups = useQuery(Groups);
 
     function handleSubmit() {
@@ -43,16 +48,26 @@ export const CreateGroupScreen = ({ navigation }: CreateGroupScreenProps) => {
             Alert.alert("Please select a group picture")
         }
         // Create the group (implement this logic as needed)
-        createGroup(groupName, groupDescription, groupSport, selectedColor, image);
+        createGroup(groupName, groupDescription, groupSport, selectedColor, image, isClub, isPublic);
         
         // Show success message or navigate to another screen
         Alert.alert("Successfully created group");
         goBack()
     }
 
+    const generateTag = () => {
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        let result = '#';
+        for (let i = 0; i < 4; i++) {
+            const randomIndex = Math.floor(Math.random() * chars.length);
+            result += chars[randomIndex];
+        }
+        return result;
+    }
+
 
     const createGroup = useCallback(
-        (groupName:string, groupDescription:string, groupSport:string, groupColor:string, groupImage:string) => {
+        (groupName:string, groupDescription:string, groupSport:string, groupColor:string, groupImage:string, isClub:boolean, isPublic:boolean) => {
             console.log(groupName)
           // if the realm exists, create an Item
     
@@ -71,6 +86,9 @@ export const CreateGroupScreen = ({ navigation }: CreateGroupScreenProps) => {
               color: groupColor,
               sport: groupSport,
               image: groupImage,
+              isClub: isClub,
+              isPublic: isPublic,
+              groupTag: generateTag()
             });
           });
         },
@@ -151,6 +169,16 @@ export const CreateGroupScreen = ({ navigation }: CreateGroupScreenProps) => {
                         placeholder="Enter group name"
                         style={styles.input}
                     />
+                </View>
+                <View style={[styles.containerInput, {flexDirection: 'row', justifyContent: 'space-between', width: 180}]}>
+                    <TouchableOpacity onPress={() => setIsPublic(true)} style={{display: 'flex', flexDirection: 'row'}}>
+                        <View style={[{width: 25, height: 25, borderRadius: 25, borderWidth: 2, borderColor: colors.black}, isPublic && {backgroundColor: colors.black}]}></View>
+                        <Text style={styles.inputTitle}>Public</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity  onPress={() => setIsPublic(false)} style={{display: 'flex', flexDirection: 'row'}}>
+                        <View style={[{width: 25, height: 25, borderRadius: 25, borderWidth: 2, borderColor: colors.black}, !isPublic && {backgroundColor: colors.black}]}></View>
+                        <Text style={styles.inputTitle}>Private</Text>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.containerInput}>
                     <Text style={styles.inputTitle}>Sport</Text>

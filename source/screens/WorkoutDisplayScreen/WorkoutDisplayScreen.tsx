@@ -11,6 +11,7 @@ import { useEffect, useState } from "react"
 import { CardioWorkout } from "../../schemas/CardioWorkoutSchema"
 import { ResistanceWorkout } from "../../schemas/ResistanceWorkoutSchema"
 import { useRealm } from "@realm/react"
+import { BSON } from "realm"
 
 type WorkoutDisplayScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'WorkoutDisplay'>; // Adjust according to your navigation stack
@@ -23,12 +24,13 @@ export const WorkoutDisplayScreen = ({ navigation, route }:WorkoutDisplayScreenP
 
     const { data, dataType } = route.params;
 
-    console.log("Data WorkoutDisplay: ", data)
-    console.log("Data Type WorkoutDisplay: ", dataType)
+    const goBack = () => {
+        navigation.goBack()
+    }
 
     const [workoutObject, setWorkoutObject] = useState<any>(null);
 
-    console.log("Data: ",data)
+    console.log("Data: ", data)
     console.log("Data Type: ", dataType)
 
     const getWorkoutObject = (id:string, type:string) => {
@@ -41,6 +43,7 @@ export const WorkoutDisplayScreen = ({ navigation, route }:WorkoutDisplayScreenP
         {
             let object = realm.objects(ResistanceWorkout).filtered("_id == $0", data);
             setWorkoutObject(object)
+            console.log(object)
         }
     }
 
@@ -49,9 +52,7 @@ export const WorkoutDisplayScreen = ({ navigation, route }:WorkoutDisplayScreenP
     }, [])
     
 
-    const goBack = () => {
-        navigation.goBack()
-    }
+   
 
     return (
         <>
@@ -63,6 +64,7 @@ export const WorkoutDisplayScreen = ({ navigation, route }:WorkoutDisplayScreenP
         {
             (workoutObject && dataType == "Cardio") &&
             <CardioWorkoutDisplayScreen data={workoutObject} />
+            
         }
         {
             (workoutObject && dataType == "Resistance") && 

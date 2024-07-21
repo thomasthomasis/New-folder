@@ -2,10 +2,11 @@ import React, {useCallback, useState} from 'react';
 import Realm, { BSON } from 'realm';
 import {useApp} from '@realm/react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {StyleSheet, Text, View, Alert} from 'react-native';
+import {StyleSheet, Text, View, Alert, TouchableOpacity} from 'react-native';
 import {Input, Button} from '@rneui/base';
 import {colors} from '../../sharedStyling/Colors';
 import styles from './WelcomeScreen.style';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export function WelcomeScreen(): React.ReactElement {
 
@@ -65,9 +66,44 @@ export function WelcomeScreen(): React.ReactElement {
   } 
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{backgroundColor: 'white'}}>
       <View style={styles.viewWrapper}>
-        <Text style={styles.title}>Ulti Tracker</Text>
+        <View style={{display: 'flex', flexDirection: 'row', width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 30}}>
+          <MaterialCommunityIcons name="poll" color={colors.text} size={50} style={{marginRight: 10,}}/>
+          <Text style={styles.title}>Ulti Tracker</Text>
+        </View>
+
+        <View style={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          {
+            isInSignUpMode &&
+            <>
+            <Text style={{fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 10,}}>Create an account</Text>
+            <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center',}}>
+              <Text style={{fontWeight: '600', fontSize: 16}}>Already have an account?</Text>
+              <TouchableOpacity onPress={() => setIsInSignUpMode(false)}>
+                <Text style={{color: colors.blue, fontWeight: '600', fontSize: 16}}> Login</Text>
+              </TouchableOpacity> 
+            </View>
+           
+            </>
+            
+          }
+          {
+            !isInSignUpMode &&
+            <>
+            <Text style={{fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 10,}}>Login</Text>
+            <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center',}}>
+              <Text style={{fontWeight: '600', fontSize: 16}}>Dont have an account?</Text>
+              <TouchableOpacity onPress={() => setIsInSignUpMode(true)}>
+                <Text style={{color: colors.blue, fontWeight: '600', fontSize: 16}}> Signup</Text>
+              </TouchableOpacity> 
+            </View>
+           
+            </>
+            
+          }
+        </View>
+        
         <Input
           placeholder="email"
           onChangeText={setEmail}
@@ -107,35 +143,7 @@ export function WelcomeScreen(): React.ReactElement {
             />
           }
         />
-        {isInSignUpMode ? (
-          <>
-            <Button
-              title="Create Account"
-              buttonStyle={styles.mainButton}
-              onPress={onPressSignUp}
-            />
-            <Button
-              title="Already have an account? Log In"
-              type="clear"
-              titleStyle={styles.secondaryButton}
-              onPress={() => setIsInSignUpMode(!isInSignUpMode)}
-            />
-          </>
-        ) : (
-          <>
-            <Button
-              title="Log In"
-              buttonStyle={styles.mainButton}
-              onPress={onPressSignIn}
-            />
-            <Button
-              title="Don't have an account? Create Account"
-              type="clear"
-              titleStyle={styles.secondaryButton}
-              onPress={() => setIsInSignUpMode(!isInSignUpMode)}
-            />
-          </>
-        )}
+        
       </View>
     </SafeAreaProvider>
   );

@@ -3,12 +3,16 @@ import { colors } from "../../sharedStyling/Colors";
 
 const styles = StyleSheet.create({
     viewWrapper: {
-      flex: 1,
-      alignItems: 'center',
+      display: 'flex',
       justifyContent: 'center',
+      alignItems: 'center',
+      paddingTop: 50,
+      backgroundColor: 'white',
     },
     title: {
-      fontSize: 18,
+      fontSize: 30,
+      fontWeight: '800',
+      color: colors.text,
     },
     subtitle: {
       fontSize: 14,
