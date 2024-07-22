@@ -1,4 +1,11 @@
 {
   "name": "SyncTutorial",
-  "displayName": "SyncTutorial"
+  "displayName": "SyncTutorial",
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "1862e569-6469-467d-99db-b62dd25ba951"
+      }
+    }
+  }
 }

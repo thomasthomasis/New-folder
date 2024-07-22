@@ -17,7 +17,6 @@ import { JoinGroupRequests } from './schemas/JoinGroupRequestsSchema';
 import { ExtraExercises } from './schemas/ExtraExercisesSchema';
 import { Feedback } from './schemas/FeedbackSchema';
 import { GroupEvents } from './schemas/GroupEventsScehma';
-import { RNSVGRadialGradient } from 'react-native-svg';
 
 
 const LoadingIndicator = () => {

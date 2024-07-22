@@ -1,4 +1,4 @@
-package com.synctutorial;
+package com.ultitracker;
 
 import android.app.Application;
 import com.facebook.react.PackageList;

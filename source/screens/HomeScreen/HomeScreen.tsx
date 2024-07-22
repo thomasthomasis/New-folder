@@ -337,8 +337,6 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
           <View style={{width: '100%', display: 'flex', justifyContent: 'flex-start'}}>
           <Text style={{textAlign: 'left', fontWeight: '800', fontSize: 20}}>Logged Workouts</Text>
           </View>
-        
-        <View style={styles.border}></View>
         {
           workouts.map((item:any, index:any) => (
             <View key={index}>

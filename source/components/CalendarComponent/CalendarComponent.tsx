@@ -37,6 +37,11 @@ export const CalendarComponent = (props: CalendarProps) => {
 
     const [workouts, setWorkouts] = useState<any>(realm.objects(Workouts).sorted('dateCreated').filtered('dateCreated >= $0 AND dateCreated < $1', startOfMonth, endOfMonth));
 
+    useEffect(() => {
+      let workouts = realm.objects(Workouts).sorted('dateCreated').filtered('dateCreated >= $0 AND dateCreated < $1', startOfMonth, endOfMonth)
+      setWorkouts(workouts)
+    },[])
+
     const getDaysOfCurrentWeek = () => {
       const weekDates = []
       const currentDayIndex = currentDate.getDay()
@@ -268,8 +273,7 @@ export const CalendarComponent = (props: CalendarProps) => {
             {
             calendarDays.map((day, index) => (
             <TouchableOpacity key={index} 
-            style={[ styles.day,  ((currentWeekDates.includes(day.toString()) && currentMonth == month && year == currentYear) && styles.currentWeekDay), day.includes("+extraDay") && {pointerEvents: 'none'}, currentWeekDates[0] == day && {borderBottomLeftRadius: 10, borderTopLeftRadius: 10}, currentWeekDates[currentWeekDates.length - 1] == day && {borderBottomRightRadius: 10, borderTopRightRadius: 10},
-              ]}   
+            style={[ styles.day, day.includes("+extraDay") && {pointerEvents: 'none'}]}   
             onPress={() => {props.onPress(day.toString()), selectDay(day.toString())}}>
 
               <View style={styles.dots}>
