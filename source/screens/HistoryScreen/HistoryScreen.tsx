@@ -23,8 +23,8 @@ export const HistoryScreen = ({ navigation, route }:HistoryScreenProps) => {
 
     const {group} = route.params
 
-    const goToWorkoutDisplayScreen = (data:any, dataType:string) => {
-        navigation.navigate("WorkoutDisplay", {data:data, dataType:dataType})
+    const goToWorkoutDisplayScreen = (specificWorkoutId:string, dataType:string, generalWorkoutId:string) => {
+        navigation.navigate("WorkoutDisplay", {specificWorkoutId:specificWorkoutId, workoutType:dataType, generalWorkoutId: generalWorkoutId})
         console.log("navigating")
     }
 
@@ -135,6 +135,7 @@ export const HistoryScreen = ({ navigation, route }:HistoryScreenProps) => {
     return (
         <>
         <FlatList 
+            showsHorizontalScrollIndicator={false}
             data = {workouts}
             renderItem={({item, index}) => (
                 <>
@@ -147,7 +148,7 @@ export const HistoryScreen = ({ navigation, route }:HistoryScreenProps) => {
                     </View>
                 }
                 
-                <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.container} onPress={() => {goToWorkoutDisplayScreen(item.workoutId, item.workoutType ?? "")}}>
+                <TouchableOpacity key={new BSON.ObjectID().toString()} style={styles.container} onPress={() => {goToWorkoutDisplayScreen(item.workoutId.toString(), item.workoutType ?? "", item._id.toString())}}>
                     {
                         (item.workoutId != null && afterJoiningDate(item.userId, item.dateCreated)) &&
                         <>

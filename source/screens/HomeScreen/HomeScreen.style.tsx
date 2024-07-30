@@ -46,31 +46,52 @@ const styles = StyleSheet.create({
     },
 
     containerWorkouts: {
-      width: screenWidth -20,
+      width: screenWidth - 48,
      
-      marginTop: 20,
+      marginTop: 24,
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
+      marginBottom: 160,
     },
 
     card: {
       marginRight: 'auto',
       marginLeft: 'auto',
-      width: screenWidth - 20,
-      borderRadius: 15,
-      backgroundColor: 'white',
-      height: 70,
-      padding: 10,
-      paddingLeft: 15,
-      paddingRight: 15,
-      marginBottom: 15,
+      width: screenWidth - 64,
+      borderRadius: 16,
+      backgroundColor: colors.white,
+      height: 72,
+      paddingLeft: 24,
+      marginBottom: 8,
       display: 'flex',
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-start',
       alignItems: 'center',
 
+    },
+
+    verticalBorder: {
+      width: 1,
+      height: 48,
+      backgroundColor: colors.unselectedItem,
+      borderRadius: 50,
+      marginRight: 32,
+    },
+
+    modalButton: {
+      position: 'absolute', 
+      bottom: 16, 
+      right: 24, 
+      backgroundColor: colors.lightGreen, 
+      width: 80, 
+      height: 80, 
+      borderRadius: 24, 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      zIndex: 2
     },
 
     containerModal: {
@@ -148,7 +169,7 @@ const styles = StyleSheet.create({
 
     continueButton: {
       width: 190,
-      backgroundColor: colors.blue,
+      backgroundColor: colors.green,
       padding: 10,
       borderRadius: 5,
       marginBottom: 10,

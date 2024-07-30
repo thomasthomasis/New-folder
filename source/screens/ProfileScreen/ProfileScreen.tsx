@@ -285,6 +285,13 @@ export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
     
   }
 
+  const truncateText = (text:string, limit:number) => {
+    if (text.length > limit) {
+        return text.substring(0, limit) + '...';
+      }
+      return text;
+}
+
 
 
   useEffect(() => {
@@ -313,6 +320,10 @@ export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
         else if(profilePicture.includes('4'))
         {
           setImageSource(require('../../assets/4.png'))
+        }
+        else
+        {
+          setImageSource(require('../../assets/defaultPFP.png'))
         }
     }
 
@@ -349,7 +360,7 @@ export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
         <ScrollView contentContainerStyle={{minHeight: screenHeight, backgroundColor: 'white'}}>
           {
             restrictedView &&
-            <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.blue}}>
+            <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.green}}>
             <View style={styles.headerTitle}>
                 <TouchableOpacity onPress={goBack} style={styles.closeButton}>
                     <MaterialCommunityIcons name="arrow-left" size={40} color={'white'}/>
@@ -360,7 +371,7 @@ export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
           }
           {
             !restrictedView &&
-            <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.blue}}>
+            <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.green}}>
             <View style={styles.headerTitle}>
             <TouchableOpacity onPress={goToProfileSettingsScreen}>
                 <MaterialCommunityIcons name="pencil" color={'white'} size={40} style={{marginRight: 10,}}/>
@@ -406,31 +417,57 @@ export const ProfileScreen = ({ navigation, route}: ProfileScreenProps) => {
           </View>
 
           <View style={styles.container}>
+            <View style={{ width: screenWidth, display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 15, paddingLeft: 15, marginTop: 20,}}>
+              <Text style={{fontSize: 18, fontWeight: '800', color: colors.text}}>Teams and Groups</Text>
+              <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center',}}>
+                <Text style={{fontSize: 20, fontWeight: '800', color: colors.text}}>{groups.length}</Text>
+                <MaterialCommunityIcons name={'account-group'} color={colors.text} size={30} style={{marginLeft: 10,}}/> 
+              </View>
+            </View>
             {
               groups.length == 0 &&
               <Text style={{fontSize: 25, fontWeight: '800', color: colors.black, marginTop: 15}}>Join or Create a Group!!</Text>
             }
-            {
-              groups.map((item:any, index:any) => {
-
-                return (
-                  <TouchableOpacity key={index} style={[styles.groupButton, shadow.shadow, {marginTop: 20}, item.color != null && {backgroundColor: item.color}]} onPress={() => {goToGroupScreen(item.groupId)}}>
-                {
-                  item.image &&
-                  <MaterialCommunityIcons name={item.image} color={"black"} size={50} /> 
-                }
-                <Text style={styles.buttonText}>{item.name}</Text>
+            <FlatList 
+              data={groups}
+              renderItem={({item, index}) => (
+                <TouchableOpacity key={index} style={[styles.groupButton, shadow.shadow, {marginTop: 15}, item.color != null && {backgroundColor: item.color}]} onPress={() => {goToGroupScreen(item.groupId)}}>
+                  <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                  {
+                    item.image &&
+                    <MaterialCommunityIcons name={item.image} color={"black"} size={45}/> 
+                  }
+                  <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center',}}>
+                    <Text style={{fontSize: 20, fontWeight: '800', color: colors.text}}>{item.members.length}</Text>
+                    <MaterialCommunityIcons name={'account-group'} color={colors.text} size={30}/> 
+                  </View>
+                  </View>
+                <View style={{width: '100%', display: 'flex', justifyContent: 'flex-start'}}>
+                  <Text style={{fontSize: 20, fontWeight: '800', color: colors.text}}>{truncateText(item.name, 10)}</Text>
+                  {
+                    item.isClub &&
+                    <Text style={{fontWeight: '400', color: colors.text, fontSize: 17,}}>Team</Text>
+                  }
+                  {
+                    !item.isClub &&
+                    <Text style={{fontWeight: '400', color: colors.text, fontSize: 17,}}>Group</Text>
+                  }
+                </View>
+                
                 </TouchableOpacity>
-                )
-              })
-            }
+              )}
+              keyExtractor={(item) => item._id}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.containerGroupButtons}
+            />
         
           </View>
         
        </ScrollView>
           }
 
-          <TouchableOpacity style={[{position: 'absolute', bottom: 25, left: screenWidth/2 - 125, backgroundColor: colors.blue, width: 250, height: 60, borderRadius: 20, display: 'flex', justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center', zIndex: 2, paddingLeft: 15, paddingRight: 15,}, shadow.shadow]} onPress={() => setShowingModalOptions(true)}>
+          <TouchableOpacity style={[{position: 'absolute', bottom: 25, left: screenWidth/2 - 125, backgroundColor: colors.green, width: 250, height: 60, borderRadius: 20, display: 'flex', justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center', zIndex: 2, paddingLeft: 15, paddingRight: 15,}, shadow.shadow]} onPress={() => setShowingModalOptions(true)}>
             <Text style={{fontSize: 20, fontWeight: '800', color: 'white'}}>Join/Create Group</Text>
             <MaterialCommunityIcons name={"account-multiple-plus-outline"} size={50} color={'white'}/>
         </TouchableOpacity>

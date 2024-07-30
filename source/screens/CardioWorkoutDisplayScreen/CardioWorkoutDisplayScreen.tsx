@@ -74,7 +74,7 @@ export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProp
 
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={[styles.title, {color: colors.blue}]}>{formatedDate}</Text>
+        <Text style={[styles.title, {color: colors.green}]}>{formatedDate}</Text>
         <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', width: 250,}}>
             <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
                 <MaterialCommunityIcons name="clock-time-five-outline" color={'black'} size={30}/>
@@ -92,7 +92,7 @@ export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProp
                 allExercises.map((item:any, index:any) => {
                     return (
                         <>
-                            <Text key={new BSON.ObjectID().toString()} style={{fontSize: 20, fontWeight: '800', marginBottom: 10, color: colors.blue,}}>{convertIdToName(item)}</Text>
+                            <Text key={new BSON.ObjectID().toString()} style={{fontSize: 20, fontWeight: '800', marginBottom: 10, color: colors.green,}}>{convertIdToName(item)}</Text>
                             {
                                 JSON.parse(time[index]).map((item:any, innerIndex:any) => {
                                     return (

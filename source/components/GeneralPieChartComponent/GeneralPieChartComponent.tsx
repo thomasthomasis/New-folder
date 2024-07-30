@@ -96,7 +96,7 @@ export const GeneralPieChart = (props: GeneralPieChartProps) => {
           dataArray.push({
             name: "Healthy",
             workouts: totalHealthy,
-            color: colors.blue
+            color: colors.green
           })
 
           dataArray.push({

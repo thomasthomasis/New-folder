@@ -1,0 +1,45 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "source/assets/fonts/Jost Black.ttf",
+      "sha1": "7c56b130a018f8fa0d16f9bc4ed201c70877816e"
+    },
+    {
+      "path": "source/assets/fonts/Jost Bold.ttf",
+      "sha1": "60eaf9ab668280a6ec2f5fc4f85bd285f22f8313"
+    },
+    {
+      "path": "source/assets/fonts/Jost Regular.ttf",
+      "sha1": "63de8f35a2b969d64b1e4012d26a38e8be1e01ae"
+    },
+    {
+      "path": "source/assets/fonts/Jost SemiBold.ttf",
+      "sha1": "f2634732403730d25cdf33f789df97874a773ada"
+    },
+    {
+      "path": "source/assets/fonts/Jost-ExtraBold.ttf",
+      "sha1": "6a1466f20f9fc5fb5d7935115ddac9af72379233"
+    },
+    {
+      "path": "source/assets/fonts/Jost-ExtraLight.ttf",
+      "sha1": "ae4c9c07d80759eab7eec93151156b0a25fb863a"
+    },
+    {
+      "path": "source/assets/fonts/Jost-Italic.ttf",
+      "sha1": "a945463fa91132a6a7774dd7c1f09d8ea2fe5f46"
+    },
+    {
+      "path": "source/assets/fonts/Jost-Light.ttf",
+      "sha1": "e813c258b3009646acbde1b8f2e57a0394bf4d30"
+    },
+    {
+      "path": "source/assets/fonts/Jost-Medium.ttf",
+      "sha1": "cbf1f8ccae3a749b57e766eaa460a301f2392d41"
+    },
+    {
+      "path": "source/assets/fonts/Jost-Thin.ttf",
+      "sha1": "b2e664de600fabd368229891854cd635c79bcb54"
+    }
+  ]
+}

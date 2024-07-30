@@ -24,31 +24,50 @@ export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
         navigation.goBack()
     }   
 
-    const userData = useQuery(Users).sorted('_id').filtered("userId == $0", user.id);
+    const [userData, setUserData] = useState<any>(null)
     
     const [selectingProfilePicture, setSelectingProfilePicture] = useState<boolean>(false)
-    const [imageSource, setImageSource] = useState(require('../../assets/1.png'))
-    const [imageSourceText, setImageSourceText] = useState('../../assets/1.png')
+    const [imageSource, setImageSource] = useState(require('../../assets/defaultPFP.png'))
+    const [imageSourceText, setImageSourceText] = useState('../../assets/defaultPFP.png')
 
-    const [firstName, setFirstName] = useState<string | undefined>(userData[0].firstName)
-    const [surname, setSurname] = useState<string | undefined>(userData[0].lastName)
-    const [username, setUsername] = useState<string | undefined>(userData[0].username)
-    const [title, setTitle] = useState<string | undefined>(userData[0].selectedTitle)
-    const [status, setStatus] = useState<string | undefined>(userData[0].status)
+    const [firstName, setFirstName] = useState<string | undefined>("")
+    const [surname, setSurname] = useState<string | undefined>("")
+    const [username, setUsername] = useState<string | undefined>("")
+    const [title, setTitle] = useState<string | undefined>("")
+    const [titles, setTitles] = useState<any>("")
+    const [status, setStatus] = useState<string | undefined>("")
     const [showModal, setShowModal] = useState<boolean>(false)
     const [showModalStatus, setShowModalStatus] = useState<boolean>(false)
     const [newProfilePictureBool, setNewProfilePictureBool] = useState<boolean>(false)
+    const [loading, setLoading] = useState(true)
 
     const statuses = ["Healthy", "Away", "Injured"]
+
+    useEffect(() => {
+        let userDataObject = realm.objects(Users).sorted('_id').filtered("userId == $0", user.id);
+
+        setUserData(userDataObject)
+        setFirstName(userDataObject[0].firstName)
+        setUsername(userDataObject[0].username)
+        setSurname(userDataObject[0].lastName)
+        setTitle(userDataObject[0].selectedTitle)
+        setStatus(userDataObject[0].status)
+        setTitles(userDataObject[0].titles)
+
+        console.log("user data: ", userData)
+
+
+        if(userDataObject)
+        {
+            setLoading(false)
+        }
+
+    }, [])
 
     const closeModals = () => {
         setShowModal(false)
         setShowModalStatus(false)
     }
-
-    const titles = userData[0].titles
-
-    const [isLoading, setIsLoading] = useState(true)
 
     const handleUsernameChange = (inputText:string) => {
         setUsername(inputText)
@@ -86,6 +105,11 @@ export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
         {
             setImageSource(require('../../assets/4.png'))
             setImageSourceText('../../assets/4.png')
+        }
+        else
+        {
+          setImageSource(require('../../assets/defaultPFP.png'))
+          setImageSourceText('../../assets/defaultPFP.png')
         }
 
         setNewProfilePictureBool(true)
@@ -143,6 +167,8 @@ export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
 
     useEffect(() => {
 
+        let userData = realm.objects(Users).sorted('_id').filtered("userId == $0", user.id);
+
         console.log(userData)
         if(userData[0].profilePicture?.includes('1'))
         {
@@ -160,12 +186,11 @@ export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
         {
           setImageSource(require('../../assets/4.png'))
         }
+        else
+        {
+          setImageSource(require('../../assets/defaultPFP.png'))
+        }
 
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-          }, 500); // Change the delay time as needed
-
-        return () => clearTimeout(timer)
       }, [])
 
       useEffect(() => {
@@ -183,13 +208,13 @@ export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
             <>
 
             {
-                isLoading && 
+                loading && 
                 <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
                     <ActivityIndicator size="large" color="#0000ff" />
                 </View>
             }
             {
-                !isLoading &&
+                !loading &&
                 <>
                 <View style={styles.header}>
                     <View style={styles.headerTitle}>
@@ -260,7 +285,7 @@ export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
                         <View style={styles.modalContent}>
                                 <View style={styles.modalContent}>
                                     {
-                                        titles.map((item, index) => (
+                                        titles.map((item:any, index:any) => (
                                             <TouchableOpacity key={index} onPress={() => {closeModals(); setTitle(item)}} style={[styles.titleButton, {marginTop: 5, marginBottom: 5}]}>
                                                 <Text style={styles.titleButtonText}>{item}</Text>
                                             </TouchableOpacity>

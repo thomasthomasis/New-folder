@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     padding: 15,
     height: 50,
     width: screenWidth - 50,
-    backgroundColor: colors.blue,
+    backgroundColor: colors.green,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',

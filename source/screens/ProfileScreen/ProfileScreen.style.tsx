@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     information: {
       width: '100%',
       height: 330,
-      backgroundColor: colors.blue,
+      backgroundColor: colors.green,
       display: 'flex',
       flexDirection: 'column',
       paddingBottom: 20,
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: colors.blue,
+      backgroundColor: colors.green,
   },
   
   closeButton: {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.blue,
+    backgroundColor: colors.green,
     
     display: 'flex',
     justifyContent: 'center',
@@ -338,21 +338,28 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 15,
   },
 
+  containerGroupButtons: {
+    paddingBottom: 20,
+  },
+
   groupButton: {
-    width: screenWidth - 30,
-    height: 70,
+    width: 130,
+    height: 180,
     backgroundColor: colors.purple,
+    opacity: 1,
 
     display: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'space-between',
 
     marginTop: 20,
-    borderRadius: 10,
-    padding: 10,
-    paddingLeft: 20,
-    paddingRight: 20,
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingTop: 15,
+    paddingBottom: 25,
+    borderRadius: 20,
+    marginRight: 20,
   },
 
   buttonText: {

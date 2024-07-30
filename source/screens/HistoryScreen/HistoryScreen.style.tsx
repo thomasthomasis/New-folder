@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
 
     
     text: {
-        color: colors.blue,
+        color: colors.green,
         width: '80%',
         fontSize: 20,
         fontWeight: '800',

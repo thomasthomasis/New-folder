@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     },
 
     button: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
         width: 170,
         height: 40,
         display: 'flex',

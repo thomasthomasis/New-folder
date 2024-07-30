@@ -6,7 +6,7 @@ import styles from './GroupEventScreen.style';
 import Modal from 'react-native-modal';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
-import { RouteProp } from '@react-navigation/native'
+import { RouteProp, useIsFocused } from '@react-navigation/native'
 import { Groups } from '../../schemas/GroupsSchema';
 import { GroupEvents } from '../../schemas/GroupEventsScehma';
 import { BSON } from 'realm';
@@ -14,6 +14,8 @@ import { colors } from '../../sharedStyling/Colors';
 import { Users } from '../../schemas/UsersSchema';
 import { ScrollView } from 'react-native-gesture-handler';
 import { shadow } from '../../sharedStyling/Shadow';
+import { TrainingWorkout } from '../../schemas/TrainingWorkoutSchema';
+import { Workouts } from '../../schemas/WorkoutSchema';
 
 type GroupEventScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'GroupEvent'>; // Adjust according to your navigation stack
@@ -24,6 +26,7 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
 
     const realm = useRealm();
     const user = useUser();
+    const isFocused = useIsFocused()
 
     const { event } = route.params;
 
@@ -34,8 +37,16 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
     }
 
     const goToEditEvent = (eventId:string) => {
-        console.log("edit event: ", eventId)
+        navigation.navigate("EditGroupEvent", {eventId:event})
     }
+
+    const [eventData, setEventData] = useState<any>(realm.objects(GroupEvents).filtered("eventId == $0", event))
+
+    useEffect(() => {
+        let eventData = realm.objects(GroupEvents).filtered("eventId == $0", event)
+
+        setEventData(eventData)
+    }, [isFocused])
 
     const truncateText = (text:string, limit:number) => {
         if (text.length > limit) {
@@ -47,9 +58,31 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
     const deleteEvent = (eventId:string) => {
         const event = realm.objects(GroupEvents).filtered("eventId == $0", eventId)
 
+        deleteWorkoutsAndTrainingWorkouts(eventId);
+
         realm.write(() => {
             realm.delete(event)
         })
+    }
+
+    const deleteWorkoutsAndTrainingWorkouts = (eventId:string) => {
+
+        const trainingWorkouts = realm.objects(TrainingWorkout).filtered("eventId == $0", eventId)
+        
+
+        for(let i = 0; i < trainingWorkouts.length; i++)
+        {
+            const generalWorkout = realm.objects(Workouts).filtered("workoutId == $0", trainingWorkouts[i]._id)
+
+            realm.write(() => {
+                realm.delete(generalWorkout)
+            })
+
+            realm.write(() => {
+                realm.delete(trainingWorkouts[i])
+            })
+        }
+
     }
 
     const handleConfirmDeletion = (eventId:string) => {
@@ -65,16 +98,12 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
             },
             {
               text: 'OK',
-              onPress: () => {deleteEvent(eventId); goBack()},
+              onPress: () => {deleteEvent(eventId); goBack();},
             },
           ],
           { cancelable: false }
         );
       };
-
-
-    let eventData = realm.objects(GroupEvents).filtered("eventId == $0", event)
-    const [eventUseState, setEventUseState] = useState<any>(eventData)
 
     const formatDate = (date:Date) => {
         const targetDate = new Date(date);
@@ -201,17 +230,44 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
         let usersReacted = eventData[0].usersReacted;
         let reactions = eventData[0].reactions;
 
+        let originalReaction = "";
+
         if (usersReacted.includes(user.id)) {
             let index = usersReacted.indexOf(user.id);
 
+            originalReaction = reactions[index]
+
             realm.write(() => {
-                if (reactions[index] === interest) {
-                reactions[index] = "null";
-                } else {
-                reactions[index] = interest;
+                if (reactions[index] === interest) 
+                {
+                    reactions[index] = "null";
+                } 
+                else 
+                {
+                    reactions[index] = interest;
                 }
+
                 eventData[0].reactions = reactions;
             });
+
+            if(originalReaction == interest)
+            {
+                console.log("delete training workout")
+                deleteTrainingWorkout();
+            }
+            else
+            {
+                if(interest == "declined")
+                {
+                    console.log("delete training workout")
+                    deleteTrainingWorkout()
+                }
+                else if(interest == "interested")
+                {
+                    console.log("create training workout")
+                    createTrainingWorkout();
+                }
+            }
         }
         else
         {
@@ -219,11 +275,58 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
             realm.write(() => {
                 eventData[0].usersReacted.push(user.id),
                 eventData[0].reactions.push(interest)
-              });
+            });
+
+            console.log("create training workout")
+            createTrainingWorkout();
         }
 
-        eventData = realm.objects(GroupEvents).filtered("eventId == $0", event)
-        setEventUseState(realm.objects(GroupEvents).filtered("eventId == $0", event)) 
+        setEventData(realm.objects(GroupEvents).filtered("eventId == $0", event)) 
+        
+    }
+
+    const createTrainingWorkout = () => {
+
+        let userData = realm.objects(Users).filtered("userId == $0", user.id)
+        let id = new BSON.ObjectID();
+
+        realm.write(() => {
+            return new TrainingWorkout(realm, {
+                _id: id,
+                userId: user?.id,
+                totalDuration: ((eventData[0].endDate?.getTime() ?? 0) - (eventData[0].startDate?.getTime() ?? 0)),
+                dateCreated: eventData[0].startDate,
+                name: eventData[0].name,
+                eventId: eventData[0].eventId,
+            });
+        });
+
+        realm.write(() => {
+            return new Workouts(realm, {
+                _id: new BSON.ObjectID(),
+                userId: user?.id,
+                dateCreated: eventData[0].startDate,
+                userStatus: userData[0].status ?? "Healthy",
+                workoutId: id,
+                workoutType: "Training"
+            });
+        })
+    }
+
+    const deleteTrainingWorkout = () => {
+        const trainingWorkout = realm.objects(TrainingWorkout).filtered("eventId == $0 AND userId == $1", eventData[0].eventId, user.id)
+        const workout = realm.objects(Workouts).filtered("workoutId == $0 AND userId == $1", eventData[0]._id, user.id);
+
+        if(trainingWorkout.length > 0)
+        {
+            realm.write(() => {
+                realm.delete(trainingWorkout)
+            })
+
+            realm.write(() => {
+                realm.delete(workout)
+            })
+        }
     }
 
     const getNumInterested = () => {
@@ -262,11 +365,22 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
             mutableSubs.add(
                 realm.objects(Users)
             )
+            mutableSubs.add(
+                realm.objects(TrainingWorkout)
+            )
         });
         }, [realm, user]);
 
     return (
         <>
+        {
+            !eventData[0] &&
+            <>
+            </>
+        }
+        {
+            eventData[0] &&
+            <>
             <View style={{width: '100%', height: 60, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                 <TouchableOpacity onPress={goBack} style={styles.closeButton}>
                     <MaterialCommunityIcons name="arrow-left" size={40}/>
@@ -285,8 +399,8 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
             <ScrollView contentContainerStyle={styles.container}>
                 <View style={styles.conatinerDates}>
                     <View>
-                        <Text style={[styles.dateText, {fontSize: 30, color: colors.blue}]}>{formatTo24HourTime(eventData[0].startDate ?? new Date())}</Text>
-                        <Text style={[styles.dateText, {fontSize: 25, color: colors.blue}]}>{getDuration(eventData[0].startDate ?? new Date(), eventData[0].endDate ?? new Date())}</Text>
+                        <Text style={[styles.dateText, {fontSize: 30, color: colors.green}]}>{formatTo24HourTime(eventData[0].startDate ?? new Date())}</Text>
+                        <Text style={[styles.dateText, {fontSize: 25, color: colors.green}]}>{getDuration(eventData[0].startDate ?? new Date(), eventData[0].endDate ?? new Date())}</Text>
                         <Text style={styles.dateText}>{formatDate(eventData[0].startDate ?? new Date())}</Text>
                     </View>
                     
@@ -306,7 +420,7 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
                     <View>
                         <Text style={{fontWeight: '800', fontSize: 20, marginRight: 10, textAlign: 'center', marginBottom: 5}}>Event Links</Text>
                         {
-                            eventData[0].linkTitles.map((item, index) => (
+                            eventData[0].linkTitles.map((item:any, index:any) => (
                                 ( item != "") ? (
                                     <TouchableOpacity key={new BSON.ObjectID().toString()} onPress={() => goToLink(eventData[0].links[index])} style={styles.link}>
                                         <Text style={styles.linkText}>{item}</Text>
@@ -330,7 +444,7 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
                 </View>
                 
                 {
-                    eventData[0].usersReacted.map((item, index) => (
+                    eventData[0].usersReacted.map((item:any, index:any) => (
                         (item != "" && eventData[0].reactions[index] == "interested") ? (
                             <View key={new BSON.ObjectID().toString()} style={styles.profile}>
                                 <Image source={getProfilePicture(item)} style={styles.image}/>
@@ -347,7 +461,7 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
                     <Text style={[styles.usersAmount, {backgroundColor: colors.red}]}>{getNumDeclined()}</Text>
                 </View>
                 {
-                    eventData[0].usersReacted.map((item, index) => (
+                    eventData[0].usersReacted.map((item:any, index:any) => (
                         (item != "" && eventData[0].reactions[index] == "declined") ? (
                             
                             <View key={new BSON.ObjectID().toString()} style={styles.profile}>
@@ -361,6 +475,9 @@ export const GroupEventScreen = ({ navigation, route}: GroupEventScreenProps) =>
                </View>
             </ScrollView>
 
+            </>
+        }
+            
            
         </>
         

@@ -97,7 +97,7 @@ export const StackedBarChartComponent = (props: StackedBarChartComponentProps) =
           dataArray.push({
             name: "Healthy",
             workouts: totalHealthy,
-            color: colors.blue
+            color: colors.green
           })
 
           dataArray.push({

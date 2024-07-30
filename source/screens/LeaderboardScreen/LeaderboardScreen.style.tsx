@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         marginTop: 10,
         height: 40,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
       },
 
     buttonText: {
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         borderWidth: 3,
-        borderColor: colors.blue,
+        borderColor: colors.green,
         display: 'flex',
         justifyContent: 'space-evenly',
         alignItems: 'center',
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
 
     selected: {
         borderWidth: 0,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
     },
 
     containerLeaderBoard: {

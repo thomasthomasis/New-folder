@@ -294,7 +294,7 @@ You are advised to review this Privacy Policy periodically for any changes. Chan
           If you have any questions about this Privacy Policy, You can contact us:{"\n"}
           </Text>
           <TouchableOpacity onPress={() => goToLink('mailto:contact@ultitracker.pro')}>
-              <Text style={{color: colors.blue, fontWeight: '900'}}>
+              <Text style={{color: colors.green, fontWeight: '900'}}>
                   By email: ultitrackerltd@gmail.com
               </Text>
           </TouchableOpacity>
@@ -957,7 +957,7 @@ Service will be uninterrupted, uncorrupted, timely, or error-free.{"\n"}
       <Text style={styles.h4}>
       Don't hesitate to contact us if you have any questions.{"\n"}{"\n"}
       <TouchableOpacity onPress={() => goToLink('mailto:contact@ultitracker.pro')}>
-          <Text style={{color: colors.blue, fontWeight: '900', fontSize: 20}}>
+          <Text style={{color: colors.green, fontWeight: '900', fontSize: 20}}>
           Via Email: contact@ultitracker.pro{"\n"}
           </Text>
       </TouchableOpacity>
@@ -997,7 +997,7 @@ Service will be uninterrupted, uncorrupted, timely, or error-free.{"\n"}
             <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center',}}>
               <Text style={{fontWeight: '600', fontSize: 16}}>Already have an account?</Text>
               <TouchableOpacity onPress={() => setIsInSignUpMode(false)}>
-                <Text style={{color: colors.blue, fontWeight: '600', fontSize: 16}}> Login</Text>
+                <Text style={{color: colors.green, fontWeight: '600', fontSize: 16}}> Login</Text>
               </TouchableOpacity> 
             </View>
            
@@ -1011,7 +1011,7 @@ Service will be uninterrupted, uncorrupted, timely, or error-free.{"\n"}
             <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center', marginBottom: 30,}}>
               <Text style={{fontWeight: '600', fontSize: 16}}>Dont have an account?</Text>
               <TouchableOpacity onPress={() => setIsInSignUpMode(true)}>
-                <Text style={{color: colors.blue, fontWeight: '600', fontSize: 16}}> Signup</Text>
+                <Text style={{color: colors.green, fontWeight: '600', fontSize: 16}}> Signup</Text>
               </TouchableOpacity> 
             </View>
            
@@ -1100,7 +1100,7 @@ Service will be uninterrupted, uncorrupted, timely, or error-free.{"\n"}
 
         <View style={{width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 50,}}>
           <TouchableOpacity style={[{backgroundColor: '#f3f3f3', width: 100, height: 70, borderWidth: 2, borderRadius: 15, borderColor: 'lightgray', display: 'flex', justifyContent: 'center', alignItems: 'center'}, shadow.shadow]}>
-            <MaterialCommunityIcons name="google" color={colors.blue} size={40}/>
+            <MaterialCommunityIcons name="google" color={colors.green} size={40}/>
           </TouchableOpacity>
         </View>
         
@@ -1112,7 +1112,7 @@ Service will be uninterrupted, uncorrupted, timely, or error-free.{"\n"}
           </Text>
           <View style={{display: 'flex', flexDirection: 'row', marginBottom: 30,}}>
           <TouchableOpacity onPress={() => {setShowTermsAndConditions(true); setShowPrivacyPolicy(false)}}>
-              <Text style={{color: colors.blue, fontWeight: '900'}}>
+              <Text style={{color: colors.green, fontWeight: '900'}}>
                   Terms of Service 
               </Text>
           </TouchableOpacity>
@@ -1120,7 +1120,7 @@ Service will be uninterrupted, uncorrupted, timely, or error-free.{"\n"}
                    and 
               </Text>
               <TouchableOpacity onPress={() => {setShowPrivacyPolicy(true); setShowTermsAndConditions(false)}}>
-              <Text style={{color: colors.blue, fontWeight: '900'}}>
+              <Text style={{color: colors.green, fontWeight: '900'}}>
                   Privacy Policy
               </Text>
           </TouchableOpacity>

@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     bigCircle: {
         width: 100,
         aspectRatio: 1/1,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
         borderRadius: 100,
 
         display: 'flex',
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     smallCircle: {
         width: 40,
         aspectRatio: 1/1,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
         borderRadius: 30,
 
         display: 'flex',
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     continueButton: {
         width: 200,
         height: 50,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',

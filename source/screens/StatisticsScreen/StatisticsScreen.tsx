@@ -13,9 +13,13 @@ import { RouteProp } from '@react-navigation/native'
 import { colors } from '../../sharedStyling/Colors';
 import { useFocusEffect } from '@react-navigation/native';
 import { Workouts } from '../../schemas/WorkoutSchema';
+import Modal from 'react-native-modal';
 import { GeneralLineChartComponent } from '../../components/GeneralLineChartComponent/GeneralLineChartComponent';
 import { GeneralPieChart } from '../../components/GeneralPieChartComponent/GeneralPieChartComponent';
 import { StackedBarChartComponent } from '../../components/StackedBarChartComponent/StackedBarChartComponent';
+import { HeaderComponent } from '../../components/HeaderComponent/HeaderComponent';
+import Storage from 'react-native-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type StatisticsScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'Statistics'>; // Adjust according to your navigation stack
@@ -44,6 +48,14 @@ export const StatisticsScreen = ({ navigation, route}: StatisticsScreenProps) =>
     navigation.navigate("ProfileSettings")
   }
 
+  const logResitanceWorkout = () => {
+    navigation.navigate("LogWorkoutResistance", {continuingWorkout: false, navigationScreen: 'Home'})
+  }
+
+  const logCardioWorkout = () => {
+    navigation.navigate("LogWorkoutCardio", { continuingWorkout: false, navigationScreen: 'Home'})
+  }
+
   const goToStatsScreen = (type:string) => {
     if(type == "Resistance")
     {
@@ -55,9 +67,39 @@ export const StatisticsScreen = ({ navigation, route}: StatisticsScreenProps) =>
     }
   }
 
-
-
   const [userData, setUserData] = useState<any>(realm.objects("Users").sorted('_id').filtered("userId == $0", userId));
+  const [modalVisible, setModalVisible] = useState<boolean>(false)
+  const [currentWorkout, setCurrentWorkout] = useState<any>([]);
+  const [currentWorkoutType, setCurrentWorkoutType] = useState<string>('')
+  const [continuingWorkout, setContinuingWorkout] = useState<boolean>(false)
+
+  const closeModal = () => {
+    setModalVisible(false)
+  }
+
+  const storage = new Storage({
+    size: 1000,
+    storageBackend: AsyncStorage,
+  })
+
+  const loadCurrentWorkout = () => {
+    storage.load({
+      key: 'currentWorkout'
+    })
+    .then(ret => {setCurrentWorkout(ret.forms); console.log(ret.forms.length)})
+    .catch(err => {
+      console.warn(err.message);
+    })
+
+    storage.load({
+      key: 'workoutType'
+    })
+    .then(ret => {setCurrentWorkoutType(ret.workoutType)})
+    .catch(err => {
+      console.warn(err.message);
+    })
+  }
+
 
   useFocusEffect(
     React.useCallback(() => {
@@ -74,6 +116,60 @@ export const StatisticsScreen = ({ navigation, route}: StatisticsScreenProps) =>
   
     return `${day}.${month}.${year}`;
   }
+
+  const handleConfirmDeleteCurrentWorkout = (workoutType:string) => {
+    // Show confirmation popup
+    Alert.alert(
+      'Confirm Action',
+      'Are you sure you want to delete your current workout?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+
+            
+            storage.save({
+              key: 'currentWorkout',
+              data: {
+                forms: [],
+              }
+            })
+        
+            storage.save({
+              key: 'workoutType',
+              data: {
+                workoutType: "",
+              }
+            })
+            setCurrentWorkout([])
+            setCurrentWorkoutType("")
+
+            if(workoutType == "Cardio")
+            {
+              closeModal()
+              logCardioWorkout()
+              
+            }
+            else if(workoutType == "Resistance")
+            {
+              closeModal()
+              logResitanceWorkout()
+              
+            }
+
+            
+          }
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
 
   const [imageSource, setImageSource] = useState(require("../../assets/3.png"))
 
@@ -229,6 +325,10 @@ export const StatisticsScreen = ({ navigation, route}: StatisticsScreenProps) =>
           {
             setImageSource(require('../../assets/4.png'))
           }
+          else
+          {
+            setImageSource(require('../../assets/defaultPFP.png'))
+          }
       }
         
       }, [userData])
@@ -241,18 +341,15 @@ export const StatisticsScreen = ({ navigation, route}: StatisticsScreenProps) =>
       }
       {
         !loading &&
+        <>
+        <HeaderComponent title={"Statistics"} goToProfileSettings={goToProfileSettings} />
+
+        <TouchableOpacity style={[styles.modalButton, shadow.shadow]} onPress={() => setModalVisible(true)}>
+          <MaterialCommunityIcons name={"plus"} size={40} color={'white'}/>
+        </TouchableOpacity>
         <ScrollView>
 
-        <View style={styles.header}>
-            <Text style={styles.headerText}>Statistics</Text>
-            <View style={{marginRight: 15, display: 'flex', flexDirection: 'row',  alignItems: 'center'}} >
-              <MaterialCommunityIcons name={"bell-outline"} size={35}/>
-              <TouchableOpacity onPress={() => goToProfileSettings()}>
-                <Image source={imageSource} style={styles.headerImage}/>
-              </TouchableOpacity>
-            </View>
-            
-        </View>
+       
 
        <View style={styles.container}>
         <View style={[styles.containerProfile, shadow.shadow]}>
@@ -291,19 +388,19 @@ export const StatisticsScreen = ({ navigation, route}: StatisticsScreenProps) =>
           workoutData.length > 0 &&
           <>
           <View style={styles.containerFilters}>
-            <TouchableOpacity style={[styles.filterButton, activeFilter == 0 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(0)}>
+            <TouchableOpacity style={[styles.filterButton, activeFilter == 0 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(0)}>
               <Text style={styles.filterButtonText}>Max</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.filterButton, activeFilter == 1 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(1)}>
+            <TouchableOpacity style={[styles.filterButton, activeFilter == 1 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(1)}>
               <Text style={styles.filterButtonText}>1Y</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.filterButton, activeFilter == 2 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(2)}>
+            <TouchableOpacity style={[styles.filterButton, activeFilter == 2 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(2)}>
               <Text style={styles.filterButtonText}>6M</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.filterButton, activeFilter == 3 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(3)}>
+            <TouchableOpacity style={[styles.filterButton, activeFilter == 3 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(3)}>
               <Text style={styles.filterButtonText}>3M</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.filterButton, activeFilter == 4 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(4)}>
+            <TouchableOpacity style={[styles.filterButton, activeFilter == 4 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(4)}>
               <Text style={styles.filterButtonText}>1M</Text>
             </TouchableOpacity>
         </View>
@@ -331,6 +428,49 @@ export const StatisticsScreen = ({ navigation, route}: StatisticsScreenProps) =>
 
        </View>
        </ScrollView>
+
+       <Modal
+          isVisible={modalVisible}
+          swipeDirection={['down']}
+          onSwipeComplete={closeModal}
+          onBackdropPress={closeModal}
+          style={styles.modalView}
+      >
+          <View style={styles.modalContent}>
+          <View style={styles.containerModal}> 
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalHeaderText}>Log a Workout</Text> 
+            </View>
+            {
+              currentWorkout.length > 0 &&
+              <View>
+                <TouchableOpacity style={[styles.modalCard, shadow.shadow]} onPress={() => {console.log("continue workout")}}>
+                  <Text style={styles.buttonText}>Continue Workout</Text>
+                </TouchableOpacity>
+              </View>
+            }
+            <View style={styles.rowModal}>
+              <TouchableOpacity style={[styles.modalCard, shadow.shadow]} onPress={() => {handleConfirmDeleteCurrentWorkout("Cardio")}}>
+                <Text style={{fontSize: 20, fontWeight: '800', color: colors.text}}>Cardio</Text>
+                <MaterialCommunityIcons name="heart" color={colors.red} size={55}/>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={[styles.modalCard, shadow.shadow]} onPress={() => {handleConfirmDeleteCurrentWorkout("Resistance")}}>
+                <Text style={{fontSize: 20, fontWeight: '800', color: colors.text}}>Strength</Text>
+                <MaterialCommunityIcons name="dumbbell" color={colors.black} size={55}/>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={[styles.modalCard, shadow.shadow]} onPress={() => {closeModal();}}>
+                <Text style={{fontSize: 20, fontWeight: '800', color: colors.text}}>Throwing</Text>
+                <MaterialCommunityIcons name="disc" color={colors.green} size={55}/>
+              </TouchableOpacity>
+            </View>
+            
+          </View>
+              
+          </View>
+      </Modal>
+       </>
           }
         </>
       

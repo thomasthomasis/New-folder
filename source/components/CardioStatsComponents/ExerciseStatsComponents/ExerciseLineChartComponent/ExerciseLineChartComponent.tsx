@@ -458,7 +458,7 @@ export const ExerciseLineChartComponent = (props: CardioExerciseLineChartCompone
         datasets: [
             { 
                 data: dataTotalDistance,
-                color: (opacity = 1) => colors.blue,
+                color: (opacity = 1) => colors.green,
                 strokeWidth: 2,
             },
         ],

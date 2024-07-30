@@ -21,6 +21,7 @@ import { UserStatistics } from '../../schemas/UserStatisticsSchema';
 import { CardioWorkout } from '../../schemas/CardioWorkoutSchema';
 import { ResistanceWorkout } from '../../schemas/ResistanceWorkoutSchema';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import { HeaderComponent } from '../../components/HeaderComponent/HeaderComponent';
 
 type LogWorkoutProps = {
     navigation: StackNavigationProp<RootStackParamList, 'LogWorkout'>;
@@ -33,11 +34,11 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
   const isFocused = useIsFocused()
 
   const logResitanceWorkout = () => {
-    navigation.navigate("LogWorkoutResistance", {continuingWorkout: false})
+    navigation.navigate("LogWorkoutResistance", {continuingWorkout: false, navigationScreen: 'LogWorkout'})
   }
 
   const logCardioWorkout = () => {
-    navigation.navigate("LogWorkoutCardio", { continuingWorkout: false})
+    navigation.navigate("LogWorkoutCardio", { continuingWorkout: false, navigationScreen: 'LogWorkout'})
   }
 
   const goToProfileSettings = () => {
@@ -85,6 +86,59 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
     setModalVisible(false)
   }
 
+  const handleConfirmDeleteCurrentWorkout = (workoutType:string) => {
+    // Show confirmation popup
+    Alert.alert(
+      'Confirm Action',
+      'Are you sure you want to delete your current workout?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+
+            
+            storage.save({
+              key: 'currentWorkout',
+              data: {
+                forms: [],
+              }
+            })
+        
+            storage.save({
+              key: 'workoutType',
+              data: {
+                workoutType: "",
+              }
+            })
+            setCurrentWorkout([])
+            setCurrentWorkoutType("")
+
+            if(workoutType == "Cardio")
+            {
+              closeModal()
+              logCardioWorkout()
+              
+            }
+            else if(workoutType == "Resistance")
+            {
+              closeModal()
+              logResitanceWorkout()
+              
+            }
+
+            
+          }
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
   //set profile picture
   useEffect(() => {
     //console.log(userData)
@@ -113,6 +167,10 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
         else if(profilePicture.includes('4'))
         {
           setImageSource(require('../../assets/4.png'))
+        }
+        else
+        {
+          setImageSource(require('../../assets/defaultPFP.png'))
         }
     }
       
@@ -144,29 +202,17 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
     <>
     {
       isLoading ? (
-        <ActivityIndicator size="large" color={colors.blue}/>
+        <ActivityIndicator size="large" color={colors.green}/>
       ) :
       (
         <>
+        <HeaderComponent title={"UltiTracker"} goToProfileSettings={goToProfileSettings}/>
 
-      
-
-        <View style={styles.header}>
-            <Text style={styles.headerText}>UltiTracker</Text>
-            <View style={{marginRight: 15, display: 'flex', flexDirection: 'row',  alignItems: 'center'}} >
-              <MaterialCommunityIcons name={"bell-outline"} size={35}/>
-              <TouchableOpacity onPress={() => goToProfileSettings()}>
-                <Image source={imageSource} style={styles.headerImage}/>
-              </TouchableOpacity>
-            </View>
-            
-        </View>
-
-        <TouchableOpacity style={[{position: 'absolute', bottom: 20, right: 20, backgroundColor: colors.blue, width: 70, height: 70, borderRadius: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2}, shadow.shadow]} onPress={() => setModalVisible(true)}>
-          <MaterialCommunityIcons name={"plus"} size={50} color={'white'}/>
+        <TouchableOpacity style={[styles.modalButton, shadow.shadow]} onPress={() => setModalVisible(true)}>
+          <MaterialCommunityIcons name={"plus"} size={40} color={'white'}/>
         </TouchableOpacity>
 
-      <Modal
+        <Modal
           isVisible={modalVisible}
           swipeDirection={['down']}
           onSwipeComplete={closeModal}
@@ -179,25 +225,27 @@ export const LogWorkoutScreen = ({ navigation }: LogWorkoutProps) => {
               <Text style={styles.modalHeaderText}>Log a Workout</Text> 
             </View>
             {
-              currentWorkout &&
+              currentWorkout.length > 0 &&
               <View>
-                <TouchableOpacity style={styles.continueButton} onPress={() => {console.log("continue workout")}}>
+                <TouchableOpacity style={[styles.modalCard, shadow.shadow]} onPress={() => {console.log("continue workout")}}>
                   <Text style={styles.buttonText}>Continue Workout</Text>
                 </TouchableOpacity>
               </View>
             }
             <View style={styles.rowModal}>
-              <TouchableOpacity style={[styles.gridOption, {backgroundColor: '#ED97A5'}, shadow.shadow]} onPress={() => {closeModal(); logCardioWorkout()}}>
-                <View style={[styles.circle, {backgroundColor: colors.red}]}>
-                  <Image style={styles.image} source={require('../../assets/Heart.png')} />
-                </View>
-                <Text style={styles.plus}>+</Text>
+              <TouchableOpacity style={[styles.modalCard, shadow.shadow]} onPress={() => {handleConfirmDeleteCurrentWorkout("Cardio")}}>
+                <Text style={{fontSize: 20, fontWeight: '800', color: colors.text}}>Cardio</Text>
+                <MaterialCommunityIcons name="heart" color={colors.red} size={55}/>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.gridOption, {backgroundColor: '#afb0b2'}, shadow.shadow]} onPress={() => {closeModal(); logResitanceWorkout()}}>
-                <View style={[styles.circle, {backgroundColor: colors.black}]}>
-                  <MaterialCommunityIcons name="weight" color={'black'} size={80}/>
-                </View>
-                <Text style={styles.plus}>+</Text>
+
+              <TouchableOpacity style={[styles.modalCard, shadow.shadow]} onPress={() => {handleConfirmDeleteCurrentWorkout("Resistance")}}>
+                <Text style={{fontSize: 20, fontWeight: '800', color: colors.text}}>Strength</Text>
+                <MaterialCommunityIcons name="dumbbell" color={colors.black} size={55}/>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={[styles.modalCard, shadow.shadow]} onPress={() => {closeModal();}}>
+                <Text style={{fontSize: 20, fontWeight: '800', color: colors.text}}>Throwing</Text>
+                <MaterialCommunityIcons name="disc" color={colors.green} size={55}/>
               </TouchableOpacity>
             </View>
             

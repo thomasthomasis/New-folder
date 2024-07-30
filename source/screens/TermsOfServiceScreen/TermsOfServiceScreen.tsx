@@ -678,7 +678,7 @@ Service will be uninterrupted, uncorrupted, timely, or error-free.{"\n"}
         <Text style={styles.h4}>
         Don't hesitate to contact us if you have any questions.{"\n"}{"\n"}
         <TouchableOpacity onPress={() => goToLink('mailto:contact@ultitracker.pro')}>
-            <Text style={{color: colors.blue, fontWeight: '900', fontSize: 20}}>
+            <Text style={{color: colors.green, fontWeight: '900', fontSize: 20}}>
             Via Email: contact@ultitracker.pro{"\n"}
             </Text>
         </TouchableOpacity>

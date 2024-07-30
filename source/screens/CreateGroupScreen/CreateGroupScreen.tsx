@@ -108,7 +108,7 @@ export const CreateGroupScreen = ({ navigation, route }: CreateGroupScreenProps)
         { color: '#ec9513', light: '#f6cc8e', dark: '#c37b10' }, // Light Orange, Dark Orange
         { color: '#f1f627', light: '#f8fb94', dark: '#b2b707' }, // Light Yellow, Dark Yellow
         { color: colors.green, light: '#90EE90', dark: '#1c8721' },  // Light Green, Dark Green
-        { color: colors.blue, light: '#ADD8E6', dark: '#2639be' },   // Light Blue, Dark Blue
+        { color: colors.green, light: '#ADD8E6', dark: '#2639be' },   // Light Blue, Dark Blue
         { color: colors.purple, light: '#D8BFD8', dark: '#9c27a0' }, // Light Purple, Dark Purple
         { color: colors.pink, light: '#f1abdf', dark: '#db2dae' }    // Light Pink, Dark Pink
       ];

@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
 
     editButton: {
         width: 120,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
         padding: 10,
 
         display: 'flex',
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     },
 
     button: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
         padding: 10,
         borderRadius: 10,
     },

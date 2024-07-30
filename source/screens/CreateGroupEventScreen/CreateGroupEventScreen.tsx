@@ -227,7 +227,7 @@ export const CreateGroupEventScreen = ({ navigation, route}: CreateGroupEventScr
         { color: '#ec9513', light: '#f6cc8e', dark: '#c37b10' }, // Light Orange, Dark Orange
         { color: '#f1f627', light: '#f8fb94', dark: '#b2b707' }, // Light Yellow, Dark Yellow
         { color: colors.green, light: '#90EE90', dark: '#1c8721' },  // Light Green, Dark Green
-        { color: colors.blue, light: '#ADD8E6', dark: '#2639be' },   // Light Blue, Dark Blue
+        { color: colors.green, light: '#ADD8E6', dark: '#2639be' },   // Light Blue, Dark Blue
         { color: colors.purple, light: '#D8BFD8', dark: '#9c27a0' }, // Light Purple, Dark Purple
         { color: colors.pink, light: '#f1abdf', dark: '#db2dae' }    // Light Pink, Dark Pink
       ];
@@ -243,6 +243,12 @@ export const CreateGroupEventScreen = ({ navigation, route}: CreateGroupEventScr
         if(startDate > endDate)
         {
             Alert.alert("The end date cannot be before the start date!")
+            return;
+        }
+
+        else if(name == "")
+        {
+            Alert.alert("You must enter a name")
             return;
         }
 
@@ -467,16 +473,16 @@ export const CreateGroupEventScreen = ({ navigation, route}: CreateGroupEventScr
                     <View style={styles.containerInput}>
                             <Text style={styles.inputTitle}>Frequency</Text>
                             <View style={styles.containerFrequency}>
-                                <TouchableOpacity onPress={() => setRepeatingFrequency("Daily")} style={[styles.frequencyOption, repeatingFrequency == "Daily" && {backgroundColor: colors.blue}]}>
+                                <TouchableOpacity onPress={() => setRepeatingFrequency("Daily")} style={[styles.frequencyOption, repeatingFrequency == "Daily" && {backgroundColor: colors.green}]}>
                                     <Text style={styles.frequencyOptionText}>Daily</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setRepeatingFrequency("Weekly")} style={[styles.frequencyOption, repeatingFrequency == "Weekly" && {backgroundColor: colors.blue}]}>
+                                <TouchableOpacity onPress={() => setRepeatingFrequency("Weekly")} style={[styles.frequencyOption, repeatingFrequency == "Weekly" && {backgroundColor: colors.green}]}>
                                     <Text style={styles.frequencyOptionText}>Weekly</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setRepeatingFrequency("Monthly")} style={[styles.frequencyOption, repeatingFrequency == "Monthly" && {backgroundColor: colors.blue}]}>
+                                <TouchableOpacity onPress={() => setRepeatingFrequency("Monthly")} style={[styles.frequencyOption, repeatingFrequency == "Monthly" && {backgroundColor: colors.green}]}>
                                     <Text style={styles.frequencyOptionText}>Monthly</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setRepeatingFrequency("Yearly")} style={[styles.frequencyOption, repeatingFrequency == "Yearly" && {backgroundColor: colors.blue}]}>
+                                <TouchableOpacity onPress={() => setRepeatingFrequency("Yearly")} style={[styles.frequencyOption, repeatingFrequency == "Yearly" && {backgroundColor: colors.green}]}>
                                     <Text style={styles.frequencyOptionText}>Yearly</Text>
                                 </TouchableOpacity>
                             </View>

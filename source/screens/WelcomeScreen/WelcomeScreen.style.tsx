@@ -25,10 +25,10 @@ const styles = StyleSheet.create({
     },
     mainButton: {
       width: 350,
-      backgroundColor: colors.blue,
+      backgroundColor: colors.green,
     },
     secondaryButton: {
-      color: colors.blue,
+      color: colors.green,
     },
 
     input: {
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     button: {
       width: screenWidth - 50,
       height: 50,
-      backgroundColor: colors.blue,
+      backgroundColor: colors.green,
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',

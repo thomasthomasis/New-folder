@@ -21,10 +21,19 @@ export const SubmitCompletion = ({ navigation, route}: SubmitCompletionProps) =>
     const realm = useRealm();
     const user = useUser();
 
-    const { levelUp, gainedXp } = route.params;
+    const { levelUp, gainedXp, navigationScreen } = route.params;
 
     const goToLogWorkout = () => {
-        navigation.navigate("LogWorkout")
+
+        if(navigationScreen == "LogWorkout")
+        {
+            navigation.navigate("LogWorkout")
+        }
+        else if(navigationScreen == "Home")
+        {
+            navigation.navigate("Home");
+        }
+        
     }
   
     const userStats = useQuery(UserStatistics).filtered("userId == $0", user.id);
@@ -68,7 +77,7 @@ export const SubmitCompletion = ({ navigation, route}: SubmitCompletionProps) =>
                 </View>
                 <View style={{display: 'flex', flexDirection: 'column'}}>
                     <View style={styles.progressBar}>
-                        <View style={[styles.bar, {width: leveled, backgroundColor: colors.blue}]}></View>
+                        <View style={[styles.bar, {width: leveled, backgroundColor: colors.green}]}></View>
                         <View style={[styles.bar, {width: unleveled, backgroundColor: 'lightgray'}]}></View>
                     </View>
                     <View style={{display: 'flex', flexDirection: 'row', justifyContent:'space-between'}}>

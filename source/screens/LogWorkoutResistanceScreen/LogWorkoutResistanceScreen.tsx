@@ -30,14 +30,14 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
   const realm = useRealm();
   const user = useUser();
 
-  const { continuingWorkout } = route.params;
+  const { continuingWorkout, navigationScreen } = route.params;
 
   const goBack = () => {
     navigation.goBack()
   }
 
   const goToSubmitCompletion = (levelUp:boolean, gainedXp:number) => {
-    navigation.navigate("SubmitCompletion", {levelUp: levelUp, gainedXp: gainedXp})
+    navigation.navigate("SubmitCompletion", {levelUp: levelUp, gainedXp: gainedXp, navigationScreen: navigationScreen})
   }
 
   const goToAddExercise = () => {
@@ -968,7 +968,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
       return (
         <>
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(0)} style={[styles.accordionHeader, {borderTopLeftRadius: 10, borderTopRightRadius: 10} , !collapsed[0] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(0)} style={[styles.accordionHeader, {borderTopLeftRadius: 10, borderTopRightRadius: 10} , !collapsed[0] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Neck</Text>
             </View>
@@ -1006,7 +1006,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(1)} style={[styles.accordionHeader, !collapsed[1] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(1)} style={[styles.accordionHeader, !collapsed[1] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Back</Text>
             </View>
@@ -1045,7 +1045,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         </View>
 
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(2)} style={[styles.accordionHeader, !collapsed[2] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(2)} style={[styles.accordionHeader, !collapsed[2] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Shoulders</Text>
             </View>
@@ -1082,7 +1082,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(3)} style={[styles.accordionHeader, !collapsed[3] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(3)} style={[styles.accordionHeader, !collapsed[3] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Chest</Text>
             </View>
@@ -1119,7 +1119,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(4)} style={[styles.accordionHeader, !collapsed[4] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(4)} style={[styles.accordionHeader, !collapsed[4] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Biceps</Text>
             </View>
@@ -1157,7 +1157,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         </View>
 
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(5)} style={[styles.accordionHeader, !collapsed[5] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(5)} style={[styles.accordionHeader, !collapsed[5] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Triceps</Text>
             </View>
@@ -1194,7 +1194,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(6)} style={[styles.accordionHeader, !collapsed[6] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(6)} style={[styles.accordionHeader, !collapsed[6] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Forearms</Text>
             </View>
@@ -1231,7 +1231,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(7)} style={[styles.accordionHeader, !collapsed[7] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(7)} style={[styles.accordionHeader, !collapsed[7] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Core</Text>
             </View>
@@ -1269,7 +1269,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         </View>
 
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(8)} style={[styles.accordionHeader, !collapsed[8] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(8)} style={[styles.accordionHeader, !collapsed[8] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Quads</Text>
             </View>
@@ -1306,7 +1306,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(9)} style={[styles.accordionHeader, !collapsed[9] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(9)} style={[styles.accordionHeader, !collapsed[9] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Glutes</Text>
             </View>
@@ -1344,7 +1344,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(10)} style={[styles.accordionHeader, !collapsed[10] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(10)} style={[styles.accordionHeader, !collapsed[10] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Hip Flexors</Text>
             </View>
@@ -1382,7 +1382,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
         </View>
 
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(11)} style={[styles.accordionHeader, !collapsed[11] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(11)} style={[styles.accordionHeader, !collapsed[11] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Groin</Text>
             </View>
@@ -1419,7 +1419,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={styles.containerAccordion}>
-          <TouchableOpacity onPress={() => toggleCollapsed(12)} style={[styles.accordionHeader, !collapsed[12] && {backgroundColor: colors.blue}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(12)} style={[styles.accordionHeader, !collapsed[12] && {backgroundColor: colors.green}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Hamstrings</Text>
             </View>
@@ -1456,7 +1456,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={[styles.containerAccordion]}>
-          <TouchableOpacity onPress={() => toggleCollapsed(13)} style={[styles.accordionHeader, !collapsed[13] && {backgroundColor: colors.blue, borderBottomLeftRadius: 0, borderBottomRightRadius: 0}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(13)} style={[styles.accordionHeader, !collapsed[13] && {backgroundColor: colors.green, borderBottomLeftRadius: 0, borderBottomRightRadius: 0}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Calves</Text>
             </View>
@@ -1493,7 +1493,7 @@ export const LogWorkoutResistanceScreen = ({ navigation, route}: LogWorkoutResis
           </Collapsible>
         </View>
         <View style={[styles.containerAccordion, {marginBottom: 100}]}>
-          <TouchableOpacity onPress={() => toggleCollapsed(14)} style={[styles.accordionHeader, {borderBottomRightRadius: 10, borderBottomLeftRadius: 10}, !collapsed[14] && {backgroundColor: colors.blue, borderBottomLeftRadius: 0, borderBottomRightRadius: 0}]}>
+          <TouchableOpacity onPress={() => toggleCollapsed(14)} style={[styles.accordionHeader, {borderBottomRightRadius: 10, borderBottomLeftRadius: 10}, !collapsed[14] && {backgroundColor: colors.green, borderBottomLeftRadius: 0, borderBottomRightRadius: 0}]}>
             <View>
               <Text style={styles.accordionHeaderText}>Other</Text>
             </View>

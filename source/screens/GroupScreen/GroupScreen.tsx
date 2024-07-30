@@ -12,10 +12,8 @@ import Modal from 'react-native-modal';
 import { JoinGroupRequests } from "../../schemas/JoinGroupRequestsSchema";
 import { Users } from "../../schemas/UsersSchema";
 import React from "react";
-import { WorkoutDisplayScreen } from "../WorkoutDisplayScreen/WorkoutDisplayScreen";
 import { CardioWorkout } from "../../schemas/CardioWorkoutSchema";
 import { ResistanceWorkout } from "../../schemas/ResistanceWorkoutSchema";
-import { ProfileScreen } from "../ProfileScreen/ProfileScreen";
 import styles from "./GroupScreen.style";
 
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -245,9 +243,9 @@ export const GroupScreen = ({ navigation, route }:GroupScreenProps) => {
 
         <>
             <View style={styles.pageVisualiser}>
-                <TouchableOpacity onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 0) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 0 && {color: 'white', fontWeight: '800'}}>Events</Text></TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 1) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 1 && {color: 'white', fontWeight: '800'}}>History</Text></TouchableOpacity>
-                <TouchableOpacity onPress={() => handlePageChange(2)} style={[styles.bar, selectedPage == 2 && {backgroundColor: colors.blue}, (selectedGroup[0].color != null && selectedPage == 2) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 2 && {color: 'white', fontWeight: '800'}}>Leaderboard</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => handlePageChange(0)} style={[styles.bar, selectedPage == 0 && {backgroundColor: colors.green}, (selectedGroup[0].color != null && selectedPage == 0) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 0 && {color: 'white', fontWeight: '800'}}>Events</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => handlePageChange(1)} style={[styles.bar, selectedPage == 1 && {backgroundColor: colors.green}, (selectedGroup[0].color != null && selectedPage == 1) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 1 && {color: 'white', fontWeight: '800'}}>History</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => handlePageChange(2)} style={[styles.bar, selectedPage == 2 && {backgroundColor: colors.green}, (selectedGroup[0].color != null && selectedPage == 2) && {backgroundColor: selectedGroup[0].color}]}><Text style={selectedPage == 2 && {color: 'white', fontWeight: '800'}}>Leaderboard</Text></TouchableOpacity>
             </View>
             <PagerView style={styles.pagerView} initialPage={selectedPage} onPageSelected={(event) => {setSelectedPage(event.nativeEvent.position)}} scrollEnabled={true} ref={pagerRef}>
                 <Events key="1"/>

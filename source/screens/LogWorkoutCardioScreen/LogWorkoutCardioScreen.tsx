@@ -28,14 +28,14 @@ export const LogWorkoutCardioScreen = ({ navigation, route}: LogWorkoutCardioPro
   const realm = useRealm();
   const user = useUser();
 
-  const { continuingWorkout } = route.params;
+  const { continuingWorkout, navigationScreen } = route.params;
 
   const goBack = () => {
     navigation.goBack()
   }
 
   const goToSubmitCompletion = (levelUp:boolean, gainedXp:number) => {
-    navigation.navigate("SubmitCompletion", {levelUp: levelUp, gainedXp: gainedXp})
+    navigation.navigate("SubmitCompletion", {levelUp: levelUp, gainedXp: gainedXp, navigationScreen: navigationScreen})
   }
 
   const goToEditExercise = (exerciseId:string) => {

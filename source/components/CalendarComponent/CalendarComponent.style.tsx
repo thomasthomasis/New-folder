@@ -7,40 +7,31 @@ const screenWidth = Dimensions.get('window').width;
 const styles = StyleSheet.create({
 
     mainContainer: {
-      width: screenWidth - 20,
+      width: screenWidth - 48,
       backgroundColor: 'white',
-      marginTop: 15,
-      paddingLeft: 15,
-      paddingRight: 15,
-      paddingBottom: 20,
-      borderRadius: 25,
+      borderRadius: 32,
     },
     
     container: {
       width: '100%',
         flexDirection: 'row',
         flexWrap: 'wrap',
-        marginTop: 10,
-        marginBottom: 10,
+        paddingBottom: 16,
       },
 
       arrows: {
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        width: '90%',
+        width: '100%',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexDirection: 'row',
-        marginTop: 20,
-        marginBottom: 20,
+        marginTop: 24,
+        marginBottom: 12,
       },
 
       month: {
         fontWeight: '800',
-        fontSize: 20,
-        marginLeft: 20,
-        marginRight: 20,
+        color: colors.text,
       },
 
       weekdays: {
@@ -48,6 +39,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
+        marginTop: 4,
+        marginBottom: 4,
       },
 
       weekday: {
@@ -70,20 +63,17 @@ const styles = StyleSheet.create({
         display: 'flex',
         alignItems: 'center',
         borderRadius: 10,
-      },
-
-      dayText: {
-        fontSize: 16,
-        marginTop: 15,
-        fontWeight: '800',
+        paddingTop: 8,
+        paddingBottom: 8,
       },
 
       currentDay: {
         position: 'absolute',
-        width: '100%',
+        top: 1,
+        width: 32,
         aspectRatio: 1/1,
         borderWidth: 2,
-        borderColor: colors.blue,
+        borderColor: colors.green,
         borderRadius: 100,
       },
 
@@ -92,31 +82,31 @@ const styles = StyleSheet.create({
       },
 
       selectedDay: {
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
         borderRadius: 50,
       },
 
       selectedDayText: {
-        color: 'white',
+        color: colors.white,
       },
 
       title: {
         textAlign: 'center',
         fontSize: 20,
-        marginTop: 10,
       },
 
       currentDayCircle: {
         position: 'absolute',
-        width: '100%',
+        top: 1,
+        width: 32,
         aspectRatio: 1/1,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
         borderRadius: 100,
       },
 
       dots: {
         position: 'absolute',
-        bottom: 5,
+        bottom: 8,
         width: '90%',
         marginRight: 'auto',
         marginLeft: 'auto',
@@ -143,10 +133,10 @@ const styles = StyleSheet.create({
       },
 
       dot: {
-        width: 5,
-        height: 5,
-        backgroundColor: colors.blue,
-        borderRadius: 5,
+        width: 4,
+        height: 4,
+        backgroundColor: colors.green,
+        borderRadius: 4,
       },
 
       dotUserStatusInjured: {
@@ -171,6 +161,69 @@ const styles = StyleSheet.create({
         borderRadius: 2,
         zIndex: 2,
       },
+
+      modalContent: {
+        backgroundColor: '#f0f0f0',
+        padding: 10,
+        borderRadius: 20,
+      },
+
+      containerModal: {
+        width: '100%',
+        height: 250,
+        
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        marginRight: 'auto',
+        marginLeft: 'auto',
+        paddingTop: 10,
+    
+        display: 'flex',
+        flexDirection: 'column',
+      },
+    
+      modalView: {
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        margin: 0,
+      },
+    
+      modalHeader: {
+        marginTop: 20,
+        marginBottom: 20,
+        paddingLeft: 24,
+        paddingRight: 24,
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'row',
+      },
+
+      gridContainer: {
+        width: screenWidth - 48,
+        marginRight: 'auto',
+        marginLeft: 'auto',
+        display: 'flex',
+        flexDirection: 'row',
+        
+        justifyContent: 'center',
+      },
+
+      gridColumn: {
+        width: 50,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+
+      gridText: {
+        marginTop: 8,
+        marginBottom: 8,
+      },
+
+
     });
 
 export default styles;

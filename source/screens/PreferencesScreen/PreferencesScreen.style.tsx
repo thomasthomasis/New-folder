@@ -9,8 +9,9 @@ const styles = StyleSheet.create({
 container: {
     width: '100%',
     minHeight: screenHeight,
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     display: 'flex',
+    alignItems: 'center',
     padding: 10,
 },
 
@@ -32,37 +33,21 @@ closeButton: {
     alignItems: 'center',
 },
 
-h1: {
-    fontSize: 30,
-    fontWeight: '900',
+row: {
+    width: screenWidth,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginBottom: 20,
 },
 
-h2: {
-    fontSize: 25,
-    fontWeight: '700'
-},
-
-h3: {
-    fontSize: 20,
-    fontWeight: '500',
-},
-
-h4: {
-    fontSize: 16,
-    fontWeight: '400',
-},
-
-bold: {
-    fontSize: 18,
-    fontWeight: '900',
-},
-
-border: {
-    width: '100%',
-    height: 3,
-    backgroundColor: 'lightgray',
-    marginRight: 'auto',
-    marginLeft: 'auto',
+option: {
+    width: 32, 
+    height: 32,
+    borderWidth: 3,
+    borderColor: colors.text,
+    borderRadius: 32,
+    marginLeft: 10,
 },
 
 });

@@ -90,9 +90,9 @@ android {
             keyPassword 'android'
         }
         release {
-            keyAlias 'my-alias'
+            keyAlias 'upload'
             keyPassword 'BloodTest1830!'
-            storeFile file('./my-release-key.jks')
+            storeFile file('./upload-keystore.jks')
             storePassword 'BloodTest1830!'
         }
     }
@@ -114,7 +114,6 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
-        
         /*
         release {
             signingConfig signingConfigs.release

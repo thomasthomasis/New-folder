@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
       titleButton: {
         width: 150,
         height: 40,
-        backgroundColor: colors.blue, 
+        backgroundColor: colors.green, 
         borderRadius: 10,
 
         display: 'flex',

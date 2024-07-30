@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     button: {
         width: '25%',
         height: 40,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.green,
         marginLeft: 15,
         marginRight: 15,
         borderRadius: 10,

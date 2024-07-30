@@ -421,7 +421,7 @@ export const ResistanceLineChartComponent = (props: ResistanceLineChartComponent
         datasets: [
             { 
                 data: dataTotalVolume,
-                color: (opacity = 1) => colors.blue,
+                color: (opacity = 1) => colors.green,
                 strokeWidth: 2,
             },
         ],

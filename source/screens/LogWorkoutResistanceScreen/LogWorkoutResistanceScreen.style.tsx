@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   
     accordionContent: {
       width: '80%',
-      backgroundColor: colors.blue,
+      backgroundColor: colors.green,
   
       marginLeft: 'auto',
       marginRight: 'auto',
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: colors.blue,
+      backgroundColor: colors.green,
       marginBottom: 10,
       borderRadius: 15,
     },

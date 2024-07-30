@@ -313,7 +313,7 @@ export const LeaderboardScreen = (props:LeaderboardScreenProps) => {
                 onSelect={(selectedItem) => {
                 chooseFilter(selectedItem)
                 }}
-                buttonStyle={[styles.dropdownButton, shadow.shadow, {backgroundColor: colors.blue}, group[0].color != null && {backgroundColor: group[0].color}]}
+                buttonStyle={[styles.dropdownButton, shadow.shadow, {backgroundColor: colors.green}, group[0].color != null && {backgroundColor: group[0].color}]}
                 buttonTextStyle={styles.buttonText}
                 defaultButtonText='Level'
                 defaultValue={'Level'}

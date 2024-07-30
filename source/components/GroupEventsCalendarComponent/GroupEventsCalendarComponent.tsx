@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react';
 import {Text, View} from 'react-native';
 import { colors } from '../../sharedStyling/Colors';
 import { useQuery, useRealm, useUser } from '@realm/react';
-import { Workouts } from '../../schemas/WorkoutSchema';
 import { TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './GroupEventsCalendarComponent.style';
@@ -239,7 +238,7 @@ export const GroupEventsCalendarComponent = (props: CalendarProps) => {
 
     useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
-          mutableSubs.add(realm.objects(Workouts));
+          mutableSubs.add(realm.objects(GroupEvents));
         });
       }, [realm, user]);
 
@@ -255,13 +254,13 @@ export const GroupEventsCalendarComponent = (props: CalendarProps) => {
               </TouchableOpacity>
             </View>
             <View style={styles.weekdays}>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>M</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>T</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>W</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>T</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>F</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>S</Text></View>
-              <View style={styles.weekday}><Text style={{color: colors.blue}}>S</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.green}}>M</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.green}}>T</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.green}}>W</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.green}}>T</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.green}}>F</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.green}}>S</Text></View>
+              <View style={styles.weekday}><Text style={{color: colors.green}}>S</Text></View>
             </View>
         <View style={styles.container}>
             

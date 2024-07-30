@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
       },
 
       currentDayText: {
-        color: colors.blue,
+        color: colors.green,
 
       },
 

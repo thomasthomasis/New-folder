@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, FlatList, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Alert, Dimensions, FlatList, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import { useRealm, useQuery, useUser} from '@realm/react';
 import { Users } from '../../schemas/UsersSchema';
 import styles from './HomeScreen.style';
@@ -18,10 +18,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Modal from 'react-native-modal';
 import { CardioWorkout } from '../../schemas/CardioWorkoutSchema';
 import { ResistanceWorkout } from '../../schemas/ResistanceWorkoutSchema';
+import { HeaderComponent } from '../../components/HeaderComponent/HeaderComponent';
+import { common } from '../../sharedStyling/CommonStyle';
+import { TrainingWorkout } from '../../schemas/TrainingWorkoutSchema';
 
 type HomeScreenProps = {
     navigation: StackNavigationProp<RootStackParamList, 'Home'>;
 }
+
+const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
 
 export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
@@ -30,39 +36,37 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const isFocused = useIsFocused()
 
   const logResitanceWorkout = () => {
-    navigation.navigate("LogWorkoutResistance", {continuingWorkout: false})
+    navigation.navigate("LogWorkoutResistance", {continuingWorkout: false, navigationScreen: 'Home'})
   }
 
   const logCardioWorkout = () => {
-    navigation.navigate("LogWorkoutCardio", { continuingWorkout: false})
+    navigation.navigate("LogWorkoutCardio", { continuingWorkout: false, navigationScreen: 'Home'})
   }
 
   const goToProfileSettings = () => {
     navigation.navigate("ProfileSettings")
   }
 
-  const goToWorkoutDisplay = (data:any, dataType:string) => {
-    navigation.navigate("WorkoutDisplay", { data:data, dataType:dataType})
+  const goToWorkoutDisplay = (specificWorkoutId:any, workoutType:string, generalWorkoutId:string) => {
+    navigation.navigate("WorkoutDisplay", { specificWorkoutId:specificWorkoutId, workoutType:workoutType, generalWorkoutId:generalWorkoutId})
   }
   
 
   const [userData, setUserData] = useState<any>(realm.objects("Users").sorted('_id').filtered("userId == $0", user.id));
-  const currentDate = new Date()
-  const [year, setYear] = useState<number>(currentDate.getFullYear())
-  const [month, setMonth] = useState<number>(currentDate.getMonth())
-  const [startOfMonth, setStartOfMonth] = useState<Date>(new Date(year, month, 1))
-  const [endOfMonth, setEndOfMonth] = useState<Date>(new Date(year, month + 1, 0))
   const [workouts, setWorkouts] = useState<any>([])
 
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [imageSource, setImageSource] = useState(require("../../assets/3.png"))
+  const [loading, setLoading] = useState<boolean>(false)
+  const [imageSource, setImageSource] = useState(require("../../assets/defaultPFP.png"))
 
-  const [selectedDay, setSelectedDay] = useState<string>('')
-
-  const [workoutObjectsOfCurrentDay, setWorkoutObjectsOfCurrentDay] = useState<any>(null)
   const [currentWorkout, setCurrentWorkout] = useState<any>([]);
   const [currentWorkoutType, setCurrentWorkoutType] = useState<string>('')
   const [continuingWorkout, setContinuingWorkout] = useState<boolean>(false)
+  const [modalVisible, setModalVisible] = useState<boolean>(false)
+
+
+  const closeModal = () => {
+    setModalVisible(false)
+  }
 
   const storage = new Storage({
     size: 1000,
@@ -86,11 +90,24 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
       console.warn(err.message);
     })
   }
+
+  useEffect(() => {
+
+    setLoading(true)
+
+    console.log("main useEffect")
+    const currentDate = new Date()
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+
+    let workoutsArray = realm.objects(Workouts).sorted('dateCreated', true).filtered('dateCreated >= $0 AND dateCreated < $1 AND userId == $2', startOfMonth, endOfMonth, user.id).slice(0,10);
+
+    divideWorkoutsIntoSections(workoutsArray)
+
+  }, [])
  
   useEffect(() => {
-    loadCurrentWorkout()
 
-    console.log("Current Workout: ", currentWorkout)
   }, [isFocused])
 
   const handleConfirmDeleteCurrentWorkout = (workoutType:string) => {
@@ -146,10 +163,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     );
   };
 
-  const [modalVisible, setModalVisible] = useState<boolean>(false)
-  const closeModal = () => {
-    setModalVisible(false)
-  }
+  
 
   const setWorkoutsFromCalendarComponent = (workouts:any) => {
     
@@ -157,11 +171,6 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
     console.log("Workouts passed from component: ", workouts)
   }
-
-  useEffect(() => {
-    let workouts = realm.objects(Workouts).sorted('dateCreated').filtered('dateCreated >= $0 AND dateCreated < $1 AND userId == $2', startOfMonth, endOfMonth, user.id);
-    divideWorkoutsIntoSections(workouts)
-  }, [])
 
   const divideWorkoutsIntoSections = (workouts:any) => {
 
@@ -197,34 +206,11 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     console.log(array)
 
     setWorkouts(array)
+    setLoading(false)
+    
   }
 
-  const selectDay = (day:string) => {
-    if(day == selectedDay)
-    {
-      setSelectedDay('')
-      let workouts = realm.objects(Workouts).sorted('dateCreated').filtered('dateCreated >= $0 AND dateCreated < $1 AND userId == $2', startOfMonth, endOfMonth, user.id);
-      divideWorkoutsIntoSections(workouts)
-      return;
-    }
-    else
-    {
-      setSelectedDay(day)
-    }
-
-    console.log(day)
-
-    const newDate = new Date(year, month, Number(day))
-    const startOfDay = new Date(newDate)
-    startOfDay.setHours(0,0,0,0);
-    const endOfDay = new Date(newDate)
-    endOfDay.setHours(23, 59, 59, 999)
-
-    let workoutsOfDay = realm.objects(Workouts).sorted('dateCreated').filtered('dateCreated >= $0 AND dateCreated < $1 AND userId == $2', startOfDay, endOfDay, user.id);
-    console.log("Workouts of day: ", workoutsOfDay)
-   
-    divideWorkoutsIntoSections(workoutsOfDay)
-  }
+  
 
   const formatDate = (date:Date) => {
    
@@ -258,19 +244,46 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
     
   }
 
+  const truncateText = (text:string, limit:number) => {
+    if (text.length > limit) {
+        return text.substring(0, limit) + '...';
+      }
+      return text;
+}
+
   const calculateTotalVolumeAndReps = (workout:any) => {
+
     let totalVolume = workout[0].totalVolume;
     let totalReps = workout[0].totalReps;
 
-    return totalReps + "reps" + "; " + totalVolume + "kg"
+    return { totalReps, totalVolume }
   }
 
   const calculateTotalDistanceAndTime = (workout:any) => {
     let totalDistance = workout[0].totalDistance;
     let totalTime = workout[0].totalTime;
 
-    return totalDistance + "km" + "; " + totalTime + "m"
+    return { totalDistance, totalTime }
   }
+
+  const getDuration = (amount:number) => {
+    const diffInMs = amount;
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    const diffInMonths = Math.floor(diffInDays / 30); // Approximation
+    const diffInYears = Math.floor(diffInDays / 365); // Approximation
+  
+    if (diffInYears > 0) return `${diffInYears} years`;
+    if (diffInMonths > 0) return `${diffInMonths} months`;
+    if (diffInWeeks > 0) return `${diffInWeeks} weeks`;
+    if (diffInDays > 0) return `${diffInDays} days`;
+    if (diffInHours > 0) return `${diffInHours} hours`;
+    if (diffInMinutes > 0) return `${diffInMinutes} minutes`;
+    return `${diffInSeconds} seconds`;
+}
 
 
   //set profile picture
@@ -301,9 +314,13 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
         {
           setImageSource(require('../../assets/4.png'))
         }
+        else
+        {
+          setImageSource(require('../../assets/defaultPFP.png'))
+        }
     }
 
-    setIsLoading(false)
+    setLoading(false)
       
     }, [isFocused])
   
@@ -317,62 +334,96 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
     return (
       <>
-        <View style={styles.header}>
-            <Text style={styles.headerText}>History</Text>
-            <View style={{marginRight: 15, display: 'flex', flexDirection: 'row',  alignItems: 'center'}} >
-              <MaterialCommunityIcons name={"bell-outline"} size={35}/>
-              <TouchableOpacity onPress={() => goToProfileSettings()}>
-                <Image source={imageSource} style={styles.headerImage}/>
-              </TouchableOpacity>
-            </View>
-            
-        </View>
+        <HeaderComponent goToProfileSettings={goToProfileSettings} title={'History'} />
 
-        <TouchableOpacity style={[{position: 'absolute', bottom: 20, right: 20, backgroundColor: colors.blue, width: 70, height: 70, borderRadius: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 2}, shadow.shadow]} onPress={() => setModalVisible(true)}>
-          <MaterialCommunityIcons name={"plus"} size={50} color={'white'}/>
+        <TouchableOpacity style={[styles.modalButton, shadow.shadow]} onPress={() => setModalVisible(true)}>
+          <MaterialCommunityIcons name={"plus"} size={40} color={'white'}/>
         </TouchableOpacity>
-        <ScrollView contentContainerStyle={styles.container}>
-        <CalendarComponent onPress={selectDay} setWorkouts={setWorkoutsFromCalendarComponent}/>
+        <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <CalendarComponent setWorkouts={setWorkoutsFromCalendarComponent}/>
         <View style={styles.containerWorkouts}>
-          <View style={{width: '100%', display: 'flex', justifyContent: 'flex-start'}}>
-          <Text style={{textAlign: 'left', fontWeight: '800', fontSize: 20}}>Logged Workouts</Text>
+          <View style={{width: '100%', display: 'flex', justifyContent: 'flex-start', paddingLeft: 8, }}>
+          <Text style={[{textAlign: 'left', }, common.h2]}>Logged Workouts</Text>
           </View>
+          {
+            loading &&
+            <View style={{width: '100%', height: screenHeight, display: 'flex', justifyContent: 'center'}}>
+              <ActivityIndicator size={'large'} color={colors.text} />
+            </View>
+          }
         {
+          !loading &&
           workouts.map((item:any, index:any) => (
-            <View key={index}>
-              <Text style={{fontWeight: '800', fontSize: 15, color: colors.text, marginBottom: 5, marginLeft: 10, marginTop: 20,}}>{formatDate(item.date)}</Text>
+            <View key={index} style={[{paddingLeft: 8, paddingRight: 8}]}>
+              <Text style={[common.h3, {marginBottom: 12, marginTop: 12}]}>{formatDate(item.date)}</Text>
               {
-                item.workouts.map((itemWorkout:any, indexWorkout:any) => {
+                item.workouts.map((itemWorkout:any) => {
+
+                  if(!itemWorkout.isValid())
+                  {
+                    return null
+                  }
 
                   let iconName = "heart"
                   let color = colors.red;
-                  let name = "Cardio"
+                  let name = "Test Name 123"
                   let object = null;
-                  let shownData = ""
+                  let data = null;
+                  let shownData1 = "";
+                  let shownData2 = "";
                   if(itemWorkout.workoutType == "Cardio")
                   {
                     iconName = "heart"
                     color = colors.red;
-                    name = "Cardio"
+                    name = "Test Name 345"
                     object = realm.objects(CardioWorkout).filtered("_id == $0", itemWorkout.workoutId);
-                    shownData = calculateTotalDistanceAndTime(object)
+                    if(object.length > 0)
+                    {
+                      data = calculateTotalDistanceAndTime(object)
+                      shownData1 = data.totalDistance + "km";
+                      shownData2 = data.totalTime + "m";
+                    }
                   }
                   else if(itemWorkout.workoutType == "Resistance")
                   {
                     iconName = "dumbbell"
                     color = colors.black;
-                    name = "Strength"
+                    name = "Time to grow some tree trunks"
                     object = realm.objects(ResistanceWorkout).filtered("_id == $0", itemWorkout.workoutId);
-                    shownData = calculateTotalVolumeAndReps(object)
+                    if(object.length > 0)
+                    {
+                      data = calculateTotalVolumeAndReps(object)
+                      shownData1 = data.totalVolume + "kg";
+                      shownData2 = data.totalReps + " reps";
+                    }
+                    
+                  }
+                  else if(itemWorkout.workoutType == "Training")
+                  {
+                    iconName = "soccer-field"
+                    color = colors.orange;
+                    name = "Tuesday Training"
+                    object = realm.objects(TrainingWorkout).filtered("_id == $0", itemWorkout.workoutId);
+                    if(object.length > 0)
+                    {
+                      data = getDuration(object[0].totalDuration ?? 0)
+                      shownData1 = data;
+                    }
+                    
                   }
 
                   return (
-                    <TouchableOpacity key={new BSON.ObjectId().toString()} style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutDisplay(itemWorkout.workoutId, itemWorkout.workoutType)}>
+                    <TouchableOpacity key={new BSON.ObjectId().toString()} style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutDisplay(itemWorkout.workoutId, itemWorkout.workoutType, itemWorkout._id)}>
                       <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly'}}>
-                        <MaterialCommunityIcons name={iconName} size={45} color={color} style={{marginRight: 20,}}/>
-                        <Text style={{fontWeight: '700', color: colors.text, fontSize: 18}}>{name}</Text>
+                        <MaterialCommunityIcons name={iconName} size={24} color={color} style={{marginRight: 16}}/>
+                        <Text style={[common.h3, {marginRight: 16, width: 96}]}>{truncateText(name, 24)}</Text>
+                        <View style={styles.verticalBorder}></View>
                       </View>
-                      <Text style={{fontWeight: '700'}}>{shownData}</Text>
+                      <View style={{display: 'flex', justifyContent: 'center', alignItems: 'flex-start', flexDirection: 'column'}}>
+                        <Text style={[common.body, {opacity: 0.8}]}>{shownData1}</Text>
+                        <Text style={[common.body, {opacity: 0.8}]}>{shownData2}</Text>
+                      </View>
+                      
                     
                   </TouchableOpacity>
                   )
@@ -427,6 +478,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
               
           </View>
       </Modal>
+
       </>
       
       );

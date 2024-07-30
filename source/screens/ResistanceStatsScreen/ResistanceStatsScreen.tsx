@@ -648,19 +648,19 @@ export const ResistanceStatsScreen = ({ navigation, route }: ResistanceStatsScre
                     workoutData.length == 0 &&
                     <View>
                         <View style={styles.containerFilters}>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 0 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(0)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 0 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(0)}>
                             <Text style={styles.filterButtonText}>Max</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 1 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(1)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 1 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(1)}>
                             <Text style={styles.filterButtonText}>1Y</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 2 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(2)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 2 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(2)}>
                             <Text style={styles.filterButtonText}>6M</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 3 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(3)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 3 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(3)}>
                             <Text style={styles.filterButtonText}>3M</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 4 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(4)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 4 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(4)}>
                             <Text style={styles.filterButtonText}>1M</Text>
                             </TouchableOpacity>
                         </View>
@@ -671,19 +671,19 @@ export const ResistanceStatsScreen = ({ navigation, route }: ResistanceStatsScre
                     workoutData.length > 0 &&
                     <View style={{minHeight: screenHeight * 2}}>
                         <View style={styles.containerFilters}>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 0 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(0)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 0 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(0)}>
                             <Text style={styles.filterButtonText}>Max</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 1 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(1)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 1 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(1)}>
                             <Text style={styles.filterButtonText}>1Y</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 2 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(2)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 2 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(2)}>
                             <Text style={styles.filterButtonText}>6M</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 3 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(3)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 3 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(3)}>
                             <Text style={styles.filterButtonText}>3M</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.filterButton, activeFilter == 4 && {backgroundColor: colors.blue}]} onPress={() => setActiveFilter(4)}>
+                            <TouchableOpacity style={[styles.filterButton, activeFilter == 4 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(4)}>
                             <Text style={styles.filterButtonText}>1M</Text>
                             </TouchableOpacity>
                         </View>

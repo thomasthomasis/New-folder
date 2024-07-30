@@ -242,8 +242,8 @@ You are advised to review this Privacy Policy periodically for any changes. Chan
             If you have any questions about this Privacy Policy, You can contact us:{"\n"}
             </Text>
             <TouchableOpacity onPress={() => goToLink('mailto:contact@ultitracker.pro')}>
-                <Text style={{color: colors.blue, fontWeight: '900'}}>
-                    By email: ultitrackerltd@gmail.com
+                <Text style={{color: colors.green, fontWeight: '900'}}>
+                    By email: contact@ultitracker.pro
                 </Text>
             </TouchableOpacity>
             

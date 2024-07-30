@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
 
     button: {
         marginTop: 20, 
-        backgroundColor: colors.blue, 
+        backgroundColor: colors.green, 
         width: 200, 
         height: 40, 
         borderRadius: 15,
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginRight: 'auto',
         marginLeft: 'auto',
-        backgroundColor: colors.blue, 
+        backgroundColor: colors.green, 
         width: 70, 
         height: 70, 
         borderRadius: 25,

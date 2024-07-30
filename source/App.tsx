@@ -14,7 +14,7 @@ import { AccountScreen } from './screens/AccountScreen/AccountScreen';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SocialScreen } from './screens/SocialScreen/SocialScreen';
 import { useRealm, useUser } from '@realm/react';
-import { Easing } from 'react-native';
+import { Easing, View } from 'react-native';
 import { LogWorkoutCardioScreen } from './screens/LogWorkoutCardioScreen/LogWorkoutCardioScreen';
 import { LogWorkoutResistanceScreen } from './screens/LogWorkoutResistanceScreen/LogWorkoutResistanceScreen';
 import { AddExerciseScreen } from './screens/AddExerciseScreen/AddExerciseScreen';
@@ -48,6 +48,7 @@ import { CardioStatsScreen } from './screens/CardioStatsScreen/CardioStatsScreen
 import { ResistanceExerciseStatsScreen } from './screens/ResistanceExerciseStatsScreen/ResistanceExerciseStatsScreen';
 import { CardioExerciseStatsScreen } from './screens/CardioExerciseStatsScreen/CardioExerciseStatsScreen';
 import { StatisticsScreen } from './screens/StatisticsScreen/StatisticsScreen';
+import { colors } from './sharedStyling/Colors';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -74,13 +75,13 @@ export const App = () => {
     }}>
       <Stack.Screen name="Home" options={{ headerShown: false}} component={HomeScreen}/>
       <Stack.Screen name="ProfileSettings" options={{ headerShown: false }} component={ProfileSettingsScreen} />
-      <Stack.Screen name="LogWorkoutCardio" component={LogWorkoutCardioScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}} />
-      <Stack.Screen name="LogWorkoutResistance" component={LogWorkoutResistanceScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}}/>
+      <Stack.Screen name="LogWorkoutCardio" component={LogWorkoutCardioScreen} initialParams={{ continuingWorkout: false, navigationScreen:'Home' }} options={{ headerShown: false}} />
+      <Stack.Screen name="LogWorkoutResistance" component={LogWorkoutResistanceScreen} initialParams={{ continuingWorkout: false, navigationScreen:"Home" }} options={{ headerShown: false}}/>
       <Stack.Screen name="AddExercise" component={AddExerciseScreen} options={{ headerShown: false}}/>
-      <Stack.Screen name="SubmitCompletion" component={SubmitCompletion} initialParams={{ levelUp: false, gainedXp: 0 }} options={{ headerShown: false}}/>
+      <Stack.Screen name="SubmitCompletion" component={SubmitCompletion} initialParams={{ levelUp: false, gainedXp: 0, navigationScreen: 'Home' }} options={{ headerShown: false}}/>
       <Stack.Screen name="EditResistanceExercise" component={EditResistanceExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
       <Stack.Screen name="EditCardioExercise" component={EditCardioExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
-      <Stack.Screen name="WorkoutDisplay" options={{ headerShown: false}} component={WorkoutDisplayScreen} initialParams={{ data: "", dataType: "" }}/>
+      <Stack.Screen name="WorkoutDisplay" options={{ headerShown: false}} component={WorkoutDisplayScreen} initialParams={{ specificWorkoutId: "", workoutType: "", generalWorkoutId: "", }}/>
     </Stack.Navigator>
     )
   }
@@ -109,12 +110,12 @@ export const App = () => {
         <Stack.Screen name="GroupMembersSettings" options={{ headerShown: false}} component={GroupMembersSettingsScreen} initialParams={{ group: "" }}/>
         <Stack.Screen name="GroupSettings" options={{ headerShown: false}} component={GroupSettingsScreen} initialParams={{ group: "" }}/>
         <Stack.Screen name="Group" options={{ headerShown: false}} component={GroupScreen} initialParams={{ group: "" }}/>
-        <Stack.Screen name="WorkoutDisplay" options={{ headerShown: false}} component={WorkoutDisplayScreen} initialParams={{ data: "", dataType: "" }}/>
+        <Stack.Screen name="WorkoutDisplay" options={{ headerShown: false}} component={WorkoutDisplayScreen} initialParams={{ specificWorkoutId: "", workoutType: "", generalWorkoutId: "" }}/>
         <Stack.Screen name="History" options={{ headerShown: false}} component={HistoryScreen} initialParams={{ group: "" }}/>
         <Stack.Screen name="GroupEvents" options={{ headerShown: false}} component={GroupEventsScreen} initialParams={{ group: "" }}/>
         <Stack.Screen name="GroupEvent" options={{ headerShown: false}} component={GroupEventScreen} initialParams={{ event: "" }}/>
         <Stack.Screen name="CreateGroupEvent" options={{ headerShown: false}} component={CreateGroupEventScreen} initialParams={{ group: "" }}/>
-        <Stack.Screen name="EditGroupEvent" options={{ headerShown: false}} component={EditGroupEventScreen} initialParams={{ event: "" }}/>
+        <Stack.Screen name="EditGroupEvent" options={{ headerShown: false}} component={EditGroupEventScreen} initialParams={{ eventId: "" }}/>
       </Stack.Navigator>
     )
   }
@@ -130,6 +131,8 @@ export const App = () => {
           },
         }}>
           <Stack.Screen name="Statistics" options={{ headerShown: false }} component={StatisticsScreen} initialParams={{ userId: user.id }}/>
+          <Stack.Screen name="LogWorkoutCardio" component={LogWorkoutCardioScreen} initialParams={{ continuingWorkout: false, navigationScreen:'Home' }} options={{ headerShown: false}} />
+          <Stack.Screen name="LogWorkoutResistance" component={LogWorkoutResistanceScreen} initialParams={{ continuingWorkout: false, navigationScreen:'Home' }} options={{ headerShown: false}}/>
           <Stack.Screen name="ResistanceStats" options={{ headerShown: false }} component={ResistanceStatsScreen} />
           <Stack.Screen name="CardioStats" options={{ headerShown: false }} component={CardioStatsScreen} />
           <Stack.Screen name="ResistanceExerciseStats" options={{ headerShown: false }} component={ResistanceExerciseStatsScreen} />
@@ -149,10 +152,10 @@ export const App = () => {
         },
       }}>
         <Stack.Screen name="LogWorkout" component={LogWorkoutScreen}  options={{ headerShown: false}} />
-        <Stack.Screen name="LogWorkoutCardio" component={LogWorkoutCardioScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}} />
-        <Stack.Screen name="LogWorkoutResistance" component={LogWorkoutResistanceScreen} initialParams={{ continuingWorkout: false }} options={{ headerShown: false}}/>
+        <Stack.Screen name="LogWorkoutCardio" component={LogWorkoutCardioScreen} initialParams={{ continuingWorkout: false, navigationScreen:'Home' }} options={{ headerShown: false}} />
+        <Stack.Screen name="LogWorkoutResistance" component={LogWorkoutResistanceScreen} initialParams={{ continuingWorkout: false, navigationScreen:'Home' }} options={{ headerShown: false}}/>
         <Stack.Screen name="AddExercise" component={AddExerciseScreen} options={{ headerShown: false}}/>
-        <Stack.Screen name="SubmitCompletion" component={SubmitCompletion} initialParams={{ levelUp: false, gainedXp: 0 }} options={{ headerShown: false}}/>
+        <Stack.Screen name="SubmitCompletion" component={SubmitCompletion} initialParams={{ levelUp: false, gainedXp: 0, navigationScreen: 'LogWorkout' }} options={{ headerShown: false}}/>
         <Stack.Screen name="EditResistanceExercise" component={EditResistanceExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
         <Stack.Screen name="EditCardioExercise" component={EditCardioExerciseScreen} initialParams={{ exercise: "" }} options={{ headerShown: false}}/>
         <Stack.Screen name="ProfileSettings" options={{ headerShown: false }} component={ProfileSettingsScreen} />
@@ -179,8 +182,14 @@ export const App = () => {
                     headerStyle: {
                       height: 0,
                     },
-                    tabBarIcon: ({ color }) => (
-                      <MaterialCommunityIcons name="view-dashboard" color={color} size={40} />
+                    tabBarIcon: ({ color, focused }) => (
+                      <>
+                        <MaterialCommunityIcons name="view-dashboard" color={color} size={32} />
+                        {
+                          focused &&
+                          <View style={{width: 32, height: 5, backgroundColor: colors.text, borderRadius: 15}}></View>
+                        }
+                      </>
                     ),
                     tabBarStyle: ((route) => {
                       const routeName = getFocusedRouteNameFromRoute(route) ?? ""
@@ -188,32 +197,14 @@ export const App = () => {
                         {
                           return {display: "none"}
                         }
-                        return
+                        return { height: 72}
                     })(route),
+                    tabBarActiveTintColor: colors.text,
+                    tabBarLabelStyle: { display: 'none'},
                   })} 
                 >
               </Tab.Screen>
-              <Tab.Screen 
-                  name="History"
-                  component={HistoryStack}
-                  options={({route}) => ({
-                    headerStyle: {
-                      height: 0,
-                    },
-                    tabBarIcon: ({ color }) => (
-                      <MaterialCommunityIcons name="calendar-blank" color={color} size={40} />
-                    ),
-                    tabBarStyle: ((route) => {
-                      const routeName = getFocusedRouteNameFromRoute(route) ?? ""
-                      if(routeName === "ProfileSettings" || routeName == "LogWorkoutCardio" || routeName == "LogWorkoutResistance" || routeName == "AddExercise" || routeName == "SubmitCompletion" || routeName == "EditResistanceExercise" || routeName == "EditCardioExercise" || routeName == "WorkoutDisplay")
-                        {
-                          return {display: "none"}
-                        }
-                        return
-                    })(route),
-                  })} 
-                >
-              </Tab.Screen>
+
               <Tab.Screen 
                   name="Stats"
                   component={StatisticsStack}
@@ -221,8 +212,14 @@ export const App = () => {
                     headerStyle: {
                       height: 0,
                     },
-                    tabBarIcon: ({ color }) => (
-                      <MaterialCommunityIcons name="poll" color={color} size={40} />
+                    tabBarIcon: ({ color, focused }) => (
+                      <>
+                        <MaterialCommunityIcons name="poll" color={color} size={32} />
+                        {
+                          focused &&
+                          <View style={{width: 32, height: 5, backgroundColor: colors.text, borderRadius: 15}}></View>
+                        }
+                      </>
                     ),
                     tabBarStyle: ((route) => {
                       const routeName = getFocusedRouteNameFromRoute(route) ?? ""
@@ -230,8 +227,39 @@ export const App = () => {
                         {
                           return {display: "none"}
                         }
-                        return
+                        return { height: 72}
                     })(route),
+                    tabBarActiveTintColor: colors.text,
+                    tabBarLabelStyle: { display: 'none'},
+                  })} 
+                >
+              </Tab.Screen>
+              <Tab.Screen 
+                  name="History"
+                  component={HistoryStack}
+                  options={({ route}) => ({
+                    headerStyle: {
+                      height: 0,
+                    },
+                    tabBarIcon: ({ color, focused }) => (
+                      <>
+                        <MaterialCommunityIcons name="calendar-blank" color={color} size={32} />
+                        {
+                          focused &&
+                          <View style={{width: 32, height: 5, backgroundColor: colors.text, borderRadius: 15}}></View>
+                        }
+                      </>
+                    ),
+                    tabBarStyle: ((route) => {
+                      const routeName = getFocusedRouteNameFromRoute(route) ?? ""
+                      if(routeName === "ProfileSettings" || routeName == "LogWorkoutCardio" || routeName == "LogWorkoutResistance" || routeName == "AddExercise" || routeName == "SubmitCompletion" || routeName == "EditResistanceExercise" || routeName == "EditCardioExercise" || routeName == "WorkoutDisplay")
+                        {
+                          return {display: "none"}
+                        }
+                        return { height: 72}
+                    })(route),
+                    tabBarActiveTintColor: colors.text,
+                    tabBarLabelStyle: { display: 'none'},
                   })} 
                 >
               </Tab.Screen>
@@ -242,16 +270,24 @@ export const App = () => {
                     headerStyle: {
                       height: 0,
                     },
-                    tabBarIcon: ({ color }) => (
-                      <MaterialCommunityIcons name="account" color={color} size={40} />
+                    tabBarIcon: ({ color, focused }) => (
+                      <>
+                        <MaterialCommunityIcons name="account" color={color} size={32} />
+                        {
+                          focused &&
+                          <View style={{width: 32, height: 5, backgroundColor: colors.text, borderRadius: 15}}></View>
+                        }
+                      </>
                     ),
                     tabBarStyle: ((route) => {
                       const routeName = getFocusedRouteNameFromRoute(route) ?? ""
                       if(routeName === 'Account' || routeName === "AppSettings" || routeName === "ProfileSettings" || routeName === "Feedback" || routeName === "AccountSettings" || routeName === "PrivacyPolicy" || routeName === "TermsOfService" || routeName == "Subscription" || routeName == "Preferences" ){
                         return {display: "none"}
                       }
-                      return
+                      return { height: 72 }
                     })(route),
+                    tabBarActiveTintColor: colors.text,
+                    tabBarLabelStyle: { display: 'none'},
                   })} 
                 >
               </Tab.Screen>

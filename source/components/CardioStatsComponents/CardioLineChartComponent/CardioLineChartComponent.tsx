@@ -421,7 +421,7 @@ export const CardioLineChartComponent = (props: CardioLineChartComponentProps) =
         datasets: [
             { 
                 data: dataTotalDistance,
-                color: (opacity = 1) => colors.blue,
+                color: (opacity = 1) => colors.green,
                 strokeWidth: 2,
             },
         ],

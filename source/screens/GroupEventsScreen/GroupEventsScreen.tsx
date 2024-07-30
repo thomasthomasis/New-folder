@@ -25,6 +25,8 @@ export const GroupEventsScreen = ({ navigation, route}: GroupEventsScreenProps) 
     const user = useUser();
     const isFocused = useIsFocused();
 
+    const { group } = route.params;
+
     const goToGroupEvent = (event:string) => {
         navigation.navigate("GroupEvent", { event: event })
     }
@@ -33,10 +35,25 @@ export const GroupEventsScreen = ({ navigation, route}: GroupEventsScreenProps) 
         navigation.navigate("CreateGroupEvent", { group: group })
     }
 
-    const { group } = route.params;
+    const [trainingFilter, setTrainingFilter] = useState<boolean>(true)
+    const [tournamentFilter, setTournamentFilter] = useState<boolean>(true)
+
+    const [eventsArray, setEventsArray] = useState<any>([])
 
     const selectedGroup = realm.objects(Groups).filtered("groupId == $0", group)
-    let events = realm.objects(GroupEvents).filtered("groupId == $0", group).sorted("startDate", true)
+
+    useEffect(() => {
+      let events = realm.objects(GroupEvents).filtered("groupId == $0", group).sorted("startDate", true)
+
+      console.log(events)
+
+      setEventsArray(events)
+
+    }, [isFocused])
+
+      useEffect(() => {
+        setIsAdmin(isOwner(group))
+    }, [])
 
     const [isAdmin, setIsAdmin] = useState<boolean>(false)
     const isOwner = (groupId:string) => {
@@ -128,77 +145,38 @@ export const GroupEventsScreen = ({ navigation, route}: GroupEventsScreenProps) 
     }
 
     useEffect(() => {
-        setIsAdmin(isOwner(group))
-    }, [])
-
-    useEffect(() => {
         realm.subscriptions.update(mutableSubs => {
             mutableSubs.add(
                 realm.objects(Groups)
             )
+            mutableSubs.add(
+              realm.objects(GroupEvents)
+            );
         });
         }, [realm, user]);
 
-    useEffect(() => {
-        if(isFocused)
-        {
-            events = realm.objects(GroupEvents).filtered("groupId == $0", group).sorted("startDate", true)
-        }
-    })
-
-    const [futureFilter, setFutureFilter] = useState<boolean>(true)
-    const [pastFilter, setPastFilter] = useState<boolean>(true)
-    const [trainingFilter, setTrainingFilter] = useState<boolean>(true)
-    const [tournamentFilter, setTournamentFilter] = useState<boolean>(true)
-
-    const [eventsArray, setEventsArray] = useState<any>(events)
+   
 
     const toggleFilter = (filter: string) => {
 
-        let futureValue = futureFilter;
-        let pastValue = pastFilter;
         let trainingValue = trainingFilter;
         let tournamentValue = tournamentFilter;
 
-        if (filter === "future") {
-          setFutureFilter(!futureFilter);
-          futureValue = !futureValue;
-        } else if (filter === "past") {
-          setPastFilter(!pastFilter);
-          pastValue = !pastValue
-        } else if (filter === "training") {
+        if (filter === "training") 
+        {
           setTrainingFilter(!trainingFilter);
           trainingValue = !trainingValue
-        } else if (filter === "tournament") {
+        } 
+        
+        else if (filter === "tournament") 
+        {
           setTournamentFilter(!tournamentFilter);
           tournamentValue = !tournamentValue
         }
 
-      
         let date = new Date();
         let query = "groupId == $0";
         let args: any[] = [group];
-      
-        if (!futureValue && !pastValue) 
-        {
-            query += " AND falsepredicate";
-        } 
-        else if (!futureValue && pastValue) 
-        {
-            query += " AND startDate < $1";
-            args.push(date);
-        } 
-        else if (futureValue && pastValue) 
-        {
-            query += " AND (startDate > $1 OR startDate < $1)";
-            args.push(date);
-        } 
-        else if(futureValue && !pastValue)
-        {
-            // If both are false, set an impossible condition
-            query += " AND startDate > $1";
-            args.push(date);
-        }
       
         if (trainingValue && tournamentValue) {
           query += " AND (isTraining == true OR isTraining == false)";
@@ -227,9 +205,6 @@ export const GroupEventsScreen = ({ navigation, route}: GroupEventsScreenProps) 
         const events = realm.objects(GroupEvents).filtered("groupId == $0", group).sorted("startDate", true)
         setEventsArray(events)
         setSelectedDay("")
-
-        setFutureFilter(true)
-        setPastFilter(true)
         setTrainingFilter(true)
         setTournamentFilter(true)
         return;
@@ -253,12 +228,6 @@ export const GroupEventsScreen = ({ navigation, route}: GroupEventsScreenProps) 
         {
           selectedDay == "" &&
           <View style={styles.filters}>
-            <TouchableOpacity style={[styles.filterButton, futureFilter && {backgroundColor: selectedGroup[0].color}]} onPress={() => toggleFilter("future")}>
-                <Text style={styles.filterButtonText}>Future</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.filterButton, pastFilter && {backgroundColor: selectedGroup[0].color}]} onPress={() => toggleFilter("past")}>
-                <Text style={styles.filterButtonText}>Past</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={[styles.filterButton, trainingFilter && {backgroundColor: selectedGroup[0].color}]} onPress={() => toggleFilter("training")}>
                 <Text style={styles.filterButtonText}>Training</Text>
             </TouchableOpacity>
@@ -270,24 +239,32 @@ export const GroupEventsScreen = ({ navigation, route}: GroupEventsScreenProps) 
         
         
 
+        {
+          eventsArray.map((item:any, index:any) => {
+
+            if(!item.isValid() || !item)
             {
-              eventsArray.map((item:any, index:any) => (
-                <TouchableOpacity key={new BSON.ObjectID().toString()} style={[styles.eventCard, {backgroundColor: item.color}, index == events.length - 1 && {marginBottom: 100,}, shadow.shadow]} onPress={() => goToGroupEvent(item.eventId)}>
-                        <View style={styles.eventRow}>
-                            <Text style={styles.eventText}>{truncateText(item.name ?? "", 20)}</Text>
-                            <Text style={styles.eventText}>{formatDate(item.startDate ?? new Date())}</Text>
-                        </View>
-                        <View style={styles.border}></View>
-                        <Text style={[styles.eventText, {textAlign: 'center', fontSize: 35,}]}>{timeDifference(item.startDate ?? new Date())}</Text>
-                    </TouchableOpacity>
-              ))
+              return null;
             }
-            {
-                isAdmin && 
-                <TouchableOpacity onPress={goToCreateGroupEvent} style={[styles.addButton, {backgroundColor: selectedGroup[0].color}, shadow.shadow]}>
-                    <MaterialCommunityIcons name="plus" size={60} color={'white'}/>
+
+            return (
+            <TouchableOpacity key={new BSON.ObjectID().toString()} style={[styles.eventCard, {backgroundColor: item.color}, index == eventsArray.length - 1 && {marginBottom: 100,}, shadow.shadow]} onPress={() => goToGroupEvent(item.eventId)}>
+                    <View style={styles.eventRow}>
+                        <Text style={styles.eventText}>{truncateText(item.name ?? "", 20)}</Text>
+                        <Text style={styles.eventText}>{formatDate(item.startDate ?? new Date())}</Text>
+                    </View>
+                    <View style={styles.border}></View>
+                    <Text style={[styles.eventText, {textAlign: 'center', fontSize: 35,}]}>{timeDifference(item.startDate ?? new Date())}</Text>
                 </TouchableOpacity>
-            }
+            )
+        })
+        }
+        {
+            isAdmin && 
+            <TouchableOpacity onPress={goToCreateGroupEvent} style={[styles.addButton, {backgroundColor: selectedGroup[0].color}, shadow.shadow]}>
+                <MaterialCommunityIcons name="plus" size={60} color={'white'}/>
+            </TouchableOpacity>
+        }
   
         </ScrollView>
         
