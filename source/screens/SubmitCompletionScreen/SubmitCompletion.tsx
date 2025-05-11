@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity, Dimensions} from 'react-native';
+import {Text, View, TouchableOpacity} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import {useQuery, useRealm, useUser} from '@realm/react';
 import {UserStatistics} from '../../schemas/UserStatisticsSchema';
 import styles from './SubmitCompletionScreen.style';
-import {useNavigation} from '@react-navigation/native';
 
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
@@ -15,16 +14,19 @@ type SubmitCompletionProps = {
   route: RouteProp<RootStackParamList, 'SubmitCompletion'>;
 };
 
-export const SubmitCompletion = ({navigation, route}: SubmitCompletionProps) => {
+export const SubmitCompletion = ({
+  navigation,
+  route,
+}: SubmitCompletionProps) => {
   const realm = useRealm();
   const user = useUser();
 
   const {levelUp, gainedXp, navigationScreen} = route.params;
 
   const goToLogWorkout = () => {
-    if (navigationScreen == 'LogWorkout') {
+    if (navigationScreen === 'LogWorkout') {
       navigation.navigate('LogWorkout');
-    } else if (navigationScreen == 'Home') {
+    } else if (navigationScreen === 'Home') {
       navigation.navigate('Home');
     }
   };
@@ -39,7 +41,7 @@ export const SubmitCompletion = ({navigation, route}: SubmitCompletionProps) => 
 
     setLeveled(Number(((xp / userStats[0].xpTarget) * 200).toFixed(0)));
     setUnleveled(200 - leveled);
-  }, [userStats]);
+  }, [leveled, userStats]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
@@ -60,8 +62,16 @@ export const SubmitCompletion = ({navigation, route}: SubmitCompletionProps) => 
         </View>
         <View style={{display: 'flex', flexDirection: 'column'}}>
           <View style={styles.progressBar}>
-            <View style={[styles.bar, {width: leveled, backgroundColor: colors.green}]}></View>
-            <View style={[styles.bar, {width: unleveled, backgroundColor: 'lightgray'}]}></View>
+            <View
+              style={[
+                styles.bar,
+                {width: leveled, backgroundColor: colors.green},
+              ]}></View>
+            <View
+              style={[
+                styles.bar,
+                {width: unleveled, backgroundColor: 'lightgray'},
+              ]}></View>
           </View>
           <View
             style={{

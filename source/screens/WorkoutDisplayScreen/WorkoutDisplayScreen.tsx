@@ -1,4 +1,4 @@
-import React, {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {Alert, Text, TouchableOpacity, View} from 'react-native';
 import {CardioWorkoutDisplayScreen} from '../../screens/CardioWorkoutDisplayScreen/CardioWorkoutDisplayScreen';
 import {ResistanceWorkoutDisplayScreen} from '../../screens/ResistanceWorkoutDisplayScreen/ResistanceWorkoutDisplayScreen';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -11,7 +11,6 @@ import {useEffect, useState} from 'react';
 import {CardioWorkout} from '../../schemas/CardioWorkoutSchema';
 import {ResistanceWorkout} from '../../schemas/ResistanceWorkoutSchema';
 import {useRealm} from '@realm/react';
-import {BSON} from 'realm';
 import {colors} from '../../sharedStyling/Colors';
 import {Workouts} from '../../schemas/WorkoutSchema';
 
@@ -20,7 +19,10 @@ type WorkoutDisplayScreenProps = {
   route: RouteProp<RootStackParamList, 'WorkoutDisplay'>;
 };
 
-export const WorkoutDisplayScreen = ({navigation, route}: WorkoutDisplayScreenProps) => {
+export const WorkoutDisplayScreen = ({
+  navigation,
+  route,
+}: WorkoutDisplayScreenProps) => {
   const realm = useRealm();
 
   const {specificWorkoutId, workoutType, generalWorkoutId} = route.params;
@@ -37,33 +39,49 @@ export const WorkoutDisplayScreen = ({navigation, route}: WorkoutDisplayScreenPr
   const [generalWorkoutData, setGeneralWorkoutData] = useState<any>(null);
 
   const getWorkoutObject = (type: string) => {
-    if (type == 'Cardio') {
-      let object = realm.objects(CardioWorkout).filtered('_id == $0', specificWorkoutId);
+    if (type === 'Cardio') {
+      let object = realm
+        .objects(CardioWorkout)
+        .filtered('_id == $0', specificWorkoutId);
       setSpecificWorkoutData(object);
-    } else if (type == 'Resistance') {
-      let object = realm.objects(ResistanceWorkout).filtered('_id == $0', specificWorkoutId);
+    } else if (type === 'Resistance') {
+      let object = realm
+        .objects(ResistanceWorkout)
+        .filtered('_id == $0', specificWorkoutId);
       setSpecificWorkoutData(object);
       console.log(object);
     }
 
-    let generalWorkoutObject = realm.objects(Workouts).filtered('_id == $0', generalWorkoutId);
+    let generalWorkoutObject = realm
+      .objects(Workouts)
+      .filtered('_id == $0', generalWorkoutId);
     setGeneralWorkoutData(generalWorkoutObject);
   };
 
   useEffect(() => {
     getWorkoutObject(workoutType);
-  }, []);
+  });
 
-  const deleteWorkout = (specificWorkoutId: string, generalWorkoutId: string, workoutType: string) => {
+  const deleteWorkout = (
+    specificWorkoutId: string,
+    generalWorkoutId: string,
+    workoutType: string,
+  ) => {
     let specificWorkout: any = [];
 
-    if (workoutType == 'Cardio') {
-      specificWorkout = realm.objects(CardioWorkout).filtered('_id == $0', specificWorkoutId);
-    } else if (workoutType == 'Resistance') {
-      specificWorkout = realm.objects(ResistanceWorkout).filtered('_id == $0', specificWorkoutId);
+    if (workoutType === 'Cardio') {
+      specificWorkout = realm
+        .objects(CardioWorkout)
+        .filtered('_id == $0', specificWorkoutId);
+    } else if (workoutType === 'Resistance') {
+      specificWorkout = realm
+        .objects(ResistanceWorkout)
+        .filtered('_id == $0', specificWorkoutId);
     }
 
-    let generalWorkout = realm.objects(Workouts).filtered('_id == $0', generalWorkoutId);
+    let generalWorkout = realm
+      .objects(Workouts)
+      .filtered('_id == $0', generalWorkoutId);
 
     console.log(specificWorkout);
     console.log(generalWorkout);
@@ -74,7 +92,11 @@ export const WorkoutDisplayScreen = ({navigation, route}: WorkoutDisplayScreenPr
     });
   };
 
-  const handleConfirmDeletion = (specificWorkoutId: string, generalWorkoutId: string, workoutType: string) => {
+  const handleConfirmDeletion = (
+    specificWorkoutId: string,
+    generalWorkoutId: string,
+    workoutType: string,
+  ) => {
     // Show confirmation popup
     Alert.alert(
       'Confirm Action',
@@ -111,20 +133,44 @@ export const WorkoutDisplayScreen = ({navigation, route}: WorkoutDisplayScreenPr
           paddingLeft: 10,
         }}>
         <TouchableOpacity onPress={goBack} style={styles.closeButton}>
-          <MaterialCommunityIcons name="arrow-left" size={40} color={colors.text} />
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={40}
+            color={colors.text}
+          />
         </TouchableOpacity>
         <View style={{display: 'flex', flexDirection: 'row'}}>
-          <TouchableOpacity onPress={() => goToEditWorkoutScreen(specificWorkoutId)}>
-            <MaterialCommunityIcons name="pencil-outline" size={40} color={colors.text} />
+          <TouchableOpacity
+            onPress={() => goToEditWorkoutScreen(specificWorkoutId)}>
+            <MaterialCommunityIcons
+              name="pencil-outline"
+              size={40}
+              color={colors.text}
+            />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleConfirmDeletion(generalWorkoutData[0].workoutId, generalWorkoutData[0]._id, generalWorkoutData[0].workoutType)}>
-            <MaterialCommunityIcons name="delete-outline" size={40} color={colors.text} />
+          <TouchableOpacity
+            onPress={() =>
+              handleConfirmDeletion(
+                generalWorkoutData[0].workoutId,
+                generalWorkoutData[0]._id,
+                generalWorkoutData[0].workoutType,
+              )
+            }>
+            <MaterialCommunityIcons
+              name="delete-outline"
+              size={40}
+              color={colors.text}
+            />
           </TouchableOpacity>
         </View>
       </View>
       {!specificWorkoutData && <Text>No workout data</Text>}
-      {specificWorkoutData && workoutType == 'Cardio' && <CardioWorkoutDisplayScreen data={specificWorkoutData} />}
-      {specificWorkoutData && workoutType == 'Resistance' && <ResistanceWorkoutDisplayScreen data={specificWorkoutData} />}
+      {specificWorkoutData && workoutType === 'Cardio' && (
+        <CardioWorkoutDisplayScreen data={specificWorkoutData} />
+      )}
+      {specificWorkoutData && workoutType === 'Resistance' && (
+        <ResistanceWorkoutDisplayScreen data={specificWorkoutData} />
+      )}
     </>
   );
 };

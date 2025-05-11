@@ -32,7 +32,20 @@ export const AppWrapper = () => {
     <AppProvider id={appId} baseUrl={baseUrl}>
       <UserProvider fallback={WelcomeScreen}>
         <RealmProvider
-          schema={[Item, CardioWorkout, Users, ResistanceWorkout, Workouts, UserStatistics, Groups, JoinGroupRequests, ExtraExercises, Feedback, GroupEvents, TrainingWorkout]}
+          schema={[
+            Item,
+            CardioWorkout,
+            Users,
+            ResistanceWorkout,
+            Workouts,
+            UserStatistics,
+            Groups,
+            JoinGroupRequests,
+            ExtraExercises,
+            Feedback,
+            GroupEvents,
+            TrainingWorkout,
+          ]}
           schemaVersion={2}
           sync={{
             flexible: true,

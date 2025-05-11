@@ -1,12 +1,13 @@
 import {Dimensions, StyleSheet} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 
-const {width, height} = Dimensions.get('window');
+const screenHeight = Dimensions.get('window').height;
+//const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    height: height,
+    height: screenHeight,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
