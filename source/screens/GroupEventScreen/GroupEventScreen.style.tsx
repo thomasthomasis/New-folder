@@ -1,43 +1,41 @@
-import { Dimensions, StyleSheet } from "react-native";
-import { colors } from "../../sharedStyling/Colors";
+import {Dimensions, StyleSheet} from 'react-native';
+import {colors} from '../../sharedStyling/Colors';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    height: screenHeight,
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
 
-    container: {
-      width: '100%',
-      height: screenHeight,
-      display: 'flex',
-      alignItems: 'center',
-      backgroundColor: 'white',
-    }, 
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 40,
+    marginLeft: 10,
 
-    closeButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 40,
-      marginLeft: 10,
-
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 
   headerTitle: {
-      width: screenWidth,
-      paddingLeft: 15,
-      fontSize: 20,
-      fontWeight: '800',
+    width: screenWidth,
+    paddingLeft: 15,
+    fontSize: 20,
+    fontWeight: '800',
   },
 
-
   closeButtonText: {
-      fontSize: 25,
-      fontWeight: '800',
-      color: 'white',
+    fontSize: 25,
+    fontWeight: '800',
+    color: 'white',
   },
 
   column: {
@@ -102,15 +100,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 
-  linkText: 
-  {
+  linkText: {
     fontSize: 20,
     color: 'white',
     fontWeight: '800',
   },
-
-
-  
 
   containerUsers: {
     width: screenWidth,
@@ -149,10 +143,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 25,
     fontWeight: '800',
-
   },
-    
-  });
-
+});
 
 export default styles;

@@ -9,13 +9,13 @@ export const common = StyleSheet.create({
     },
     h2: {
         fontSize: 16,
-        fontWeight: '600',
         color: colors.text,
+        fontFamily: 'Jost SemiBold',
     },
     h3: {
         fontSize: 14,
-        fontWeight: '400',
         color: colors.text,
+        fontFamily: 'Jost-Medium'
     },
     body: {
         fontSize: 12,

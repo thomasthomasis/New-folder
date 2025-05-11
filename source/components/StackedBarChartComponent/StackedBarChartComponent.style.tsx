@@ -1,15 +1,13 @@
-import { Dimensions, StyleSheet } from "react-native";
-import { colors } from "../../sharedStyling/Colors";
+import {Dimensions, StyleSheet} from 'react-native';
+import {colors} from '../../sharedStyling/Colors';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
-
-   
   container: {
-    backgroundColor: "#f0f0f0", 
-    borderRadius: 10, 
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
     padding: 10,
     paddingTop: 20,
     paddingBottom: 30,
@@ -53,15 +51,13 @@ const styles = StyleSheet.create({
 
   legend: {
     width: '100%',
-    display: 'flex', 
-    flexDirection: 'row', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    position: 'absolute', 
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     bottom: 10,
-  }
-    
-  });
-
+  },
+});
 
 export default styles;

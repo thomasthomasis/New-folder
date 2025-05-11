@@ -16,15 +16,8 @@ export function CreateToDoPrompt(props: Props): React.ReactElement<Props> {
       <Text h4 style={styles.addItemTitle}>
         Add To-Do Item
       </Text>
-      <Input
-        placeholder="What do you want to do?"
-        onChangeText={(text: string) => setSummary(text)}
-      />
-      <Button
-        title="Save"
-        buttonStyle={styles.saveButton}
-        onPress={() => onSubmit({summary})}
-      />
+      <Input placeholder="What do you want to do?" onChangeText={(text: string) => setSummary(text)} />
+      <Button title="Save" buttonStyle={styles.saveButton} onPress={() => onSubmit({summary})} />
     </View>
   );
 }

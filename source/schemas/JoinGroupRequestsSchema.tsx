@@ -1,4 +1,4 @@
-import Realm from "realm";
+import Realm from 'realm';
 
 export class JoinGroupRequests extends Realm.Object<JoinGroupRequests> {
   _id!: Realm.BSON.ObjectId;
@@ -13,6 +13,5 @@ export class JoinGroupRequests extends Realm.Object<JoinGroupRequests> {
       userId: 'string',
     },
     primaryKey: '_id',
+  };
 }
-};
-

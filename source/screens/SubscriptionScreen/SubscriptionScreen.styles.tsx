@@ -1,28 +1,27 @@
-import { Dimensions, StyleSheet } from "react-native";
-import { colors } from "../../sharedStyling/Colors";
+import {Dimensions, StyleSheet} from 'react-native';
+import {colors} from '../../sharedStyling/Colors';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
-
-container: {
+  container: {
     width: '100%',
     minHeight: screenHeight,
     backgroundColor: 'white',
     display: 'flex',
     alignItems: 'center',
     paddingTop: 20,
-},
+  },
 
-headerTitle: {
+  headerTitle: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-},
+  },
 
-closeButton: {
+  closeButton: {
     width: 40,
     height: 40,
     borderRadius: 40,
@@ -31,9 +30,9 @@ closeButton: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-},
+  },
 
-containerOption: {
+  containerOption: {
     width: '90%',
     paddingTop: 30,
     paddingLeft: 30,
@@ -43,9 +42,7 @@ containerOption: {
     borderRadius: 5,
     paddingBottom: 30,
     marginBottom: 40,
-}
-    
+  },
 });
-
 
 export default styles;

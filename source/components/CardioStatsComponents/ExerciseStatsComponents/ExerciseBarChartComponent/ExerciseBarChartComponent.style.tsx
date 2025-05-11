@@ -1,15 +1,13 @@
-import { Dimensions, StyleSheet } from "react-native";
-import { colors } from "../../../../sharedStyling/Colors";
+import {Dimensions, StyleSheet} from 'react-native';
+import {colors} from '../../../../sharedStyling/Colors';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
-
   mainContainer: {
     width: screenWidth - 20,
     backgroundColor: 'white',
-
   },
 
   container: {
@@ -22,7 +20,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 25,
-
   },
 
   legendContainer: {
@@ -48,9 +45,6 @@ const styles = StyleSheet.create({
   legendText: {
     fontSize: 14,
   },
- 
-    
-  });
-
+});
 
 export default styles;

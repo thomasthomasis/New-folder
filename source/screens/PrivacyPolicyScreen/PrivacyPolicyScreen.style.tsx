@@ -1,23 +1,22 @@
-import { StyleSheet } from "react-native";
-import { colors } from "../../sharedStyling/Colors";
+import {StyleSheet} from 'react-native';
+import {colors} from '../../sharedStyling/Colors';
 
 const styles = StyleSheet.create({
-
-container: {
+  container: {
     width: '100%',
     backgroundColor: 'white',
     display: 'flex',
     padding: 10,
-},
+  },
 
-headerTitle: {
+  headerTitle: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-},
+  },
 
-closeButton: {
+  closeButton: {
     width: 40,
     height: 40,
     borderRadius: 40,
@@ -26,42 +25,40 @@ closeButton: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-},
+  },
 
-h1: {
+  h1: {
     fontSize: 30,
     fontWeight: '900',
-},
+  },
 
-h2: {
+  h2: {
     fontSize: 25,
-    fontWeight: '700'
-},
+    fontWeight: '700',
+  },
 
-h3: {
+  h3: {
     fontSize: 20,
     fontWeight: '500',
-},
+  },
 
-h4: {
+  h4: {
     fontSize: 16,
     fontWeight: '400',
-},
+  },
 
-bold: {
+  bold: {
     fontSize: 18,
     fontWeight: '900',
-},
+  },
 
-border: {
+  border: {
     width: '100%',
     height: 3,
     backgroundColor: 'lightgray',
     marginRight: 'auto',
     marginLeft: 'auto',
-},
-    
+  },
 });
-
 
 export default styles;

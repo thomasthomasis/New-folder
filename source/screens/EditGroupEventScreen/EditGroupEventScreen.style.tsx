@@ -1,11 +1,10 @@
-import { Dimensions, StyleSheet } from "react-native";
-import { colors } from "../../sharedStyling/Colors";
+import {Dimensions, StyleSheet} from 'react-native';
+import {colors} from '../../sharedStyling/Colors';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
-
   container: {
     width: '90%',
     display: 'flex',
@@ -18,11 +17,11 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
     marginBottom: 100,
-},
+  },
 
-    scrollView: {
-      width: '100%',
-      marginBottom: 200,
+  scrollView: {
+    width: '100%',
+    marginBottom: 200,
   },
 
   headerTitle: {
@@ -30,194 +29,187 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-},
+  },
 
-containerInput: {
-  width: '95%',
-},
+  containerInput: {
+    width: '95%',
+  },
 
-inputTitle: {
-  fontWeight: '500',
-  fontSize: 18,
-  marginBottom: 5,
-  marginLeft: 5,
-},
+  inputTitle: {
+    fontWeight: '500',
+    fontSize: 18,
+    marginBottom: 5,
+    marginLeft: 5,
+  },
 
-input: {
-  borderWidth: 2,
-  borderColor: 'gray',
-  borderRadius: 15,
-  marginBottom: 20,
-  padding: 10,
-},
+  input: {
+    borderWidth: 2,
+    borderColor: 'gray',
+    borderRadius: 15,
+    marginBottom: 20,
+    padding: 10,
+  },
 
-textarea: {
-  borderWidth: 2,
-  borderColor: 'gray',
-  borderRadius: 5,
-  marginBottom: 10,
-  padding: 10,
-},
+  textarea: {
+    borderWidth: 2,
+    borderColor: 'gray',
+    borderRadius: 5,
+    marginBottom: 10,
+    padding: 10,
+  },
 
-option: {
-  width: 25,
-  height: 25,
-  borderRadius: 25,
-  borderWidth: 3,
-  borderColor: colors.black,
+  option: {
+    width: 25,
+    height: 25,
+    borderRadius: 25,
+    borderWidth: 3,
+    borderColor: colors.black,
+  },
 
-},
+  optionText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.black,
+  },
 
-optionText: {
-  fontSize: 18,
-  fontWeight: '800',
-  color: colors.black,
-},
+  containerFrequency: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
 
-containerFrequency: {
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'center',
-  marginBottom: 10,
-},
+  frequencyOption: {
+    width: '25%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 30,
+    backgroundColor: 'lightgray',
+    borderRadius: 10,
+    marginLeft: 3,
+    marginRight: 3,
+  },
 
-frequencyOption: {
-  width: '25%',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: 30,
-  backgroundColor: 'lightgray',
-  borderRadius: 10,
-  marginLeft: 3,
-  marginRight: 3,
-},
+  frequencyOptionText: {
+    fontWeight: '800',
+    fontSize: 16,
+    color: 'white',
+  },
 
-frequencyOptionText: {
-  fontWeight: '800',
-  fontSize: 16,
-  color: 'white',
-},
+  button: {
+    width: 160,
+    height: 45,
+    backgroundColor: colors.green,
+    borderRadius: 10,
 
-button: {
-  width: 160,
-  height: 45,
-  backgroundColor: colors.green,
-  borderRadius: 10,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 'auto',
+    marginLeft: 'auto',
+  },
 
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginRight: 'auto',
-  marginLeft: 'auto',
-},
+  buttonText: {
+    fontSize: 20,
+    color: 'white',
+    fontWeight: '700',
+  },
 
-buttonText: {
-  fontSize: 20,
-  color: 'white',
-  fontWeight: '700',
-},
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 40,
+    marginLeft: 10,
 
-closeButton: {
-  width: 40,
-  height: 40,
-  borderRadius: 40,
-  marginLeft: 10,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
+  check: {
+    width: 40,
+    height: 40,
+    borderRadius: 40,
+    marginRight: 10,
 
-check: {
-  width: 40,
-  height: 40,
-  borderRadius: 40,
-  marginRight: 10,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
+  closeButtonText: {
+    fontSize: 25,
+    fontWeight: '800',
+    color: 'white',
+  },
 
-closeButtonText: {
-  fontSize: 25,
-  fontWeight: '800',
-  color: 'white',
-},
+  colorRow: {},
 
-colorRow: {
+  color: {},
 
-},
+  selectedColour: {
+    width: '100%',
+    height: 40,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: 'black',
+  },
 
-color: {
+  modalView: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
 
-},
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 20,
 
-selectedColour: {
-  width: '100%',
-  height: 40,
-  borderRadius: 15,
-  borderWidth: 1,
-  borderColor: 'black',
-},
+    display: 'flex',
+    alignItems: 'center',
+  },
 
-modalView: {
-  width: '100%',
-  display: 'flex',
-  justifyContent: 'flex-end',
-  margin: 0,
-},
+  addButton: {
+    width: 200,
+    height: 40,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'lightgray',
+    borderRadius: 10,
+    marginBottom: 10,
+  },
 
-modalContent: {
-  backgroundColor: 'white',
-  padding: 10,
-  borderRadius: 20,
+  addButtonText: {
+    fontWeight: '800',
+    fontSize: 20,
+  },
 
-  display: 'flex',
-  alignItems: 'center',
-},
+  containerLinks: {
+    width: screenWidth - 70,
+  },
 
-addButton: {
-  width: 200,
-  height: 40,
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  backgroundColor: 'lightgray',
-  borderRadius: 10,
-  marginBottom: 10,
-},
+  border: {
+    width: screenWidth - 70,
+    height: 2,
+    backgroundColor: 'lightgray',
+    marginBottom: 10,
+    marginRight: 'auto',
+    marginLeft: 'auto',
+  },
 
-addButtonText: {
-  fontWeight: '800',
-  fontSize: 20,
-},
-
-containerLinks: {
-  width: screenWidth - 70,
-},
-
-border: {
-  width: screenWidth - 70,
-  height: 2,
-  backgroundColor: 'lightgray',
-  marginBottom: 10,
-  marginRight: 'auto',
-  marginLeft: 'auto',
-},
-
-dateText: {
-  marginBottom: 20,
-  fontSize: 16,
-},
-datePickerStyle: {
-  width: 200,
-  marginTop: 20,
-},
-    
-  });
-
+  dateText: {
+    marginBottom: 20,
+    fontSize: 16,
+  },
+  datePickerStyle: {
+    width: 200,
+    marginTop: 20,
+  },
+});
 
 export default styles;
