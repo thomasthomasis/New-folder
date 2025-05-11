@@ -7,11 +7,11 @@ export class CardioWorkout extends Realm.Object<CardioWorkout> {
   distance!: Realm.List<string>;
   exercise!: Realm.List<string>;
   extraNotes!: Realm.List<string>;
+  name?: string;
   time!: Realm.List<string>;
   totalDistance?: number;
   totalTime?: number;
   user_id!: string;
-
 
   static schema: Realm.ObjectSchema = {
     name: 'CardioWorkout',
@@ -22,12 +22,12 @@ export class CardioWorkout extends Realm.Object<CardioWorkout> {
       distance: 'string[]',
       exercise: 'string[]',
       extraNotes: 'string[]',
+      name: 'string?',
       time: 'string[]',
       totalDistance: 'int?',
       totalTime: 'int?',
       user_id: 'string',
     },
     primaryKey: '_id',
-  }
-
-};
+  };
+}

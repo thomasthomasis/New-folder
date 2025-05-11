@@ -1,35 +1,34 @@
-import { Dimensions, StyleSheet } from "react-native";
-import { colors } from "../../sharedStyling/Colors";
+import {Dimensions, StyleSheet} from 'react-native';
+import {colors} from '../../sharedStyling/Colors';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
-
   header: {
-    width: '100%', 
-    height: 60, 
-    display: 'flex', 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-between', 
-    backgroundColor: 'lightgray',
-    paddingBottom: 10,
+    width: '100%',
+    height: 60,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.background,
   },
 
   headerText: {
     fontWeight: '900',
     fontSize: 25,
     marginLeft: 15,
+    color: colors.text,
   },
 
   headerImage: {
-    marginTop: 10,
-    width: 60,
-    height: 60,
+    width: 45,
+    height: 45,
     borderRadius: 60,
     borderWidth: 3,
     borderColor: 'white',
+    marginLeft: 10,
   },
 
   container: {
@@ -42,8 +41,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
 
-    backgroundColor: 'lightgray',
-   
+    backgroundColor: colors.background,
   },
 
   containerPieChart: {
@@ -55,10 +53,8 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    
+
     marginBottom: 20,
-
-
   },
 
   rowPieChart: {
@@ -85,7 +81,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     width: screenWidth - 30,
   },
 
@@ -99,99 +95,94 @@ const styles = StyleSheet.create({
     width: screenWidth - 130,
   },
 
-  logWorkoutButton:{
+  logWorkoutButton: {
     width: 80,
     height: 80,
-    backgroundColor: colors.blue,
+    backgroundColor: colors.green,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 80,
   },
 
-  logWorkoutButtonText:{
+  logWorkoutButtonText: {
     fontWeight: '800',
     color: 'white',
     fontSize: 20,
   },
 
-    plus: {
-      position: 'absolute',
-      color: 'black',
+  plus: {
+    position: 'absolute',
+    color: 'black',
 
-      bottom: 0,
-      right: 5,
+    bottom: 0,
+    right: 5,
 
-      fontSize: 40,
-    },
+    fontSize: 40,
+  },
 
-    gridOption: {
-      width: '48%',
-      aspectRatio: 1/1,
-      borderRadius: 10,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
+  gridOption: {
+    width: '48%',
+    aspectRatio: 1 / 1,
+    borderRadius: 10,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
-    circle: {
-      width: '70%',
-      aspectRatio: 1/1,
-      borderRadius: 100,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
+  circle: {
+    width: '70%',
+    aspectRatio: 1 / 1,
+    borderRadius: 100,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
-    image: {
-      width: '70%',
-      height: '70%',
-      resizeMode: 'contain',
-    },
+  image: {
+    width: '70%',
+    height: '70%',
+    resizeMode: 'contain',
+  },
 
-    cardioContainer: {
-      width: '97%',
-      backgroundColor: colors.red,
-      borderRadius: 10,
-      padding: 10,
-    },
+  cardioContainer: {
+    width: '97%',
+    backgroundColor: colors.red,
+    borderRadius: 10,
+    padding: 10,
+  },
 
-    form: {
-      width: 300,
-      height: 400,
-    },
+  form: {
+    width: 300,
+    height: 400,
+  },
 
-    button: {
-      width: 170,
-      backgroundColor: 'lightgray',
-      padding: 10,
-      borderRadius: 5,
-      marginBottom: 10,
-    },
+  button: {
+    width: 170,
+    backgroundColor: 'lightgray',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
 
-    continueButton: {
-      width: 190,
-      backgroundColor: colors.blue,
-      padding: 10,
-      borderRadius: 5,
-      marginBottom: 10,
-      marginRight: 'auto',
-      marginLeft: 'auto',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-
-    buttonText: {
-      fontWeight: '800',
-      color: 'white',
-      fontSize: 20,
-    },
+  modalButton: {
+    position: 'absolute',
+    bottom: 16,
+    right: 24,
+    backgroundColor: colors.lightGreen,
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+  },
 
   containerModal: {
     width: '100%',
-    height: 300,
-    
+    minHeight: 450,
+
     borderRadius: 20,
     marginRight: 'auto',
     marginLeft: 'auto',
@@ -211,9 +202,26 @@ const styles = StyleSheet.create({
   },
 
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: '#f0f0f0',
     padding: 10,
     borderRadius: 20,
+  },
+
+  modalCard: {
+    width: screenWidth - 50,
+    height: 80,
+    paddingLeft: 25,
+    paddingRight: 25,
+    backgroundColor: 'white',
+    marginRight: 'auto',
+    marginLeft: 'auto',
+    borderRadius: 20,
+    marginBottom: 10,
+
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 
   modalHeader: {
@@ -221,27 +229,40 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: '100%',
     display: 'flex',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
 
   modalHeaderText: {
-    fontSize: 25,
-    fontWeight: '800',
-    textAlign: 'left',
+    fontSize: 20,
+    fontWeight: '900',
+    color: colors.text,
+    textAlign: 'center',
   },
 
   rowModal: {
     width: '100%',
     display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    
-
-
+    flexDirection: 'column',
   },
 
-    
-    
-  });
+  buttonText: {
+    fontWeight: '800',
+    color: colors.text,
+    fontSize: 20,
+  },
+
+  continueButton: {
+    width: 190,
+    backgroundColor: colors.green,
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    marginRight: 'auto',
+    marginLeft: 'auto',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default styles;

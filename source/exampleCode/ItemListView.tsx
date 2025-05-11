@@ -10,7 +10,7 @@ import {CreateToDoPrompt} from './CreateToDoPrompt';
 
 import {Item} from '../schemas/ItemSchema';
 import {colors} from '../sharedStyling/Colors';
-import { flingGestureHandlerProps } from 'react-native-gesture-handler/lib/typescript/handlers/FlingGestureHandler';
+import {flingGestureHandlerProps} from 'react-native-gesture-handler/lib/typescript/handlers/FlingGestureHandler';
 
 // If you're getting this app code by cloning the repository at
 // https://github.com/mongodb/ template-app-react-native-todo,
@@ -30,9 +30,7 @@ export function ItemListView() {
 
   // This state will be used to toggle between showing all items and only showing the current user's items
   // This is initialized based on which subscription is already active
-  const [showAllItems, setShowAllItems] = useState(
-    !!realm.subscriptions.findByName(itemSubscriptionName),
-  );
+  const [showAllItems, setShowAllItems] = useState(!!realm.subscriptions.findByName(itemSubscriptionName));
 
   // This effect will initialize the subscription to the items collection
   // By default it will filter out all items that do not belong to the current user
@@ -48,10 +46,7 @@ export function ItemListView() {
     } else {
       realm.subscriptions.update(mutableSubs => {
         mutableSubs.removeByName(itemSubscriptionName);
-        mutableSubs.add(
-          realm.objects(Item).filtered(`owner_id == "${user?.id}"`),
-          {name: ownItemsSubscriptionName},
-        );
+        mutableSubs.add(realm.objects(Item).filtered(`owner_id == "${user?.id}"`), {name: ownItemsSubscriptionName});
       });
     }
   }, [realm, user, showAllItems]);
@@ -118,19 +113,14 @@ export function ItemListView() {
             trackColor={{true: '#00ED64'}}
             onValueChange={() => {
               if (realm.syncSession?.state !== 'active') {
-                Alert.alert(
-                  'Switching subscriptions does not affect Realm data when the sync is offline.',
-                );
+                Alert.alert('Switching subscriptions does not affect Realm data when the sync is offline.');
               }
               setShowAllItems(!showAllItems);
             }}
             value={showAllItems}
           />
         </View>
-        <Overlay
-          isVisible={showNewItemOverlay}
-          overlayStyle={styles.overlay}
-          onBackdropPress={() => setShowNewItemOverlay(false)}>
+        <Overlay isVisible={showNewItemOverlay} overlayStyle={styles.overlay} onBackdropPress={() => setShowNewItemOverlay(false)}>
           <CreateToDoPrompt
             onSubmit={({summary}) => {
               setShowNewItemOverlay(false);
@@ -143,35 +133,18 @@ export function ItemListView() {
           data={items}
           renderItem={({item}) => (
             <ListItem key={`${item._id}`} bottomDivider topDivider>
-              <ListItem.Title style={styles.itemTitle}>
-                {item.summary}
-              </ListItem.Title>
+              <ListItem.Title style={styles.itemTitle}>{item.summary}</ListItem.Title>
               <ListItem.Subtitle style={styles.itemSubtitle}>
                 <Text>{item.owner_id === user?.id ? '(mine)' : ''}</Text>
               </ListItem.Subtitle>
               <ListItem.Content>
-                {!item.isComplete && (
-                  <Button
-                    title="Mark done"
-                    type="clear"
-                    onPress={() => toggleItemIsComplete(item._id)}
-                  />
-                )}
-                <Button
-                  title="Delete"
-                  type="clear"
-                  onPress={() => deleteItem(item._id)}
-                />
+                {!item.isComplete && <Button title="Mark done" type="clear" onPress={() => toggleItemIsComplete(item._id)} />}
+                <Button title="Delete" type="clear" onPress={() => deleteItem(item._id)} />
               </ListItem.Content>
             </ListItem>
           )}
         />
-        <Button
-          title="Add To-Do"
-          buttonStyle={styles.addToDoButton}
-          onPress={() => setShowNewItemOverlay(true)}
-        />
-
+        <Button title="Add To-Do" buttonStyle={styles.addToDoButton} onPress={() => setShowNewItemOverlay(true)} />
       </View>
     </SafeAreaProvider>
   );
@@ -238,5 +211,5 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     textAlign: 'center',
-  }
+  },
 });

@@ -7,15 +7,17 @@ import {App} from './App';
 import {WelcomeScreen} from './screens/WelcomeScreen/WelcomeScreen';
 
 import {Item} from './schemas/ItemSchema';
-import { CardioWorkout } from './schemas/CardioWorkoutSchema';
-import { Users } from './schemas/UsersSchema';
-import { ResistanceWorkout } from './schemas/ResistanceWorkoutSchema';
-import { Workouts } from './schemas/WorkoutSchema';
-import { UserStatistics } from './schemas/UserStatisticsSchema';
-import { Groups } from './schemas/GroupsSchema';
-import { JoinGroupRequests } from './schemas/JoinGroupRequestsSchema';
-import { ExtraExercises } from './schemas/ExtraExercisesSchema';
-import { Feedback } from './schemas/FeedbackSchema';
+import {CardioWorkout} from './schemas/CardioWorkoutSchema';
+import {Users} from './schemas/UsersSchema';
+import {ResistanceWorkout} from './schemas/ResistanceWorkoutSchema';
+import {Workouts} from './schemas/WorkoutSchema';
+import {UserStatistics} from './schemas/UserStatisticsSchema';
+import {Groups} from './schemas/GroupsSchema';
+import {JoinGroupRequests} from './schemas/JoinGroupRequestsSchema';
+import {ExtraExercises} from './schemas/ExtraExercisesSchema';
+import {Feedback} from './schemas/FeedbackSchema';
+import {GroupEvents} from './schemas/GroupEventsScehma';
+import {TrainingWorkout} from './schemas/TrainingWorkoutSchema';
 
 const LoadingIndicator = () => {
   return (
@@ -30,17 +32,13 @@ export const AppWrapper = () => {
     <AppProvider id={appId} baseUrl={baseUrl}>
       <UserProvider fallback={WelcomeScreen}>
         <RealmProvider
-          schema={[Item, CardioWorkout, Users, ResistanceWorkout, Workouts, UserStatistics, Groups, JoinGroupRequests, ExtraExercises, Feedback]}
+          schema={[Item, CardioWorkout, Users, ResistanceWorkout, Workouts, UserStatistics, Groups, JoinGroupRequests, ExtraExercises, Feedback, GroupEvents, TrainingWorkout]}
+          schemaVersion={2}
           sync={{
             flexible: true,
-            initialSubscriptions: {
-              update(subs, realm) {
-                subs.add(realm.objects('Users'))
-              },
-            },
             onError: (_session, error) => {
               // Show sync errors in the console
-              console.error("Error: " + error);
+              console.error('Error: ' + error);
             },
           }}
           fallback={LoadingIndicator}>

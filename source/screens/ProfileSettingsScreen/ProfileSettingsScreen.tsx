@@ -1,344 +1,335 @@
 import React, {useState, useEffect} from 'react';
 import {Alert, StyleSheet, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, TouchableWithoutFeedback, Keyboard} from 'react-native';
-import { useQuery, useRealm, useUser } from '@realm/react';
-import { Users } from '../../schemas/UsersSchema';
+import {useQuery, useRealm, useUser} from '@realm/react';
+import {Users} from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { shadow } from '../../sharedStyling/Shadow';
+import {shadow} from '../../sharedStyling/Shadow';
 import styles from './ProfileSettingsScreen.style';
 import Modal from 'react-native-modal';
 
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
-import { colors } from '../../sharedStyling/Colors';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
+import {colors} from '../../sharedStyling/Colors';
 
 type ProfileSettingsProps = {
-    navigation: StackNavigationProp<RootStackParamList, 'ProfileSettings'>;
-}
+  navigation: StackNavigationProp<RootStackParamList, 'ProfileSettings'>;
+};
 
-export const ProfileSettingsScreen = ({ navigation }: ProfileSettingsProps) => {
+export const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
+  const realm = useRealm();
+  const user = useUser();
 
-    const realm = useRealm()
-    const user = useUser()
+  const goBack = () => {
+    navigation.goBack();
+  };
 
-    const goBack = () => {
-        navigation.goBack()
-    }   
+  const [userData, setUserData] = useState<any>(null);
 
-    const userData = useQuery(Users).sorted('_id').filtered("userId == $0", user.id);
-    
-    const [selectingProfilePicture, setSelectingProfilePicture] = useState<boolean>(false)
-    const [imageSource, setImageSource] = useState(require('../../assets/1.png'))
-    const [imageSourceText, setImageSourceText] = useState('../../assets/1.png')
+  const [selectingProfilePicture, setSelectingProfilePicture] = useState<boolean>(false);
+  const [imageSource, setImageSource] = useState(require('../../assets/defaultPFP.png'));
+  const [imageSourceText, setImageSourceText] = useState('../../assets/defaultPFP.png');
 
-    const [firstName, setFirstName] = useState<string | undefined>(userData[0].firstName)
-    const [surname, setSurname] = useState<string | undefined>(userData[0].lastName)
-    const [username, setUsername] = useState<string | undefined>(userData[0].username)
-    const [title, setTitle] = useState<string | undefined>(userData[0].selectedTitle)
-    const [status, setStatus] = useState<string | undefined>(userData[0].status)
-    const [showModal, setShowModal] = useState<boolean>(false)
-    const [showModalStatus, setShowModalStatus] = useState<boolean>(false)
-    const [newProfilePictureBool, setNewProfilePictureBool] = useState<boolean>(false)
+  const [firstName, setFirstName] = useState<string | undefined>('');
+  const [surname, setSurname] = useState<string | undefined>('');
+  const [username, setUsername] = useState<string | undefined>('');
+  const [title, setTitle] = useState<string | undefined>('');
+  const [titles, setTitles] = useState<any>('');
+  const [status, setStatus] = useState<string | undefined>('');
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showModalStatus, setShowModalStatus] = useState<boolean>(false);
+  const [newProfilePictureBool, setNewProfilePictureBool] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
 
-    const statuses = ["Healthy", "Away", "Injured"]
+  const statuses = ['Healthy', 'Away', 'Injured'];
 
-    const closeModals = () => {
-        setShowModal(false)
-        setShowModalStatus(false)
+  useEffect(() => {
+    let userDataObject = realm.objects(Users).sorted('_id').filtered('userId == $0', user.id);
+
+    setUserData(userDataObject);
+    setFirstName(userDataObject[0].firstName);
+    setUsername(userDataObject[0].username);
+    setSurname(userDataObject[0].lastName);
+    setTitle(userDataObject[0].selectedTitle);
+    setStatus(userDataObject[0].status);
+    setTitles(userDataObject[0].titles);
+
+    console.log('user data: ', userData);
+
+    if (userDataObject) {
+      setLoading(false);
+    }
+  }, []);
+
+  const closeModals = () => {
+    setShowModal(false);
+    setShowModalStatus(false);
+  };
+
+  const handleUsernameChange = (inputText: string) => {
+    setUsername(inputText);
+  };
+
+  const handlefirstNameChange = (inputText: string) => {
+    setFirstName(inputText);
+  };
+
+  const handleSurnameChange = (inputText: string) => {
+    setSurname(inputText);
+  };
+
+  const returnToMainMenu = () => {
+    setSelectingProfilePicture(false);
+  };
+
+  const updateImageSource = (source: string) => {
+    if (source.includes('1')) {
+      setImageSource(require('../../assets/1.png'));
+      setImageSourceText('../../assets/1.png');
+    } else if (source.includes('2')) {
+      setImageSource(require('../../assets/2.png'));
+      setImageSourceText('../../assets/2.png');
+    } else if (source.includes('3')) {
+      setImageSource(require('../../assets/3.png'));
+      setImageSourceText('../../assets/3.png');
+    } else if (source.includes('4')) {
+      setImageSource(require('../../assets/4.png'));
+      setImageSourceText('../../assets/4.png');
+    } else {
+      setImageSource(require('../../assets/defaultPFP.png'));
+      setImageSourceText('../../assets/defaultPFP.png');
     }
 
-    const titles = userData[0].titles
+    setNewProfilePictureBool(true);
 
-    const [isLoading, setIsLoading] = useState(true)
+    console.log(source);
 
-    const handleUsernameChange = (inputText:string) => {
-        setUsername(inputText)
+    returnToMainMenu();
+  };
+
+  const updateUserInformation = (newProfilePicture: boolean) => {
+    if (newProfilePicture) {
+      realm.write(() => {
+        userData[0].firstName = firstName;
+        userData[0].lastName = surname;
+        userData[0].profilePicture = imageSourceText;
+        userData[0].username = username;
+        userData[0].selectedTitle = title;
+        userData[0].status = status;
+      });
+    } else {
+      realm.write(() => {
+        userData[0].firstName = firstName;
+        userData[0].lastName = surname;
+        userData[0].username = username;
+        userData[0].selectedTitle = title;
+        userData[0].status = status;
+      });
     }
+  };
 
-    const handlefirstNameChange = (inputText:string) => {
-        setFirstName(inputText)
+  const handleConfirm = () => {
+    // Show confirmation popup
+    Alert.alert(
+      'Confirm Action',
+      'Are you sure you want to update your information?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            updateUserInformation(newProfilePictureBool);
+            goBack();
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+  };
+
+  useEffect(() => {
+    let userData = realm.objects(Users).sorted('_id').filtered('userId == $0', user.id);
+
+    console.log(userData);
+    if (userData[0].profilePicture?.includes('1')) {
+      setImageSource(require('../../assets/1.png'));
+    } else if (userData[0].profilePicture?.includes('2')) {
+      setImageSource(require('../../assets/2.png'));
+    } else if (userData[0].profilePicture?.includes('3')) {
+      setImageSource(require('../../assets/3.png'));
+    } else if (userData[0].profilePicture?.includes('4')) {
+      setImageSource(require('../../assets/4.png'));
+    } else {
+      setImageSource(require('../../assets/defaultPFP.png'));
     }
+  }, []);
 
-    const handleSurnameChange = (inputText:string) => {
-        setSurname(inputText)
-    }
+  useEffect(() => {
+    realm.subscriptions.update(mutableSubs => {
+      mutableSubs.add(realm.objects(Users));
+    });
+  }, [realm, user]);
 
-    const returnToMainMenu = () => {
-        setSelectingProfilePicture(false)
-    }
-
-    const updateImageSource = (source:string) => {
-        if(source.includes('1'))
-        {
-            setImageSource(require('../../assets/1.png'))
-            setImageSourceText("../../assets/1.png")
-        }
-        else if(source.includes('2'))
-        {
-            setImageSource(require('../../assets/2.png'))
-            setImageSourceText('../../assets/2.png')
-        }
-        else if(source.includes('3'))
-        {
-            setImageSource(require('../../assets/3.png'))
-            setImageSourceText('../../assets/3.png')
-        }
-        else if(source.includes('4'))
-        {
-            setImageSource(require('../../assets/4.png'))
-            setImageSourceText('../../assets/4.png')
-        }
-
-        setNewProfilePictureBool(true)
-
-        console.log(source)
-
-        returnToMainMenu();
-    }
-
-    const updateUserInformation = (newProfilePicture:boolean) => {
-
-        if(newProfilePicture)
-        {
-            realm.write(() => {
-                userData[0].firstName = firstName;
-                userData[0].lastName = surname;
-                userData[0].profilePicture = imageSourceText;
-                userData[0].username = username;
-                userData[0].selectedTitle = title;
-                userData[0].status = status;
-            })
-        }
-        else
-        {
-            realm.write(() => {
-                userData[0].firstName = firstName;
-                userData[0].lastName = surname;
-                userData[0].username = username;
-                userData[0].selectedTitle = title;
-                userData[0].status = status;
-            }) 
-        }
-
-    }
-
-    const handleConfirm = () => {
-        // Show confirmation popup
-        Alert.alert(
-          'Confirm Action',
-          'Are you sure you want to update your information?',
-          [
-            {
-              text: 'Cancel',
-              onPress: () => console.log('Cancel Pressed'),
-              style: 'cancel',
-            },
-            {
-              text: 'OK',
-              onPress: () => {updateUserInformation(newProfilePictureBool); goBack()}
-            },
-          ],
-          { cancelable: false }
-        );
-      };
-
-    useEffect(() => {
-
-        console.log(userData)
-        if(userData[0].profilePicture?.includes('1'))
-        {
-          setImageSource(require('../../assets/1.png'))
-        }
-        else if(userData[0].profilePicture?.includes('2'))
-        {
-          setImageSource(require('../../assets/2.png'))
-        }
-        else if(userData[0].profilePicture?.includes('3'))
-        {
-          setImageSource(require('../../assets/3.png'))
-        }
-        else if(userData[0].profilePicture?.includes('4'))
-        {
-          setImageSource(require('../../assets/4.png'))
-        }
-
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-          }, 500); // Change the delay time as needed
-
-        return () => clearTimeout(timer)
-      }, [])
-
-      useEffect(() => {
-        realm.subscriptions.update(mutableSubs => {
-            mutableSubs.add(
-            realm.objects(Users),
-            );
-        });
-        }, [realm, user]);
-
-    return (
+  return (
+    <>
+      {!selectingProfilePicture && (
         <>
-        {
-            !selectingProfilePicture &&
+          {loading && (
+            <View
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: '100%',
+              }}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          )}
+          {!loading && (
             <>
-
-            {
-                isLoading && 
-                <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'}}>
-                    <ActivityIndicator size="large" color="#0000ff" />
+              <View style={styles.header}>
+                <View style={styles.headerTitle}>
+                  <TouchableOpacity onPress={goBack} style={styles.closeButton}>
+                    <MaterialCommunityIcons name="arrow-left" size={40} />
+                  </TouchableOpacity>
+                  <Text style={{fontSize: 20, fontWeight: '800', marginLeft: 20}}>Edit Profile</Text>
                 </View>
-            }
-            {
-                !isLoading &&
-                <>
+                <TouchableOpacity onPress={handleConfirm}>
+                  <MaterialCommunityIcons name="check" color={'black'} size={40} style={{marginRight: 10}} />
+                </TouchableOpacity>
+              </View>
 
-                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 10, position: 'absolute', zIndex: 2}}>
-                    <TouchableOpacity onPress={goBack}>
-                        <MaterialCommunityIcons name="arrow-left" color={'black'} size={40} style={{marginLeft: 10,}}/>
+              <View style={styles.container}>
+                <TouchableOpacity onPress={() => setSelectingProfilePicture(true)}>
+                  <Image source={imageSource} style={styles.image} />
+                  <MaterialCommunityIcons
+                    name="image-edit-outline"
+                    color={'black'}
+                    size={25}
+                    style={{
+                      backgroundColor: 'white',
+                      borderRadius: 40,
+                      position: 'absolute',
+                      bottom: -10,
+                      right: 5,
+                      padding: 5,
+                    }}
+                  />
+                </TouchableOpacity>
+
+                <View style={styles.information}>
+                  <View style={styles.row}>
+                    <Text style={styles.inputTitle}>Username</Text>
+                    <TextInput style={styles.input} onChangeText={handleUsernameChange} value={username} />
+                  </View>
+                  <View style={styles.row}>
+                    <Text style={styles.inputTitle}>First Name</Text>
+                    <TextInput style={styles.input} onChangeText={handlefirstNameChange} value={firstName} />
+                  </View>
+                  <View style={styles.row}>
+                    <Text style={styles.inputTitle}>Surname</Text>
+                    <TextInput style={styles.input} onChangeText={handleSurnameChange} value={surname} />
+                  </View>
+                  <View style={styles.row}>
+                    <Text style={styles.inputTitle}>Title</Text>
+                    <TouchableOpacity style={styles.input} onPress={() => setShowModal(true)}>
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          fontWeight: '600',
+                          color: colors.black,
+                        }}>
+                        {title}
+                      </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={handleConfirm}>
-                        <MaterialCommunityIcons name="check" color={'black'} size={40} style={{marginRight: 10,}}/>
+                  </View>
+                  <View style={styles.row}>
+                    <Text style={styles.inputTitle}>Status</Text>
+                    <TouchableOpacity style={styles.input} onPress={() => setShowModalStatus(true)}>
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          fontWeight: '600',
+                          color: colors.black,
+                        }}>
+                        {status}
+                      </Text>
                     </TouchableOpacity>
+                  </View>
                 </View>
-            
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View style={styles.container}>
-                        <TouchableOpacity onPress={() => setSelectingProfilePicture(true)}>
-                            <Image source={imageSource} style={{width: 150, height: 150, borderRadius: 100,}}/>
-                            <MaterialCommunityIcons name="image-edit-outline" color={'black'} size={40} style={{backgroundColor: 'white', borderRadius: 40, position: 'absolute', bottom: 0, right: 10, padding: 5,}}/>
-                        </TouchableOpacity>
+              </View>
 
-                        <View style={[styles.information, shadow.shadow]}>
-                            <Text style={{fontSize: 25, fontWeight: '900', marginBottom: 5,}}>Information</Text>
-                            <View style={styles.smallBorder}></View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Email</Text>
-                                <Text style={{fontSize: 18, fontWeight: '600'}}>{user.profile.email}</Text>
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Username</Text>
-                                <TextInput
-                                    style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
-                                    onChangeText={handleUsernameChange}
-                                    value={username}
-                                />
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>First Name</Text>
-                                <TextInput
-                                    style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
-                                    onChangeText={handlefirstNameChange}
-                                    value={firstName}
-                                />
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Surname</Text>
-                                <TextInput
-                                    style={{fontSize: 18, fontWeight: '600', borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}}
-                                    onChangeText={handleSurnameChange}
-                                    value={surname}
-                                />
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Title</Text>
-                                <TouchableOpacity style={{borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}} onPress={() => setShowModal(true)}>
-                                <Text style={{fontSize: 18, fontWeight: '600', }}>{title}</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Status</Text>
-                                <TouchableOpacity style={{borderBottomWidth: 2, borderBottomColor: 'lightgray', padding: 0,}} onPress={() => setShowModalStatus(true)}>
-                                <Text style={{fontSize: 18, fontWeight: '600', }}>{status}</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.row}>
-                                <Text style={{fontSize: 18, fontWeight: '600', color: '#bfc0be'}}>Joined</Text>
-                                <Text style={{fontSize: 18, fontWeight: '600'}}>{userData[0].dateCreated?.toLocaleString()}</Text>
-                            </View>
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            
+              <Modal isVisible={showModal} swipeDirection={['down']} onSwipeComplete={closeModals} onBackdropPress={closeModals} style={styles.modalView}>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalContent}>
+                    {titles.map((item: any, index: any) => (
+                      <TouchableOpacity
+                        key={index}
+                        onPress={() => {
+                          closeModals();
+                          setTitle(item);
+                        }}
+                        style={[styles.titleButton, {marginTop: 5, marginBottom: 5}]}>
+                        <Text style={styles.titleButtonText}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </Modal>
 
-                <Modal
-                isVisible={showModal}
-                swipeDirection={['down']}
-                onSwipeComplete={closeModals}
-                onBackdropPress={closeModals}
-                style={styles.modalView}
-                >
-                        <View style={styles.modalContent}>
-                                <View style={styles.modalContent}>
-                                    {
-                                        titles.map((item, index) => (
-                                            <TouchableOpacity key={index} onPress={() => {closeModals(); setTitle(item)}} style={[styles.titleButton, {marginTop: 5, marginBottom: 5}]}>
-                                                <Text style={styles.titleButtonText}>{item}</Text>
-                                            </TouchableOpacity>
-                                        ))
-                                    }
-                                </View>
-                        </View>
-                    
-                    
-                </Modal>
-
-                <Modal
-                isVisible={showModalStatus}
-                swipeDirection={['down']}
-                onSwipeComplete={closeModals}
-                onBackdropPress={closeModals}
-                style={styles.modalView}
-                >
-                    
-                    <View style={styles.modalContent}>
-                            <View style={styles.modalContent}>
-                                {
-                                    statuses.map((item, index) => (
-                                        <TouchableOpacity key={index} onPress={() => {closeModals(); setStatus(item)}} style={[styles.titleButton, {marginTop: 5, marginBottom: 5}, index == 1 && {backgroundColor: colors.orange}, index == 2 && {backgroundColor: colors.red}]}>
-                                            <Text style={styles.titleButtonText}>{item}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                }
-                            </View>
-                    </View>
-                  
-                    
-                </Modal>
+              <Modal isVisible={showModalStatus} swipeDirection={['down']} onSwipeComplete={closeModals} onBackdropPress={closeModals} style={styles.modalView}>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalContent}>
+                    {statuses.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        onPress={() => {
+                          closeModals();
+                          setStatus(item);
+                        }}
+                        style={[styles.titleButton, {marginTop: 5, marginBottom: 5}, index == 1 && {backgroundColor: colors.orange}, index == 2 && {backgroundColor: colors.red}]}>
+                        <Text style={styles.titleButtonText}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </Modal>
             </>
-            }
+          )}
+        </>
+      )}
 
-            
+      {selectingProfilePicture && (
+        <>
+          <View style={styles.header}>
+            <View style={styles.headerTitle}>
+              <TouchableOpacity onPress={returnToMainMenu} style={styles.closeButton}>
+                <MaterialCommunityIcons name="arrow-left" size={40} />
+              </TouchableOpacity>
+              <Text style={{fontSize: 20, fontWeight: '800', marginLeft: 20}}>Select Image</Text>
+            </View>
+          </View>
 
-            
-            </>
-        }
-            
-
-            {
-          selectingProfilePicture &&
-          <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%',}}>
-            <TouchableOpacity onPress={returnToMainMenu} style={{width: 40, height: 40, borderRadius: 40, borderWidth: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-              <MaterialCommunityIcons name="arrow-left-thick" color={'black'} size={30}/>
+          <View style={[styles.information, {alignItems: 'center'}]}>
+            <TouchableOpacity onPress={() => updateImageSource('../../assets/1.png')}>
+              <Image style={styles.image} source={require('../../assets/1.png')} />
             </TouchableOpacity>
-            <Text style={styles.title}>Select Option</Text>
-            <View style={[styles.smallBorder, {backgroundColor: 'black'}]}></View>
-            <TouchableOpacity onPress={() => updateImageSource("../../assets/1.png")}>
-              <Image style={styles.image} source={require("../../assets/1.png")} />
+            <TouchableOpacity onPress={() => updateImageSource('../../assets/2.png')}>
+              <Image style={styles.image} source={require('../../assets/2.png')} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => updateImageSource("../../assets/2.png")}>
-              <Image style={styles.image} source={require("../../assets/2.png")} />
+            <TouchableOpacity onPress={() => updateImageSource('../../assets/3.png')}>
+              <Image style={styles.image} source={require('../../assets/3.png')} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => updateImageSource("../../assets/3.png")}>
-              <Image style={styles.image} source={require("../../assets/3.png")} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => updateImageSource("./assets/4.png")}>
-              <Image style={styles.image} source={require("../../assets/4.png")} />
+            <TouchableOpacity onPress={() => updateImageSource('./assets/4.png')}>
+              <Image style={styles.image} source={require('../../assets/4.png')} />
             </TouchableOpacity>
           </View>
-        }
         </>
-
-        
-    )
-}
-
+      )}
+    </>
+  );
+};

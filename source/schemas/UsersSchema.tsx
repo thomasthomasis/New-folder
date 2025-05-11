@@ -1,10 +1,12 @@
-import Realm from "realm";
+import Realm from 'realm';
 
 export class Users extends Realm.Object<Users> {
   _id!: Realm.BSON.ObjectId;
   dateCreated?: Date;
+  favouriteExercises?: Realm.List<string>;
   firstName?: string;
   lastName?: string;
+  preferences?: Realm.List<string>;
   profilePicture?: string;
   selectedTitle?: string;
   status?: string;
@@ -14,19 +16,20 @@ export class Users extends Realm.Object<Users> {
 
   static schema: Realm.ObjectSchema = {
     name: 'Users',
-  properties: {
-    _id: 'objectId',
-    dateCreated: 'date?',
-    firstName: 'string?',
-    lastName: 'string?',
-    profilePicture: 'string?',
-    selectedTitle: 'string?',
-    status: 'string?',
-    titles: 'string[]',
-    userId: 'string',
-    username: 'string?',
-  },
-  primaryKey: '_id',
+    properties: {
+      _id: 'objectId',
+      dateCreated: 'date?',
+      favouriteExercises: 'string[]',
+      firstName: 'string?',
+      lastName: 'string?',
+      preferences: 'string[]',
+      profilePicture: 'string?',
+      selectedTitle: 'string?',
+      status: 'string?',
+      titles: 'string[]',
+      userId: 'string',
+      username: 'string?',
+    },
+    primaryKey: '_id',
+  };
 }
-};
-

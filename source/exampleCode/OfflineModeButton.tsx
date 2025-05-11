@@ -19,9 +19,7 @@ export function OfflineModeButton() {
           togglePauseSync(false);
         }
       }}>
-      <Text style={styles.buttonText}>
-        {realm.syncSession?.state === 'active' ? 'Disable Sync' : 'Enable Sync'}
-      </Text>
+      <Text style={styles.buttonText}>{realm.syncSession?.state === 'active' ? 'Disable Sync' : 'Enable Sync'}</Text>
     </Pressable>
   );
 }
