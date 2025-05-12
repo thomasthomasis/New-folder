@@ -1,9 +1,8 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, Image, TouchableOpacity, Linking, FlatList} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Alert, Text, View, Image, TouchableOpacity, Linking} from 'react-native';
 import {useRealm, useUser} from '@realm/react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './GroupEventScreen.style';
-import Modal from 'react-native-modal';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 import {RouteProp, useIsFocused} from '@react-navigation/native';
@@ -37,6 +36,7 @@ export const GroupEventScreen = ({navigation, route}: GroupEventScreenProps) => 
 
   const goToEditEvent = (eventId: string) => {
     navigation.navigate('EditGroupEvent', {eventId: event});
+    console.log('eventId', eventId);
   };
 
   const [eventData, setEventData] = useState<any>(realm.objects(GroupEvents).filtered('eventId == $0', event));
@@ -45,7 +45,7 @@ export const GroupEventScreen = ({navigation, route}: GroupEventScreenProps) => 
     let eventData = realm.objects(GroupEvents).filtered('eventId == $0', event);
 
     setEventData(eventData);
-  }, [isFocused]);
+  }, [event, isFocused, realm]);
 
   const truncateText = (text: string, limit: number) => {
     if (text.length > limit) {
@@ -161,7 +161,7 @@ export const GroupEventScreen = ({navigation, route}: GroupEventScreenProps) => 
   };
 
   const goToLink = (url: string) => {
-    Linking.openURL(url).catch(err => Alert.alert('Link Broken...'));
+    Linking.openURL(url).catch(() => Alert.alert('Link Broken...'));
   };
 
   const [interested, setInterested] = useState<string>('');
@@ -170,7 +170,7 @@ export const GroupEventScreen = ({navigation, route}: GroupEventScreenProps) => 
       setInterested(eventData[0].reactions[eventData[0].usersReacted.indexOf(user.id)]);
       console.log(eventData[0].reactions[eventData[0].usersReacted.indexOf(user.id)]);
     }
-  }, []);
+  }, [eventData, user.id]);
 
   const isInterested = (value: string) => {
     if (interested == value) {

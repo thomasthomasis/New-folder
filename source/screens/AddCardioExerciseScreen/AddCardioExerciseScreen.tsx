@@ -1,9 +1,8 @@
-import React, {useCallback, useState, useEffect, useRef} from 'react';
-import {Alert, StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView, Animated, FlatList} from 'react-native';
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
+import {Alert, Text, View, TouchableOpacity, TextInput, ScrollView} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import {BSON} from 'realm';
-import {useUser, useRealm, useQuery, useObject} from '@realm/react';
-import {ResistanceWorkout} from '../../schemas/ResistanceWorkoutSchema';
+import {useUser, useRealm, useQuery} from '@realm/react';
 import {Workouts} from '../../schemas/WorkoutSchema';
 import {UserStatistics} from '../../schemas/UserStatisticsSchema';
 import {ExtraExercises} from '../../schemas/ExtraExercisesSchema';
@@ -11,9 +10,8 @@ import {shadow} from '../../sharedStyling/Shadow';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Storage from 'react-native-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Collapsible from 'react-native-collapsible';
 import styles from './AddCardioExerciseScreen.style';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
@@ -58,6 +56,15 @@ export const AddCardioExerciseScreen = ({navigation, route}: AddCardioExerciseSc
   const [previousSearchedExercises, setPreviousSearchedExercises] = useState<string[]>([]);
   const [currentWorkout, setCurrentWorkout] = useState<any>([]);
 
+  // Removed duplicate declaration of 'storage' and wrapped initialization in useMemo
+  const storage = React.useMemo(() => {
+    return new Storage({
+      size: 1000,
+      storageBackend: AsyncStorage,
+      defaultExpires: null,
+    });
+  }, []);
+
   const onClose = () => {
     setSearchModalVisible(false);
   };
@@ -95,31 +102,45 @@ export const AddCardioExerciseScreen = ({navigation, route}: AddCardioExerciseSc
     }
   };
 
-  const loadCurrentWorkout = async () => {
-    try {
-      await storage
-        .load({
-          key: 'currentWorkoutCardio',
-        })
-        .then(ret => {
-          setCurrentWorkout(ret.currentWorkout);
-          console.log('Current Workout Add Exercise Screen: ', ret.currentWorkout);
-        })
-        .catch(err => {
-          console.warn(err.message);
-        });
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   useEffect(() => {
+    const loadCurrentWorkout = async () => {
+      try {
+        await storage
+          .load({
+            key: 'currentWorkoutCardio',
+          })
+          .then(ret => {
+            setCurrentWorkout(ret.currentWorkout);
+            console.log('Current Workout Add Exercise Screen: ', ret.currentWorkout);
+          })
+          .catch(err => {
+            console.warn(err.message);
+          });
+      } catch (e) {
+        console.log(e);
+      }
+    };
     loadCurrentWorkout();
-  }, [isFocused]);
+  }, [isFocused, storage]);
+
+  const getFavouriteExercises = useCallback(() => {
+    let favouriteExercisesArray = [];
+
+    let favourites = userData[0].favouriteExercises;
+    if (favourites) {
+      for (let i = 0; i < favourites.length; i++) {
+        if (favourites[i].includes('?cardio')) {
+          favouriteExercisesArray.push(favourites[i]);
+        }
+      }
+
+      setFavouriteExercises(favouriteExercisesArray);
+    }
+  }, [userData]);
 
   useEffect(() => {
     getFavouriteExercises();
-  }, [isFocused]);
+  }, [isFocused, getFavouriteExercises]);
 
   const handleCancel = () => {
     // Show confirmation popup
@@ -142,21 +163,6 @@ export const AddCardioExerciseScreen = ({navigation, route}: AddCardioExerciseSc
       ],
       {cancelable: false},
     );
-  };
-
-  const getFavouriteExercises = () => {
-    let favouriteExercisesArray = [];
-
-    let favourites = userData[0].favouriteExercises;
-    if (favourites) {
-      for (let i = 0; i < favourites.length; i++) {
-        if (favourites[i].includes('?cardio')) {
-          favouriteExercisesArray.push(favourites[i]);
-        }
-      }
-
-      setFavouriteExercises(favouriteExercisesArray);
-    }
   };
 
   const getExerciseName = (id: string) => {
@@ -199,7 +205,19 @@ export const AddCardioExerciseScreen = ({navigation, route}: AddCardioExerciseSc
     }
   };
 
-  const addExtraExercises = () => {
+  const normalExercises = useMemo(() => {
+    return [
+      {id: '0', name: 'Running'},
+      {id: '1', name: 'Cycling'},
+      {id: '2', name: 'Swimming'},
+      {id: '3', name: 'Rowing'},
+      {id: '4', name: 'Elliptical'},
+      {id: '5', name: 'Stair Climbing'},
+      {id: '6', name: 'Skipping'},
+    ];
+  }, []);
+
+  const addExtraExercises = useCallback(() => {
     for (let i = 0; i < extraExercises.length; i++) {
       let object = {
         id: '',
@@ -214,17 +232,7 @@ export const AddCardioExerciseScreen = ({navigation, route}: AddCardioExerciseSc
 
       normalExercises.push(object);
     }
-  };
-
-  const normalExercises = [
-    {id: '0', name: 'Running'},
-    {id: '1', name: 'Cycling'},
-    {id: '2', name: 'Swimming'},
-    {id: '3', name: 'Rowing'},
-    {id: '4', name: 'Elliptical'},
-    {id: '5', name: 'Stair Climbing'},
-    {id: '6', name: 'Skipping'},
-  ];
+  }, [extraExercises, normalExercises]);
 
   const favouriteExercise = (exerciseId: string) => {
     let id = '';
@@ -250,11 +258,7 @@ export const AddCardioExerciseScreen = ({navigation, route}: AddCardioExerciseSc
     console.log(userData[0].favouriteExercises);
   };
 
-  const storage = new Storage({
-    size: 1000,
-    storageBackend: AsyncStorage,
-    defaultExpires: null,
-  });
+  // Removed duplicate declaration of 'storage'
 
   const saveSearchedExercises = (exerciseId: string) => {
     let oldArray = previousSearchedExercises;
@@ -275,7 +279,7 @@ export const AddCardioExerciseScreen = ({navigation, route}: AddCardioExerciseSc
     loadSearchedWorkouts();
   };
 
-  const loadSearchedWorkouts = () => {
+  const loadSearchedWorkouts = useCallback(() => {
     storage
       .load({
         key: 'recentSearchesCardio',
@@ -287,15 +291,15 @@ export const AddCardioExerciseScreen = ({navigation, route}: AddCardioExerciseSc
       .catch(err => {
         console.warn(err.message);
       });
-  };
+  }, [storage]);
 
   useEffect(() => {
     loadSearchedWorkouts();
-  }, []);
+  }, [loadSearchedWorkouts]);
 
   useEffect(() => {
     addExtraExercises();
-  }, [extraExercises]);
+  }, [addExtraExercises, extraExercises]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
@@ -369,7 +373,7 @@ export const AddCardioExerciseScreen = ({navigation, route}: AddCardioExerciseSc
         )}
 
         <Text style={[styles.title, common.h2]}>All Exercises</Text>
-        {normalExercises.map((item, index) => {
+        {normalExercises.map(item => {
           return (
             <TouchableOpacity
               key={new BSON.ObjectID().toString()}

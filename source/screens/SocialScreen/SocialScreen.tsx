@@ -46,8 +46,7 @@ export const SocialScreen = ({navigation}: SocialScreenProps) => {
   const [selectedGroup, setSelectedGroup] = useState<string>('');
 
   const [showingModal, setShowingModal] = useState<boolean>(false);
-  const [showingModalOptions, setShowingModalOptions] =
-    useState<boolean>(false);
+  const [showingModalOptions, setShowingModalOptions] = useState<boolean>(false);
 
   const onClose = () => {
     setShowingModal(false);
@@ -224,57 +223,31 @@ export const SocialScreen = ({navigation}: SocialScreenProps) => {
           data={groups}
           renderItem={({item}) => (
             <TouchableOpacity
-              style={[
-                styles.groupButton,
-                shadow.shadow,
-                {marginTop: 20},
-                item.color != null && {backgroundColor: item.color},
-              ]}
+              style={[styles.groupButton, shadow.shadow, {marginTop: 20}, item.color != null && {backgroundColor: item.color}]}
               onPress={() => {
                 goToGroupScreen(item.groupId);
               }}>
-              {item.image && (
-                <MaterialCommunityIcons
-                  name={item.image}
-                  color={'black'}
-                  size={50}
-                />
-              )}
+              {item.image && <MaterialCommunityIcons name={item.image} color={'black'} size={50} />}
               <Text style={styles.buttonText}>{item.name}</Text>
               <TouchableOpacity
                 onPress={() => {
                   setShowingModal(true);
                   setSelectedGroup(item.groupId);
                 }}>
-                <MaterialCommunityIcons
-                  name="dots-vertical"
-                  color={'white'}
-                  size={40}
-                />
+                <MaterialCommunityIcons name="dots-vertical" color={'white'} size={40} />
               </TouchableOpacity>
             </TouchableOpacity>
           )}
         />
 
         <View style={[styles.addButtonContainer, shadow.shadow]}>
-          <TouchableOpacity
-            onPress={() => setShowingModalOptions(true)}
-            style={[
-              styles.button,
-              {width: 60, height: 60, borderRadius: 80, marginTop: 10},
-              shadow.shadow,
-            ]}>
+          <TouchableOpacity onPress={() => setShowingModalOptions(true)} style={[styles.button, {width: 60, height: 60, borderRadius: 80, marginTop: 10}, shadow.shadow]}>
             <MaterialCommunityIcons name="plus" color={'white'} size={50} />
           </TouchableOpacity>
         </View>
       </View>
 
-      <Modal
-        isVisible={showingModal}
-        swipeDirection={['down']}
-        onSwipeComplete={onClose}
-        onBackdropPress={onClose}
-        style={styles.modalView}>
+      <Modal isVisible={showingModal} swipeDirection={['down']} onSwipeComplete={onClose} onBackdropPress={onClose} style={styles.modalView}>
         <View style={styles.modalContent}>
           <Text
             style={{
@@ -324,12 +297,7 @@ export const SocialScreen = ({navigation}: SocialScreenProps) => {
         </View>
       </Modal>
 
-      <Modal
-        isVisible={showingModalOptions}
-        swipeDirection={['down']}
-        onSwipeComplete={onClose}
-        onBackdropPress={onClose}
-        style={styles.modalView}>
+      <Modal isVisible={showingModalOptions} swipeDirection={['down']} onSwipeComplete={onClose} onBackdropPress={onClose} style={styles.modalView}>
         <View style={styles.modalContent}>
           <TouchableOpacity
             onPress={() => {

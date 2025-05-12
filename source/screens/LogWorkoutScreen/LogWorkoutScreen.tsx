@@ -1,10 +1,7 @@
-import React, {useEffect, useState} from 'react';
-import {Text, View, TouchableOpacity, ScrollView, Image, Dimensions, Alert, ActivityIndicator} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {Text, View, TouchableOpacity, Alert, ActivityIndicator} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
-import {LogWorkoutCardioScreen} from '../LogWorkoutCardioScreen/LogWorkoutCardioScreen';
-import {LogWorkoutResistanceScreen} from '../LogWorkoutResistanceScreen/LogWorkoutResistanceScreen';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {SubmitCompletion} from '../SubmitCompletionScreen/SubmitCompletion';
 import {shadow} from '../../sharedStyling/Shadow';
 import Storage from 'react-native-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,15 +9,13 @@ import styles from './LogWorkoutScreen.styles';
 import Modal from 'react-native-modal';
 import {useRealm, useUser} from '@realm/react';
 import {Users} from '../../schemas/UsersSchema';
-import {BarChart, PieChart} from 'react-native-gifted-charts';
 
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
-import {BSON} from 'realm';
 import {UserStatistics} from '../../schemas/UserStatisticsSchema';
 import {CardioWorkout} from '../../schemas/CardioWorkoutSchema';
 import {ResistanceWorkout} from '../../schemas/ResistanceWorkoutSchema';
-import {useFocusEffect, useIsFocused} from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import {HeaderComponent} from '../../components/HeaderComponent/HeaderComponent';
 
 type LogWorkoutProps = {
@@ -54,20 +49,23 @@ export const LogWorkoutScreen = ({navigation}: LogWorkoutProps) => {
 
   let userData = realm.objects('Users').sorted('_id').filtered('userId == $0', user.id);
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading] = useState<boolean>(false);
   const [imageSource, setImageSource] = useState(require('../../assets/3.png'));
+  console.log('Image Source: ', imageSource);
 
   const [currentWorkoutResistance, setCurrentWorkoutResistance] = useState<any>([]);
   const [currentWorkoutCardio, setCurrentWorkoutCardio] = useState<any>([]);
-  const [currentWorkoutType, setCurrentWorkoutType] = useState<string>('');
-  const [continuingWorkout, setContinuingWorkout] = useState<boolean>(false);
 
-  const storage = new Storage({
-    size: 1000,
-    storageBackend: AsyncStorage,
-  });
+  const storage = useMemo(() => {
+    return new Storage({
+      size: 1000,
+      storageBackend: AsyncStorage,
+      defaultExpires: null,
+      enableCache: true,
+    });
+  }, []);
 
-  const loadCurrentWorkout = () => {
+  const loadCurrentWorkout = useCallback(() => {
     storage
       .load({
         key: 'currentWorkoutResistance',
@@ -91,11 +89,11 @@ export const LogWorkoutScreen = ({navigation}: LogWorkoutProps) => {
       .catch(err => {
         console.warn(err.message);
       });
-  };
+  }, [storage]);
 
   useEffect(() => {
     loadCurrentWorkout();
-  }, [isFocused]);
+  }, [isFocused, loadCurrentWorkout]);
 
   const continueWorkout = (workoutType: string) => {
     if (workoutType == 'resistance') {
@@ -191,8 +189,6 @@ export const LogWorkoutScreen = ({navigation}: LogWorkoutProps) => {
       mutableSubs.add(realm.objects(ResistanceWorkout));
     });
   }, [realm, user]);
-
-  const screenHeight = Dimensions.get('window').height;
 
   return (
     <>

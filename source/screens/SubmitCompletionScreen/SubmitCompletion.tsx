@@ -14,10 +14,7 @@ type SubmitCompletionProps = {
   route: RouteProp<RootStackParamList, 'SubmitCompletion'>;
 };
 
-export const SubmitCompletion = ({
-  navigation,
-  route,
-}: SubmitCompletionProps) => {
+export const SubmitCompletion = ({navigation, route}: SubmitCompletionProps) => {
   const realm = useRealm();
   const user = useUser();
 
@@ -62,16 +59,8 @@ export const SubmitCompletion = ({
         </View>
         <View style={{display: 'flex', flexDirection: 'column'}}>
           <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.bar,
-                {width: leveled, backgroundColor: colors.green},
-              ]}></View>
-            <View
-              style={[
-                styles.bar,
-                {width: unleveled, backgroundColor: 'lightgray'},
-              ]}></View>
+            <View style={[styles.bar, {width: leveled, backgroundColor: colors.green}]}></View>
+            <View style={[styles.bar, {width: unleveled, backgroundColor: 'lightgray'}]}></View>
           </View>
           <View
             style={{

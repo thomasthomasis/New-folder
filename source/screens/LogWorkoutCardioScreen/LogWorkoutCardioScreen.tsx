@@ -1,8 +1,8 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Button, Text, View, TouchableOpacity, TextInput, TouchableWithoutFeedback, ScrollView} from 'react-native';
+import React, {useCallback, useState, useEffect, useMemo} from 'react';
+import {Alert, Button, Text, View, TouchableOpacity, TextInput, ScrollView} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import {BSON} from 'realm';
-import {useUser, useRealm, useQuery} from '@realm/react';
+import {useUser, useRealm} from '@realm/react';
 import {CardioWorkout} from '../../schemas/CardioWorkoutSchema';
 import {Workouts} from '../../schemas/WorkoutSchema';
 import {UserStatistics} from '../../schemas/UserStatisticsSchema';
@@ -12,7 +12,6 @@ import {shadow} from '../../sharedStyling/Shadow';
 import Storage from 'react-native-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './LogWorkoutCardioScreen.style';
-import {useNavigation} from '@react-navigation/native';
 import Modal from 'react-native-modal';
 
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -47,10 +46,10 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
   };
 
   const [selectingExercise, setSelectingExercise] = useState(false);
-  const [userStatistics, setUserStatistics] = useState<any>(realm.objects('UserStatistics').filtered('userId == $0', user.id));
-  const [userData, setUserData] = useState<any>(realm.objects('Users').filtered('userId == $0', user.id));
+  const [userStatistics] = useState<any>(realm.objects('UserStatistics').filtered('userId == $0', user.id));
+  const [userData] = useState<any>(realm.objects('Users').filtered('userId == $0', user.id));
 
-  const [extraExercises, setExtraExercises] = useState<any>(realm.objects(ExtraExercises).filtered('userId == $0 && type == $1', user.id, 'Cardio'));
+  const [extraExercises] = useState<any>(realm.objects(ExtraExercises).filtered('userId == $0 && type == $1', user.id, 'Cardio'));
 
   const [totalExercises, setTotalExercises] = useState<any>(null);
 
@@ -65,23 +64,19 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
 
   const [forms, setForms] = useState<any>([]);
 
-  const normalExercises = [
-    {id: '0', name: 'Running'},
-    {id: '1', name: 'Cycling'},
-    {id: '2', name: 'Swimming'},
-    {id: '3', name: 'Rowing'},
-    {id: '4', name: 'Elliptical'},
-    {id: '5', name: 'Stair Climbing'},
-    {id: '6', name: 'Skipping'},
-  ];
+  const normalExercises = useMemo(() => {
+    return [
+      {id: '0', name: 'Running'},
+      {id: '1', name: 'Cycling'},
+      {id: '2', name: 'Swimming'},
+      {id: '3', name: 'Rowing'},
+      {id: '4', name: 'Elliptical'},
+      {id: '5', name: 'Stair Climbing'},
+      {id: '6', name: 'Skipping'},
+    ];
+  }, []);
 
-  useEffect(() => {
-    addExercisesToArray();
-
-    setFilteredData(normalExercises);
-  }, [extraExercises]);
-
-  const addExercisesToArray = () => {
+  const addExercisesToArray = useCallback(() => {
     for (let i = 0; i < extraExercises.length; i++) {
       let id = extraExercises[i].exerciseId;
       let name = extraExercises[i].name;
@@ -97,7 +92,13 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
     setTotalExercises(normalExercises);
 
     console.log(totalExercises);
-  };
+  }, [extraExercises, normalExercises, totalExercises]);
+
+  useEffect(() => {
+    addExercisesToArray();
+
+    setFilteredData(normalExercises);
+  }, [addExercisesToArray, extraExercises, normalExercises]);
 
   const getExerciseName = (id: string) => {
     console.log(id);
@@ -185,11 +186,13 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
     saveCurrentWorkout();
   };
 
-  const storage = new Storage({
-    size: 1000,
-    storageBackend: AsyncStorage,
-    defaultExpires: null,
-  });
+  const storage = useMemo(() => {
+    return new Storage({
+      size: 1000,
+      storageBackend: AsyncStorage,
+      defaultExpires: null,
+    });
+  }, []);
 
   const saveCurrentWorkout = () => {
     storage.save({
@@ -209,7 +212,7 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
     console.log('saved workout, forms: ', forms);
   };
 
-  const loadCurrentWorkout = () => {
+  const loadCurrentWorkout = useCallback(() => {
     storage
       .load({
         key: 'currentWorkout',
@@ -221,13 +224,13 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
       .catch(err => {
         console.warn(err.message);
       });
-  };
+  }, [storage]);
 
   useEffect(() => {
     if (continuingWorkout) {
       loadCurrentWorkout();
     }
-  }, []);
+  }, [continuingWorkout, loadCurrentWorkout]);
 
   const submitData = () => {
     let distances: string[] = [];
@@ -316,7 +319,7 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
         });
       });
     },
-    [realm, user],
+    [realm, user?.id, userData],
   );
 
   const updateUserStatistics = useCallback(
@@ -345,7 +348,7 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
         (userStatistics[0].lvl = newLvl), (userStatistics[0].xp = newXp), (userStatistics[0].numWorkouts = numWorkouts + 1), (userStatistics[0].numCardioWorkouts = numCardioWorkouts + 1), (userStatistics[0].xpTarget = newXpTarget);
       });
     },
-    [realm, user],
+    [realm, userStatistics],
   );
 
   const updateUserTitles = useCallback(
@@ -443,7 +446,7 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
         userData[0].titles = newUnlockedTitles;
       });
     },
-    [realm, user],
+    [realm, userData],
   );
 
   const calculateLevel = (currLvl: number, currXp: number, xpGained: number) => {
@@ -591,6 +594,17 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
     setVisibleOptions(false);
   };
 
+  const updateExerciseList = useCallback(() => {
+    let newList = extraExercises;
+    console.log('Updated list: ', newList);
+
+    let newTotalExercises = newList.concat(normalExercises);
+
+    setTotalExercises(newTotalExercises);
+
+    setFilteredData(totalExercises);
+  }, [extraExercises, normalExercises, totalExercises]);
+
   const addExercise = useCallback(
     (input: string) => {
       if (!input.trim()) {
@@ -611,19 +625,8 @@ export const LogWorkoutCardioScreen = ({navigation, route}: LogWorkoutCardioProp
       onClose();
       updateExerciseList();
     },
-    [realm, user],
+    [realm, updateExerciseList, user.id],
   );
-
-  const updateExerciseList = () => {
-    let newList = extraExercises;
-    console.log('Updated list: ', newList);
-
-    let newTotalExercises = newList.concat(normalExercises);
-
-    setTotalExercises(newTotalExercises);
-
-    setFilteredData(totalExercises);
-  };
 
   const deleteExercise = (exerciseId: string) => {
     const exercise = realm.objects(ExtraExercises).filtered('exerciseId == $0', exerciseId);

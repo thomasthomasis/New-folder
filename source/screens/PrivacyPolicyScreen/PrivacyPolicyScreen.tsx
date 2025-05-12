@@ -1,17 +1,11 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, Image, TouchableOpacity, ScrollView, Linking} from 'react-native';
-import {useRealm, useUser} from '@realm/react';
-import {Users} from '../../schemas/UsersSchema';
+import React from 'react';
+import {Alert, Text, View, TouchableOpacity, ScrollView, Linking} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {UserStatistics} from '../../schemas/UserStatisticsSchema';
-import {shadow} from '../../sharedStyling/Shadow';
 import styles from './PrivacyPolicyScreen.style';
 
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
-import {RouteProp} from '@react-navigation/native';
 import {colors} from '../../sharedStyling/Colors';
-import {useFocusEffect} from '@react-navigation/native';
 
 type PrivacyPolicyScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'PrivacyPolicy'>; // Adjust according to your navigation stack
@@ -23,7 +17,7 @@ export const PrivacyPolicyScreen = ({navigation}: PrivacyPolicyScreenProps) => {
   };
 
   const goToLink = (url: string) => {
-    Linking.openURL(url).catch(err => Alert.alert('Link Broken...'));
+    Linking.openURL(url).catch(() => Alert.alert('Link Broken...'));
   };
 
   return (

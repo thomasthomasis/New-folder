@@ -1,5 +1,5 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, Image, TouchableOpacity, ActivityIndicator, ScrollView, Dimensions, FlatList} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Text, View, Image, TouchableOpacity, ActivityIndicator, ScrollView, Dimensions, FlatList} from 'react-native';
 import {useRealm, useUser} from '@realm/react';
 import {Users} from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -7,12 +7,11 @@ import {shadow} from '../../sharedStyling/Shadow';
 import styles from './ProfileScreen.style';
 import Modal from 'react-native-modal';
 
-import {CardStyleInterpolators, StackNavigationProp} from '@react-navigation/stack';
+import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 import {RouteProp} from '@react-navigation/native';
 import {colors} from '../../sharedStyling/Colors';
 import {useFocusEffect} from '@react-navigation/native';
-import {Workouts} from '../../schemas/WorkoutSchema';
 import {Groups} from '../../schemas/GroupsSchema';
 
 type ProfileScreenProps = {
@@ -53,17 +52,9 @@ export const ProfileScreen = ({navigation, route}: ProfileScreenProps) => {
     navigation.navigate('JoinGroup');
   };
 
-  const goToEditingGroupScreen = (group: string) => {
-    navigation.navigate('GroupSettings', {group: group});
-  };
-
-  const goToEditingGroupMembersScreen = (group: string) => {
-    navigation.navigate('GroupMembersSettings', {group: group});
-  };
-
   const [userData, setUserData] = useState<any>(realm.objects('Users').sorted('_id').filtered('userId == $0', userId));
   const [groups, setGroups] = useState<any>(realm.objects(Groups).filtered('ANY members == $0', userId));
-  const [selectedGroup, setSelectedGroup] = useState<string>('');
+  //const [selectedGroup] = useState<string>('');
   const [showingModalOptions, setShowingModalOptions] = useState<boolean>(false);
   const [showingModalStatus, setShowingModalStatus] = useState<boolean>(false);
   const [imageSource, setImageSource] = useState();
@@ -91,15 +82,7 @@ export const ProfileScreen = ({navigation, route}: ProfileScreenProps) => {
     setUserStatus(status);
   };
 
-  const getGroupName = (groupId: string) => {
-    const group = realm.objects(Groups).filtered('groupId == $0', groupId);
-
-    if (group.length > 0) {
-      return group[0].name;
-    }
-    return '';
-  };
-
+  /*
   const checkIfOwner = () => {
     if (selectedGroup == '') {
       return false;
@@ -113,7 +96,9 @@ export const ProfileScreen = ({navigation, route}: ProfileScreenProps) => {
       return false;
     }
   };
+  */
 
+  /*
   const leaveGroup = (groupId: string) => {
     console.log(groupId);
 
@@ -168,50 +153,7 @@ export const ProfileScreen = ({navigation, route}: ProfileScreenProps) => {
     });
   };
 
-  const handleConfirmLeave = () => {
-    // Show confirmation popup
-    Alert.alert(
-      'Confirm Action',
-      'Are you sure you want to leave the group?',
-      [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: () => {
-            onClose();
-            leaveGroup(selectedGroup);
-          },
-        },
-      ],
-      {cancelable: false},
-    );
-  };
 
-  const handleConfirmDelete = () => {
-    // Show confirmation popup
-    Alert.alert(
-      'Confirm Action',
-      'Are you sure you want to delete the group?',
-      [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {
-          text: 'OK',
-          onPress: () => {
-            handleConfirmDeleteConfirm();
-          },
-        },
-      ],
-      {cancelable: false},
-    );
-  };
 
   const handleConfirmDeleteConfirm = () => {
     // Show confirmation popup
@@ -235,12 +177,13 @@ export const ProfileScreen = ({navigation, route}: ProfileScreenProps) => {
       {cancelable: false},
     );
   };
+  */
 
   useFocusEffect(
     React.useCallback(() => {
       let data = realm.objects('Users').sorted('_id').filtered('userId == $0', userId);
       setUserData(data);
-    }, []),
+    }, [realm, userId]),
   );
 
   const formatDate = (date: Date) => {
@@ -269,6 +212,8 @@ export const ProfileScreen = ({navigation, route}: ProfileScreenProps) => {
       default:
         prefix = 'th';
     }
+
+    console.log(prefix);
 
     return dayNum + ' ' + month + ' ' + year;
   };
@@ -306,7 +251,7 @@ export const ProfileScreen = ({navigation, route}: ProfileScreenProps) => {
     if (groups && profilePicture) {
       setLoading(false);
     }
-  }, [userData]);
+  }, [realm, userData, userId]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {

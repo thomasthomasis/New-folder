@@ -1,13 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {
-  Alert,
-  Text,
-  View,
-  TouchableOpacity,
-  ActivityIndicator,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import {Alert, Text, View, TouchableOpacity, ActivityIndicator, ScrollView, Dimensions} from 'react-native';
 import {useRealm, useUser} from '@realm/react';
 import {Users} from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -37,10 +29,7 @@ type StatisticsScreenProps = {
 //const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
-export const StatisticsScreen = ({
-  navigation,
-  route,
-}: StatisticsScreenProps) => {
+export const StatisticsScreen = ({navigation, route}: StatisticsScreenProps) => {
   const realm = useRealm();
   const user = useUser();
 
@@ -72,9 +61,7 @@ export const StatisticsScreen = ({
     }
   };
 
-  const [userData, setUserData] = useState<any>(
-    realm.objects('Users').sorted('_id').filtered('userId == $0', userId),
-  );
+  const [userData, setUserData] = useState<any>(realm.objects('Users').sorted('_id').filtered('userId == $0', userId));
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [currentWorkout, setCurrentWorkout] = useState<any>([]);
   const [currentWorkoutType, setCurrentWorkoutType] = useState<string>('');
@@ -92,10 +79,7 @@ export const StatisticsScreen = ({
 
   useFocusEffect(
     React.useCallback(() => {
-      let data = realm
-        .objects('Users')
-        .sorted('_id')
-        .filtered('userId == $0', userId);
+      let data = realm.objects('Users').sorted('_id').filtered('userId == $0', userId);
       setUserData(data);
     }, [realm, userId]),
   );
@@ -196,35 +180,19 @@ export const StatisticsScreen = ({
           endDate = currentDate;
           break;
         case 1:
-          startDate = new Date(
-            currentDate.getFullYear() - 1,
-            currentDate.getMonth(),
-            currentDate.getDate(),
-          );
+          startDate = new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate());
           endDate = currentDate;
           break;
         case 2:
-          startDate = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth() - 5,
-            currentDate.getDate(),
-          );
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, currentDate.getDate());
           endDate = currentDate;
           break;
         case 3:
-          startDate = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth() - 3,
-            currentDate.getDate(),
-          );
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 3, currentDate.getDate());
           endDate = currentDate;
           break;
         case 4:
-          startDate = new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth() - 1,
-            currentDate.getDate(),
-          );
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate());
           endDate = currentDate;
           break;
         default:
@@ -246,14 +214,7 @@ export const StatisticsScreen = ({
     setStartDate(startDate);
     setEndDate(endDate);
 
-    const workouts = realm
-      .objects(Workouts)
-      .filtered(
-        'userId == $0 AND dateCreated >= $1 AND dateCreated <= $2',
-        userId,
-        startDate,
-        endDate,
-      );
+    const workouts = realm.objects(Workouts).filtered('userId == $0 AND dateCreated >= $1 AND dateCreated <= $2', userId, startDate, endDate);
     setWorkoutData(workouts);
 
     console.log('Workouts: ', workouts.length);
@@ -265,13 +226,7 @@ export const StatisticsScreen = ({
     //setWorkoutData([])
   }, [activeFilter, realm, userId]);
 
-  const setSpecificTime = (
-    date: any,
-    hours: any,
-    minutes: any,
-    seconds: any,
-    milliseconds: any,
-  ) => {
+  const setSpecificTime = (date: any, hours: any, minutes: any, seconds: any, milliseconds: any) => {
     date.setHours(hours);
     date.setMinutes(minutes);
     date.setSeconds(seconds);
@@ -307,14 +262,9 @@ export const StatisticsScreen = ({
       {loading && <ActivityIndicator size={'large'} />}
       {!loading && (
         <>
-          <HeaderComponent
-            title={'Statistics'}
-            goToProfileSettings={goToProfileSettings}
-          />
+          <HeaderComponent title={'Statistics'} goToProfileSettings={goToProfileSettings} />
 
-          <TouchableOpacity
-            style={[styles.modalButton, shadow.shadow]}
-            onPress={() => setModalVisible(true)}>
+          <TouchableOpacity style={[styles.modalButton, shadow.shadow]} onPress={() => setModalVisible(true)}>
             <MaterialCommunityIcons name={'plus'} size={40} color={'white'} />
           </TouchableOpacity>
           <ScrollView>
@@ -361,12 +311,7 @@ export const StatisticsScreen = ({
                         flexDirection: 'row',
                       }}>
                       <Text style={{fontWeight: '700', fontSize: 20}}>0</Text>
-                      <MaterialCommunityIcons
-                        name="medal-outline"
-                        color={colors.black}
-                        size={40}
-                        style={{marginLeft: 5}}
-                      />
+                      <MaterialCommunityIcons name="medal-outline" color={colors.black} size={40} style={{marginLeft: 5}} />
                     </View>
                     <View
                       style={{
@@ -376,12 +321,7 @@ export const StatisticsScreen = ({
                         flexDirection: 'row',
                       }}>
                       <Text style={{fontWeight: '700', fontSize: 20}}>2</Text>
-                      <MaterialCommunityIcons
-                        name="account-group"
-                        color={colors.black}
-                        size={40}
-                        style={{marginLeft: 5}}
-                      />
+                      <MaterialCommunityIcons name="account-group" color={colors.black} size={40} style={{marginLeft: 5}} />
                     </View>
                   </View>
                 </View>
@@ -402,55 +342,25 @@ export const StatisticsScreen = ({
               {workoutData.length > 0 && (
                 <>
                   <View style={styles.containerFilters}>
-                    <TouchableOpacity
-                      style={[
-                        styles.filterButton,
-                        activeFilter === 0 && {backgroundColor: colors.green},
-                      ]}
-                      onPress={() => setActiveFilter(0)}>
+                    <TouchableOpacity style={[styles.filterButton, activeFilter === 0 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(0)}>
                       <Text style={styles.filterButtonText}>Max</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        styles.filterButton,
-                        activeFilter === 1 && {backgroundColor: colors.green},
-                      ]}
-                      onPress={() => setActiveFilter(1)}>
+                    <TouchableOpacity style={[styles.filterButton, activeFilter === 1 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(1)}>
                       <Text style={styles.filterButtonText}>1Y</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        styles.filterButton,
-                        activeFilter === 2 && {backgroundColor: colors.green},
-                      ]}
-                      onPress={() => setActiveFilter(2)}>
+                    <TouchableOpacity style={[styles.filterButton, activeFilter === 2 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(2)}>
                       <Text style={styles.filterButtonText}>6M</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        styles.filterButton,
-                        activeFilter === 3 && {backgroundColor: colors.green},
-                      ]}
-                      onPress={() => setActiveFilter(3)}>
+                    <TouchableOpacity style={[styles.filterButton, activeFilter === 3 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(3)}>
                       <Text style={styles.filterButtonText}>3M</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        styles.filterButton,
-                        activeFilter === 4 && {backgroundColor: colors.green},
-                      ]}
-                      onPress={() => setActiveFilter(4)}>
+                    <TouchableOpacity style={[styles.filterButton, activeFilter === 4 && {backgroundColor: colors.green}]} onPress={() => setActiveFilter(4)}>
                       <Text style={styles.filterButtonText}>1M</Text>
                     </TouchableOpacity>
                   </View>
 
                   <View style={{marginTop: 25}}>
-                    <GeneralLineChartComponent
-                      data={workoutData}
-                      startDate={startDate}
-                      endDate={endDate}
-                      filter={activeFilter}
-                    />
+                    <GeneralLineChartComponent data={workoutData} startDate={startDate} endDate={endDate} filter={activeFilter} />
                   </View>
 
                   <View style={styles.containerPieCharts}>
@@ -459,14 +369,8 @@ export const StatisticsScreen = ({
                   </View>
 
                   <View>
-                    <StackedBarChartComponent
-                      data={workoutData}
-                      type={'workoutType'}
-                    />
-                    <StackedBarChartComponent
-                      data={workoutData}
-                      type={'status'}
-                    />
+                    <StackedBarChartComponent data={workoutData} type={'workoutType'} />
+                    <StackedBarChartComponent data={workoutData} type={'status'} />
                   </View>
 
                   <View
@@ -524,12 +428,7 @@ export const StatisticsScreen = ({
             </View>
           </ScrollView>
 
-          <Modal
-            isVisible={modalVisible}
-            swipeDirection={['down']}
-            onSwipeComplete={closeModal}
-            onBackdropPress={closeModal}
-            style={styles.modalView}>
+          <Modal isVisible={modalVisible} swipeDirection={['down']} onSwipeComplete={closeModal} onBackdropPress={closeModal} style={styles.modalView}>
             <View style={styles.modalContent}>
               <View style={styles.containerModal}>
                 <View style={styles.modalHeader}>
@@ -560,11 +459,7 @@ export const StatisticsScreen = ({
                       }}>
                       Cardio
                     </Text>
-                    <MaterialCommunityIcons
-                      name="heart"
-                      color={colors.red}
-                      size={55}
-                    />
+                    <MaterialCommunityIcons name="heart" color={colors.red} size={55} />
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -580,11 +475,7 @@ export const StatisticsScreen = ({
                       }}>
                       Strength
                     </Text>
-                    <MaterialCommunityIcons
-                      name="dumbbell"
-                      color={colors.black}
-                      size={55}
-                    />
+                    <MaterialCommunityIcons name="dumbbell" color={colors.black} size={55} />
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -600,11 +491,7 @@ export const StatisticsScreen = ({
                       }}>
                       Throwing
                     </Text>
-                    <MaterialCommunityIcons
-                      name="disc"
-                      color={colors.green}
-                      size={55}
-                    />
+                    <MaterialCommunityIcons name="disc" color={colors.green} size={55} />
                   </TouchableOpacity>
                 </View>
               </View>

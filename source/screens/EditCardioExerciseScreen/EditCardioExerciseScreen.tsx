@@ -1,7 +1,7 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, TouchableOpacity, TextInput, ScrollView} from 'react-native';
+import React, {useState} from 'react';
+import {Alert, Text, View, TouchableOpacity, TextInput} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
-import {useUser, useRealm, useQuery} from '@realm/react';
+import {useUser, useRealm} from '@realm/react';
 import {ExtraExercises} from '../../schemas/ExtraExercisesSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './EditCardioExerciseScreen.style';

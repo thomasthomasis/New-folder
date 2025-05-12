@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {Alert, Image, PermissionsAndroid, Platform, ScrollView, Text, TextInput, TouchableOpacity, View} from 'react-native';
-import {useQuery, useRealm, useUser} from '@realm/react';
+import {Alert, ScrollView, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {useRealm, useUser} from '@realm/react';
 import {Groups} from '../../schemas/GroupsSchema';
 import {BSON} from 'realm';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -33,7 +33,6 @@ export const CreateGroupScreen = ({navigation, route}: CreateGroupScreenProps) =
   const [groupSport, setGroupSport] = useState('');
   const [image, setImage] = useState<string>('');
   const [isPublic, setIsPublic] = useState<boolean>(true);
-  const groups = useQuery(Groups);
 
   function handleSubmit() {
     if (!groupName.trim()) {
@@ -215,7 +214,7 @@ export const CreateGroupScreen = ({navigation, route}: CreateGroupScreenProps) =
 
       <Modal isVisible={modalVisible} swipeDirection={['down']} onSwipeComplete={onClose} onBackdropPress={onClose} style={styles.modalView}>
         <View style={styles.modalContent}>
-          {colorsArray.map((item, index) => (
+          {colorsArray.map(item => (
             <View
               key={new BSON.ObjectID().toString()}
               style={{

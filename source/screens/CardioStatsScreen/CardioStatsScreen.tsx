@@ -1,23 +1,15 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, Image, TouchableOpacity, ActivityIndicator, ScrollView, Dimensions} from 'react-native';
+import React, {useState, useEffect, useCallback, useMemo} from 'react';
+import {Text, View, TouchableOpacity, ActivityIndicator, ScrollView, Dimensions} from 'react-native';
 import {useRealm, useUser} from '@realm/react';
-import {Users} from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {UserStatistics} from '../../schemas/UserStatisticsSchema';
 import {shadow} from '../../sharedStyling/Shadow';
 import styles from './CardioStatsScreen.style';
 
-import {CardStyleInterpolators, StackNavigationProp} from '@react-navigation/stack';
+import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 import {RouteProp} from '@react-navigation/native';
 import {colors} from '../../sharedStyling/Colors';
-import {useFocusEffect} from '@react-navigation/native';
-import {Workouts} from '../../schemas/WorkoutSchema';
-import {GeneralLineChartComponent} from '../../components/GeneralLineChartComponent/GeneralLineChartComponent';
-import {GeneralPieChart} from '../../components/GeneralPieChartComponent/GeneralPieChartComponent';
-import {StackedBarChartComponent} from '../../components/StackedBarChartComponent/StackedBarChartComponent';
 
-import {ResistancePieChartComponent} from '../../components/ResistanceStatsComponents/ResistancePieChartComponent/ResistancePieChartComponent';
 import {ExtraExercises} from '../../schemas/ExtraExercisesSchema';
 import {CardioWorkout} from '../../schemas/CardioWorkoutSchema';
 import {CardioLineChartComponent} from '../../components/CardioStatsComponents/CardioLineChartComponent/CardioLineChartComponent';
@@ -29,7 +21,7 @@ type CardioStatsScreenProps = {
 };
 
 const screenHeight = Dimensions.get('window').height;
-const screenWidth = Dimensions.get('window').width;
+//const screenWidth = Dimensions.get('window').width;
 
 export const CardioStatsScreen = ({navigation, route}: CardioStatsScreenProps) => {
   const realm = useRealm();
@@ -42,7 +34,7 @@ export const CardioStatsScreen = ({navigation, route}: CardioStatsScreenProps) =
   };
 
   const goToWorkoutView = (workoutId: string) => {
-    console.log('navigate to workout view screen');
+    console.log('navigate to workout view screen ', workoutId);
   };
 
   const goToExerciseStats = (exerciseId: string) => {
@@ -52,13 +44,9 @@ export const CardioStatsScreen = ({navigation, route}: CardioStatsScreenProps) =
     });
   };
 
-  useEffect(() => {
-    addExtraExercisesToSection();
-  }, []);
-
   const [loading, setLoading] = useState(true);
 
-  const [extraExercises, setExtraExercises] = useState<any>(realm.objects(ExtraExercises).filtered('userId == $0 && type == $1', user.id, 'Cardio'));
+  const [extraExercises] = useState<any>(realm.objects(ExtraExercises).filtered('userId == $0 && type == $1', user.id, 'Cardio'));
 
   const [activeFilter, setActiveFilter] = useState(0);
   const [workoutData, setWorkoutData] = useState<any>(null);
@@ -70,83 +58,85 @@ export const CardioStatsScreen = ({navigation, route}: CardioStatsScreenProps) =
   const [highestDistanceSession, setHighestDistanceSession] = useState<any>(null);
   const [highestTimeAndDistanceSet, setHighestTimeAndDistanceSet] = useState<any>(null);
 
-  const normalExercises = [
-    {id: '0', name: 'Running'},
-    {id: '1', name: 'Cycling'},
-    {id: '2', name: 'Swimming'},
-    {id: '3', name: 'Jumping Rope'},
-    {id: '4', name: 'Rowing'},
-    {id: '5', name: 'Elliptical Training'},
-    {id: '6', name: 'Hiking'},
-    {id: '7', name: 'Dancing'},
-    {id: '8', name: 'Kickboxing'},
-    {id: '9', name: 'Stair Climbing'},
-    {id: '10', name: 'Pilates'},
-    {id: '11', name: 'Zumba'},
-    {id: '12', name: 'Yoga'},
-    {id: '13', name: 'High Knees'},
-    {id: '14', name: 'Butt Kicks'},
-    {id: '15', name: 'Mountain Climbers'},
-    {id: '16', name: 'Burpees'},
-    {id: '17', name: 'Side Shuffles'},
-    {id: '18', name: 'Box Jumps'},
-    {id: '19', name: 'Skipping'},
-    {id: '20', name: 'Speed Skating'},
-    {id: '21', name: 'Shadow Boxing'},
-    {id: '22', name: 'Treadmill Running'},
-    {id: '23', name: 'Stationary Bike'},
-    {id: '24', name: 'Trampoline'},
-    {id: '25', name: 'Staircase Running'},
-    {id: '26', name: 'Speed Walking'},
-    {id: '27', name: 'Inline Skating'},
-    {id: '28', name: 'Plyometrics'},
-    {id: '29', name: 'Boot Camp'},
-    {id: '30', name: 'Circuit Training'},
-    {id: '31', name: 'HIIT'},
-    {id: '33', name: 'Sprints'},
-    {id: '34', name: 'CrossFit'},
-    {id: '35', name: 'Bodyweight Exercises'},
-    {id: '36', name: 'Cardio Kickboxing'},
-    {id: '37', name: 'Battle Ropes'},
-    {id: '41', name: 'Racquetball'},
-    {id: '42', name: 'Basketball'},
-    {id: '43', name: 'Soccer'},
-    {id: '44', name: 'Tennis'},
-    {id: '45', name: 'Squash'},
-    {id: '46', name: 'Badminton'},
-    {id: '47', name: 'Frisbee'},
-    {id: '48', name: 'Ultimate Frisbee'},
-    {id: '49', name: 'Touch Football'},
-    {id: '50', name: 'Beach Volleyball'},
-    {id: '51', name: 'Paddleboarding'},
-    {id: '52', name: 'Surfing'},
-    {id: '53', name: 'Kayaking'},
-    {id: '54', name: 'Canoeing'},
-    {id: '55', name: 'Rowboat'},
-    {id: '56', name: 'Stand-up Paddleboarding'},
-    {id: '57', name: 'Rock Climbing'},
-    {id: '60', name: 'Cross-country Skiing'},
-    {id: '61', name: 'Downhill Skiing'},
-    {id: '62', name: 'Snowboarding'},
-    {id: '63', name: 'Snowshoeing'},
-    {id: '64', name: 'Hockey'},
-    {id: '65', name: 'Lacrosse'},
-    {id: '66', name: 'Field Hockey'},
-    {id: '67', name: 'Rugby'},
-    {id: '68', name: 'Handball'},
-    {id: '69', name: 'Water Polo'},
-    {id: '70', name: 'Swimming Laps'},
-    {id: '88', name: 'Rowing Machine'},
-    {id: '89', name: 'Elliptical Machine'},
-    {id: '90', name: 'Treadmill Walking'},
-    {id: '91', name: 'Treadmill Jogging'},
-    {id: '92', name: 'Outdoor Running'},
-    {id: '93', name: 'Outdoor Walking'},
-    {id: '95', name: 'Track Running'},
-    {id: '96', name: 'Field Running'},
-    {id: '97', name: 'Beach Running'},
-    {id: '98', name: 'Parkour'},
-  ];
+  const normalExercises = useMemo(() => {
+    return [
+      {id: '0', name: 'Running'},
+      {id: '1', name: 'Cycling'},
+      {id: '2', name: 'Swimming'},
+      {id: '3', name: 'Jumping Rope'},
+      {id: '4', name: 'Rowing'},
+      {id: '5', name: 'Elliptical Training'},
+      {id: '6', name: 'Hiking'},
+      {id: '7', name: 'Dancing'},
+      {id: '8', name: 'Kickboxing'},
+      {id: '9', name: 'Stair Climbing'},
+      {id: '10', name: 'Pilates'},
+      {id: '11', name: 'Zumba'},
+      {id: '12', name: 'Yoga'},
+      {id: '13', name: 'High Knees'},
+      {id: '14', name: 'Butt Kicks'},
+      {id: '15', name: 'Mountain Climbers'},
+      {id: '16', name: 'Burpees'},
+      {id: '17', name: 'Side Shuffles'},
+      {id: '18', name: 'Box Jumps'},
+      {id: '19', name: 'Skipping'},
+      {id: '20', name: 'Speed Skating'},
+      {id: '21', name: 'Shadow Boxing'},
+      {id: '22', name: 'Treadmill Running'},
+      {id: '23', name: 'Stationary Bike'},
+      {id: '24', name: 'Trampoline'},
+      {id: '25', name: 'Staircase Running'},
+      {id: '26', name: 'Speed Walking'},
+      {id: '27', name: 'Inline Skating'},
+      {id: '28', name: 'Plyometrics'},
+      {id: '29', name: 'Boot Camp'},
+      {id: '30', name: 'Circuit Training'},
+      {id: '31', name: 'HIIT'},
+      {id: '33', name: 'Sprints'},
+      {id: '34', name: 'CrossFit'},
+      {id: '35', name: 'Bodyweight Exercises'},
+      {id: '36', name: 'Cardio Kickboxing'},
+      {id: '37', name: 'Battle Ropes'},
+      {id: '41', name: 'Racquetball'},
+      {id: '42', name: 'Basketball'},
+      {id: '43', name: 'Soccer'},
+      {id: '44', name: 'Tennis'},
+      {id: '45', name: 'Squash'},
+      {id: '46', name: 'Badminton'},
+      {id: '47', name: 'Frisbee'},
+      {id: '48', name: 'Ultimate Frisbee'},
+      {id: '49', name: 'Touch Football'},
+      {id: '50', name: 'Beach Volleyball'},
+      {id: '51', name: 'Paddleboarding'},
+      {id: '52', name: 'Surfing'},
+      {id: '53', name: 'Kayaking'},
+      {id: '54', name: 'Canoeing'},
+      {id: '55', name: 'Rowboat'},
+      {id: '56', name: 'Stand-up Paddleboarding'},
+      {id: '57', name: 'Rock Climbing'},
+      {id: '60', name: 'Cross-country Skiing'},
+      {id: '61', name: 'Downhill Skiing'},
+      {id: '62', name: 'Snowboarding'},
+      {id: '63', name: 'Snowshoeing'},
+      {id: '64', name: 'Hockey'},
+      {id: '65', name: 'Lacrosse'},
+      {id: '66', name: 'Field Hockey'},
+      {id: '67', name: 'Rugby'},
+      {id: '68', name: 'Handball'},
+      {id: '69', name: 'Water Polo'},
+      {id: '70', name: 'Swimming Laps'},
+      {id: '88', name: 'Rowing Machine'},
+      {id: '89', name: 'Elliptical Machine'},
+      {id: '90', name: 'Treadmill Walking'},
+      {id: '91', name: 'Treadmill Jogging'},
+      {id: '92', name: 'Outdoor Running'},
+      {id: '93', name: 'Outdoor Walking'},
+      {id: '95', name: 'Track Running'},
+      {id: '96', name: 'Field Running'},
+      {id: '97', name: 'Beach Running'},
+      {id: '98', name: 'Parkour'},
+    ];
+  }, []);
 
   useEffect(() => {
     let {startDate, endDate} = getDateRange(activeFilter);
@@ -169,7 +159,7 @@ export const CardioStatsScreen = ({navigation, route}: CardioStatsScreenProps) =
     if (cardioWorkouts) {
       setLoading(false);
     }
-  }, [activeFilter]);
+  }, [activeFilter, realm, userId]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
@@ -334,7 +324,7 @@ export const CardioStatsScreen = ({navigation, route}: CardioStatsScreenProps) =
     return id;
   };
 
-  const addExtraExercisesToSection = () => {
+  const addExtraExercisesToSection = useCallback(() => {
     for (let i = 0; i < extraExercises.length; i++) {
       let id = extraExercises[i].exerciseId;
       let name = extraExercises[i].name;
@@ -346,7 +336,11 @@ export const CardioStatsScreen = ({navigation, route}: CardioStatsScreenProps) =
 
       normalExercises.push(object);
     }
-  };
+  }, [extraExercises, normalExercises]);
+
+  useEffect(() => {
+    addExtraExercisesToSection();
+  }, [addExtraExercisesToSection]);
 
   return (
     <>

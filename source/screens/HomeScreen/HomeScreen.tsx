@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, Dimensions, FlatList, Image, ScrollView, Text, TouchableOpacity, View} from 'react-native';
-import {useRealm, useQuery, useUser} from '@realm/react';
+import {ActivityIndicator, Alert, Dimensions, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {useRealm, useUser} from '@realm/react';
 import {Users} from '../../schemas/UsersSchema';
 import styles from './HomeScreen.style';
 
@@ -27,7 +27,7 @@ type HomeScreenProps = {
 };
 
 const screenHeight = Dimensions.get('window').height;
-const screenWidth = Dimensions.get('window').width;
+//const screenWidth = Dimensions.get('window').width;
 
 export const HomeScreen = ({navigation}: HomeScreenProps) => {
   const realm = useRealm();
@@ -60,15 +60,16 @@ export const HomeScreen = ({navigation}: HomeScreenProps) => {
     });
   };
 
-  const [userData, setUserData] = useState<any>(realm.objects('Users').sorted('_id').filtered('userId == $0', user.id));
+  const [userData] = useState<any>(realm.objects('Users').sorted('_id').filtered('userId == $0', user.id));
   const [workouts, setWorkouts] = useState<any>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [imageSource, setImageSource] = useState(require('../../assets/defaultPFP.png'));
+  console.log('imageSource: ', imageSource);
 
   const [currentWorkout, setCurrentWorkout] = useState<any>([]);
   const [currentWorkoutType, setCurrentWorkoutType] = useState<string>('');
-  const [continuingWorkout, setContinuingWorkout] = useState<boolean>(false);
+  console.log('currentWorkoutType: ', currentWorkoutType);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   const closeModal = () => {
@@ -79,31 +80,6 @@ export const HomeScreen = ({navigation}: HomeScreenProps) => {
     size: 1000,
     storageBackend: AsyncStorage,
   });
-
-  const loadCurrentWorkout = () => {
-    storage
-      .load({
-        key: 'currentWorkout',
-      })
-      .then(ret => {
-        setCurrentWorkout(ret.forms);
-        console.log(ret.forms.length);
-      })
-      .catch(err => {
-        console.warn(err.message);
-      });
-
-    storage
-      .load({
-        key: 'workoutType',
-      })
-      .then(ret => {
-        setCurrentWorkoutType(ret.workoutType);
-      })
-      .catch(err => {
-        console.warn(err.message);
-      });
-  };
 
   useEffect(() => {
     setLoading(true);
@@ -116,7 +92,7 @@ export const HomeScreen = ({navigation}: HomeScreenProps) => {
     let workoutsArray = realm.objects(Workouts).sorted('dateCreated', true).filtered('dateCreated >= $0 AND dateCreated < $1 AND userId == $2', startOfMonth, endOfMonth, user.id).slice(0, 10);
 
     divideWorkoutsIntoSections(workoutsArray);
-  }, []);
+  }, [realm, user.id]);
 
   useEffect(() => {}, [isFocused]);
 
@@ -294,7 +270,7 @@ export const HomeScreen = ({navigation}: HomeScreenProps) => {
     }
 
     setLoading(false);
-  }, [isFocused]);
+  }, [isFocused, userData]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {

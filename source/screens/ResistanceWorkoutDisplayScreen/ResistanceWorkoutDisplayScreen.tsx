@@ -11,16 +11,12 @@ type ResistanceWorkoutDisplayProps = {
   data: any;
 };
 
-export const ResistanceWorkoutDisplayScreen = (
-  props: ResistanceWorkoutDisplayProps,
-) => {
+export const ResistanceWorkoutDisplayScreen = (props: ResistanceWorkoutDisplayProps) => {
   const realm = useRealm();
   const user = useUser();
 
   const convertIdToName = (id: string) => {
-    const exercise = realm
-      .objects(ExtraExercises)
-      .filtered('userId == $0 AND exerciseId == $1', user.id, id);
+    const exercise = realm.objects(ExtraExercises).filtered('userId == $0 AND exerciseId == $1', user.id, id);
 
     if (exercise.length == 0) {
       for (let section of sections) {
@@ -377,22 +373,13 @@ export const ResistanceWorkoutDisplayScreen = (
                         width: 2,
                         backgroundColor: 'gray',
                       }}></View>
-                    <Text style={{fontSize: 18, fontWeight: '600'}}>
-                      {item.value} kg
-                    </Text>
-                    <Text style={{fontSize: 18, fontWeight: '600'}}>
-                      {JSON.parse(reps[index])[innerIndex].value} reps
-                    </Text>
+                    <Text style={{fontSize: 18, fontWeight: '600'}}>{item.value} kg</Text>
+                    <Text style={{fontSize: 18, fontWeight: '600'}}>{JSON.parse(reps[index])[innerIndex].value} reps</Text>
                   </View>
                 );
               })}
 
-              <View
-                key={new BSON.ObjectID().toString()}
-                style={[
-                  styles.smallBorder,
-                  {backgroundColor: 'lightgray'},
-                ]}></View>
+              <View key={new BSON.ObjectID().toString()} style={[styles.smallBorder, {backgroundColor: 'lightgray'}]}></View>
             </>
           );
         })}

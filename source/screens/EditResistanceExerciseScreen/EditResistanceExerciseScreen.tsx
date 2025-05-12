@@ -1,7 +1,7 @@
-import React, {useCallback, useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {Alert, Text, View, TouchableOpacity, TextInput, ScrollView} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
-import {useUser, useRealm, useQuery} from '@realm/react';
+import {useUser, useRealm} from '@realm/react';
 import {ExtraExercises} from '../../schemas/ExtraExercisesSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './EditResistanceExerciseScreen.style';
@@ -27,7 +27,9 @@ export const EditResistanceExerciseScreen = ({navigation, route}: EditExerciseSc
 
   const selectedExercise = realm.objects(ExtraExercises).filtered('userId == $0 AND exerciseId == $1', user.id, exercise);
 
-  const muscles = ['Neck', 'Back', 'Shoulders', 'Chest', 'Biceps', 'Triceps', 'Forearms', 'Core', 'Quads', 'Glutes', 'Hip Flexors', 'Groin', 'Hamstrings', 'Calves', 'Other'];
+  const muscles = useMemo(() => {
+    return ['Neck', 'Back', 'Shoulders', 'Chest', 'Biceps', 'Triceps', 'Forearms', 'Core', 'Quads', 'Glutes', 'Hip Flexors', 'Groin', 'Hamstrings', 'Calves', 'Other'];
+  }, []);
 
   const [boxChecked, setBoxChecked] = useState<boolean[]>([false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]);
   const [selectedMuscles, setSelectedMuscles] = useState<string>('');
@@ -102,7 +104,7 @@ export const EditResistanceExerciseScreen = ({navigation, route}: EditExerciseSc
     }
 
     setBoxChecked(array);
-  }, []);
+  }, [muscles, selectedExercise]);
 
   return (
     <ScrollView>

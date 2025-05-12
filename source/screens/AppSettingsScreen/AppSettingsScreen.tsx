@@ -1,22 +1,18 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {Alert, StyleSheet, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, TouchableWithoutFeedback, Keyboard, ScrollView} from 'react-native';
-import {useQuery, useRealm, useUser} from '@realm/react';
-import {Users} from '../../schemas/UsersSchema';
+import React, {useCallback} from 'react';
+import {Alert, Text, View, TouchableOpacity} from 'react-native';
+import {useUser} from '@realm/react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {shadow} from '../../sharedStyling/Shadow';
 import styles from './AppSettingsScreen.style';
-import Modal from 'react-native-modal';
 
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
-import {colors} from '../../sharedStyling/Colors';
 
 type AppSettingsScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'AppSettings'>;
 };
 
 export const AppSettingsScreen = ({navigation}: AppSettingsScreenProps) => {
-  const realm = useRealm();
   const user = useUser();
 
   const goBack = () => {

@@ -1,11 +1,10 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {Alert, StyleSheet, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, TouchableWithoutFeedback, Keyboard} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Alert, Text, View, TouchableOpacity, ActivityIndicator} from 'react-native';
 import {useApp, useQuery, useRealm, useUser} from '@realm/react';
 import {Users} from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {shadow} from '../../sharedStyling/Shadow';
 import styles from './AccountSettingsScreen.style';
-import Modal from 'react-native-modal';
 
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
@@ -26,13 +25,7 @@ export const AccountSettingsScreen = ({navigation}: AccountSettingsProps) => {
 
   const userData = useQuery(Users).sorted('_id').filtered('userId == $0', user.id);
 
-  const [password, setPassword] = useState<string>('');
-
-  const handlePasswordChange = (inputText: string) => {
-    setPassword(inputText);
-  };
-
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const resetPassword = () => {
     console.log('Password reset');
@@ -45,10 +38,6 @@ export const AccountSettingsScreen = ({navigation}: AccountSettingsProps) => {
       console.error('Error deleting account:', error);
     }
   };
-
-  const signOut = useCallback(() => {
-    user?.logOut();
-  }, [user]);
 
   const handleConfirm = () => {
     // Show confirmation popup

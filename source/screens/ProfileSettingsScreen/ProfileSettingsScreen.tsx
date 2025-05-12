@@ -1,9 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import {Alert, StyleSheet, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, TouchableWithoutFeedback, Keyboard} from 'react-native';
-import {useQuery, useRealm, useUser} from '@realm/react';
+import {Alert, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator} from 'react-native';
+import {useRealm, useUser} from '@realm/react';
 import {Users} from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {shadow} from '../../sharedStyling/Shadow';
 import styles from './ProfileSettingsScreen.style';
 import Modal from 'react-native-modal';
 
@@ -58,7 +57,7 @@ export const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
     if (userDataObject) {
       setLoading(false);
     }
-  }, []);
+  }, [realm, user.id, userData]);
 
   const closeModals = () => {
     setShowModal(false);
@@ -165,7 +164,7 @@ export const ProfileSettingsScreen = ({navigation}: ProfileSettingsProps) => {
     } else {
       setImageSource(require('../../assets/defaultPFP.png'));
     }
-  }, []);
+  }, [realm, user.id]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {

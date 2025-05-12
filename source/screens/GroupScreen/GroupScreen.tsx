@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useState} from 'react';
-import {Alert, Button, FlatList, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {useEffect, useState} from 'react';
+import {FlatList, Image, Text, TouchableOpacity, View} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import {useQuery, useRealm, useUser} from '@realm/react';
 import {Groups} from '../../schemas/GroupsSchema';
@@ -18,7 +18,7 @@ import styles from './GroupScreen.style';
 
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
-import {RouteProp, useNavigation} from '@react-navigation/native';
+import {RouteProp} from '@react-navigation/native';
 import {GroupEventsScreen} from '../GroupEventsScreen/GroupEventsScreen';
 
 type GroupScreenProps = {
@@ -273,7 +273,7 @@ export const GroupScreen = ({navigation, route}: GroupScreenProps) => {
           <View style={[styles.smallBorder, {width: 250, marginBottom: 20}]}></View>
           <FlatList
             data={selectedGroup[0].members}
-            renderItem={({item, index}) => (
+            renderItem={({item}) => (
               <>
                 <View key={new BSON.ObjectID().toString()} style={styles.userInfoContainer}>
                   <View style={styles.userData}>

@@ -1,13 +1,11 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, Image, TouchableOpacity, ScrollView, FlatList, Dimensions} from 'react-native';
+import React, {useState, useEffect, useCallback} from 'react';
+import {Text, View, TouchableOpacity, ScrollView} from 'react-native';
 import {useRealm, useUser} from '@realm/react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './GroupEventsScreen.style';
-import Modal from 'react-native-modal';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
-import {RouteProp, useFocusEffect, useIsFocused} from '@react-navigation/native';
-import {colors} from '../../sharedStyling/Colors';
+import {RouteProp, useIsFocused} from '@react-navigation/native';
 import {Groups} from '../../schemas/GroupsSchema';
 import {GroupEvents} from '../../schemas/GroupEventsScehma';
 import {BSON} from 'realm';
@@ -47,25 +45,28 @@ export const GroupEventsScreen = ({navigation, route}: GroupEventsScreenProps) =
     console.log(events);
 
     setEventsArray(events);
-  }, [isFocused]);
+  }, [group, isFocused, realm]);
+
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const isOwner = useCallback(
+    (groupId: string) => {
+      const group = realm.objects(Groups).filtered('groupId == $0', groupId);
+
+      const userIndex = group[0].members.indexOf(user.id);
+      const userRole = group[0].memberRoles[userIndex];
+
+      if (user.id == group[0].owner || userRole == 'Captain' || userRole == 'Coach') {
+        return true;
+      }
+
+      return false;
+    },
+    [realm, user.id],
+  );
 
   useEffect(() => {
     setIsAdmin(isOwner(group));
-  }, []);
-
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const isOwner = (groupId: string) => {
-    const group = realm.objects(Groups).filtered('groupId == $0', groupId);
-
-    const userIndex = group[0].members.indexOf(user.id);
-    const userRole = group[0].memberRoles[userIndex];
-
-    if (user.id == group[0].owner || userRole == 'Captain' || userRole == 'Coach') {
-      return true;
-    }
-
-    return false;
-  };
+  }, [group, isOwner]);
 
   const timeDifference = (date: Date) => {
     const now = new Date();
@@ -164,7 +165,6 @@ export const GroupEventsScreen = ({navigation, route}: GroupEventsScreenProps) =
       tournamentValue = !tournamentValue;
     }
 
-    let date = new Date();
     let query = 'groupId == $0';
     let args: any[] = [group];
 
@@ -200,7 +200,6 @@ export const GroupEventsScreen = ({navigation, route}: GroupEventsScreenProps) =
     }
 
     const day = parseInt(dayString, 10);
-    const now = new Date();
 
     setSelectedDay(dayString);
 

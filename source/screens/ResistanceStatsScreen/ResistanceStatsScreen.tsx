@@ -1,25 +1,17 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, Image, TouchableOpacity, ActivityIndicator, ScrollView, Dimensions} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Text, View, TouchableOpacity, ActivityIndicator, ScrollView, Dimensions} from 'react-native';
 import {useRealm, useUser} from '@realm/react';
-import {Users} from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {UserStatistics} from '../../schemas/UserStatisticsSchema';
 import {shadow} from '../../sharedStyling/Shadow';
 import styles from './ResistanceStatsScreen.style';
 
-import {CardStyleInterpolators, StackNavigationProp} from '@react-navigation/stack';
+import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 import {RouteProp} from '@react-navigation/native';
 import {colors} from '../../sharedStyling/Colors';
-import {useFocusEffect} from '@react-navigation/native';
-import {Workouts} from '../../schemas/WorkoutSchema';
-import {GeneralLineChartComponent} from '../../components/GeneralLineChartComponent/GeneralLineChartComponent';
-import {GeneralPieChart} from '../../components/GeneralPieChartComponent/GeneralPieChartComponent';
-import {StackedBarChartComponent} from '../../components/StackedBarChartComponent/StackedBarChartComponent';
 import {ResistanceWorkout} from '../../schemas/ResistanceWorkoutSchema';
 import {ResistanceLineChartComponent} from '../../components/ResistanceStatsComponents/ResistanceLineChartComponent/ResistanceLineChartComponent';
 import {ResistanceBarChartComponent} from '../../components/ResistanceStatsComponents/ResistanceBarChartComponent/ResistanceBarChartComponent';
-import {ResistancePieChartComponent} from '../../components/ResistanceStatsComponents/ResistancePieChartComponent/ResistancePieChartComponent';
 import {ExtraExercises} from '../../schemas/ExtraExercisesSchema';
 
 type ResistanceStatsScreenProps = {
@@ -28,7 +20,7 @@ type ResistanceStatsScreenProps = {
 };
 
 const screenHeight = Dimensions.get('window').height;
-const screenWidth = Dimensions.get('window').width;
+//const screenWidth = Dimensions.get('window').width;
 
 export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreenProps) => {
   const realm = useRealm();
@@ -40,7 +32,7 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
     navigation.goBack();
   };
 
-  const goToWorkoutView = (workoutId: string) => {
+  const goToWorkoutView = () => {
     console.log('navigate to workout view screen');
   };
 
@@ -304,11 +296,11 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
 
   useEffect(() => {
     addExtraExercisesToSection();
-  }, []);
+  });
 
   const [loading, setLoading] = useState(true);
 
-  const [extraExercises, setExtraExercises] = useState<any>(realm.objects(ExtraExercises).filtered('userId == $0 && type == $1', user.id, 'Resistance'));
+  const [extraExercises] = useState<any>(realm.objects(ExtraExercises).filtered('userId == $0 && type == $1', user.id, 'Resistance'));
 
   const [activeFilter, setActiveFilter] = useState(0);
   const [workoutData, setWorkoutData] = useState<any>(null);
@@ -321,6 +313,46 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
   const [highestVolumeAndRepSet, setHighestVolumeAndRepSet] = useState<any>(null);
 
   useEffect(() => {
+    const getDateRange = (filter: number) => {
+      const currentDate = new Date();
+      let startDate: Date;
+      let endDate: Date;
+
+      switch (filter) {
+        case 0:
+          startDate = new Date(0); // January 1, 1970 (Epoch time)
+          endDate = currentDate;
+          break;
+        case 1:
+          startDate = new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate());
+          endDate = currentDate;
+          break;
+        case 2:
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, currentDate.getDate());
+          endDate = currentDate;
+          break;
+        case 3:
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 3, currentDate.getDate());
+          endDate = currentDate;
+          break;
+        case 4:
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate());
+          endDate = currentDate;
+          break;
+        default:
+          startDate = new Date(0);
+          endDate = currentDate;
+          break;
+      }
+
+      startDate = setSpecificTime(startDate, 1, 0, 0, 0);
+      endDate = setSpecificTime(endDate, 24, 59, 59, 999);
+
+      console.log(startDate);
+      console.log(endDate);
+
+      return {startDate, endDate};
+    };
     let {startDate, endDate} = getDateRange(activeFilter);
     setStartDate(startDate);
     setEndDate(endDate);
@@ -342,7 +374,7 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
     if (resistanceWorkouts) {
       setLoading(false);
     }
-  }, [activeFilter]);
+  }, [activeFilter, realm, userId]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
@@ -356,47 +388,6 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
     date.setSeconds(seconds);
     date.setMilliseconds(milliseconds);
     return date;
-  };
-
-  const getDateRange = (filter: number) => {
-    const currentDate = new Date();
-    let startDate: Date;
-    let endDate: Date;
-
-    switch (filter) {
-      case 0:
-        startDate = new Date(0); // January 1, 1970 (Epoch time)
-        endDate = currentDate;
-        break;
-      case 1:
-        startDate = new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate());
-        endDate = currentDate;
-        break;
-      case 2:
-        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, currentDate.getDate());
-        endDate = currentDate;
-        break;
-      case 3:
-        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 3, currentDate.getDate());
-        endDate = currentDate;
-        break;
-      case 4:
-        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate());
-        endDate = currentDate;
-        break;
-      default:
-        startDate = new Date(0);
-        endDate = currentDate;
-        break;
-    }
-
-    startDate = setSpecificTime(startDate, 1, 0, 0, 0);
-    endDate = setSpecificTime(endDate, 24, 59, 59, 999);
-
-    console.log(startDate);
-    console.log(endDate);
-
-    return {startDate, endDate};
   };
 
   const getHighestVolumeSession = (data: any) => {
@@ -567,9 +558,9 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
       let muscleGroups = extraInformation.split(',');
 
       for (let j = 0; j < muscleGroups.length; j++) {
-        if (muscleGroups[j] == '') continue;
+        if (muscleGroups[j] === '') continue;
 
-        let section = sections.find(section => section.title == muscleGroups[j]);
+        let section = sections.find(section => section.title === muscleGroups[j]);
 
         if (section) {
           let name = getExerciseName(extraExercises[i].exerciseId);
@@ -577,7 +568,7 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
           section.content.push(newExercise);
         }
 
-        section = sections.find(section => section.title == 'Other');
+        section = sections.find(section => section.title === 'Other');
 
         if (section) {
           let alreadyExists = section.content.some(item => item.name === getExerciseName(extraExercises[i].exerciseId));
@@ -672,7 +663,7 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
                     <ResistanceBarChartComponent data={workoutData} />
                   </View>
 
-                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView(highestVolumeSession.workoutId)}>
+                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView()}>
                     <Text
                       style={{
                         fontSize: 20,
@@ -699,7 +690,7 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
                     </Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView(highestRepSession.workoutId)}>
+                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView()}>
                     <Text
                       style={{
                         fontSize: 20,
@@ -726,7 +717,7 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
                     </Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView(highestVolumeAndRepSet.workoutIdVolume)}>
+                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView()}>
                     <Text
                       style={{
                         fontSize: 20,
@@ -761,7 +752,7 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
                     </Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView(highestVolumeAndRepSet.workoutIdReps)}>
+                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView()}>
                     <Text
                       style={{
                         fontSize: 20,
@@ -796,7 +787,7 @@ export const ResistanceStatsScreen = ({navigation, route}: ResistanceStatsScreen
                     </Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView(highestVolumeAndRepSet.workoutIdWeight)}>
+                  <TouchableOpacity style={[styles.card, shadow.shadow]} onPress={() => goToWorkoutView()}>
                     <Text
                       style={{
                         fontSize: 20,

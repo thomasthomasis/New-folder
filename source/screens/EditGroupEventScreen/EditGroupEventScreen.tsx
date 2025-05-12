@@ -1,5 +1,5 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, Image, TouchableOpacity, ScrollView, TextInput, Platform} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Alert, Text, View, TouchableOpacity, ScrollView, TextInput} from 'react-native';
 import {useRealm, useUser} from '@realm/react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './EditGroupEventScreen.style';
@@ -13,7 +13,6 @@ import {GroupEvents} from '../../schemas/GroupEventsScehma';
 import {BSON} from 'realm';
 import {shadow} from '../../sharedStyling/Shadow';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {Picker} from '@react-native-picker/picker';
 
 type EditGroupEventScreenProps = {
   navigation: StackNavigationProp<RootStackParamList, 'EditGroupEvent'>; // Adjust according to your navigation stack
@@ -67,7 +66,7 @@ export const EditGroupEventScreen = ({navigation, route}: EditGroupEventScreenPr
     console.log(inputPairs);
 
     setInputPairs(inputPairs);
-  }, []);
+  }, [eventId, realm]);
 
   type InputPair = {
     input1: string;
@@ -199,7 +198,6 @@ export const EditGroupEventScreen = ({navigation, route}: EditGroupEventScreenPr
     const dayOfWeek = daysOfWeek[date.getDay()];
     const dayOfMonth = date.getDate();
     const month = monthsOfYear[date.getMonth()];
-    const year = date.getFullYear();
     let hours = date.getHours();
     const minutes = date.getMinutes();
     const period = hours >= 12 ? 'PM' : 'AM';
@@ -446,7 +444,7 @@ export const EditGroupEventScreen = ({navigation, route}: EditGroupEventScreenPr
 
       <Modal isVisible={modalVisible} swipeDirection={['down']} onSwipeComplete={onClose} onBackdropPress={onClose} style={styles.modalView}>
         <View style={styles.modalContent}>
-          {colorsArray.map((item, index) => (
+          {colorsArray.map(item => (
             <View
               key={new BSON.ObjectID().toString()}
               style={{

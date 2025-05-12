@@ -1,7 +1,7 @@
 import {useQuery, useRealm, useUser} from '@realm/react';
-import {ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, Image, ScrollView, Text, View} from 'react-native';
 import {Groups} from '../../schemas/GroupsSchema';
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {UserStatistics} from '../../schemas/UserStatisticsSchema';
 import SelectDropdown from 'react-native-select-dropdown';
 import {colors} from '../../sharedStyling/Colors';
@@ -131,7 +131,7 @@ export const LeaderboardScreen = (props: LeaderboardScreenProps) => {
         let workouts = realm.objects(ResistanceWorkout).filtered('userId == $0 AND dateCreated >= $1', stringIds[i], userJoinDate);
         let totalData = 0;
         for (let j = 0; j < workouts.length; j++) {
-          totalData += workouts[i].totalVolume ?? 0;
+          totalData += Number(workouts[i].totalVolume ?? 0);
         }
 
         dataTemp.push({totalData: totalData, user: user[0].userId});
@@ -157,29 +157,32 @@ export const LeaderboardScreen = (props: LeaderboardScreenProps) => {
     setLoading(false);
   };
 
-  const getLevels = (stringIds: string[]) => {
-    let users: any = [];
-    let levels: any = [];
+  const getLevels = useCallback(
+    (stringIds: string[]) => {
+      let users: any = [];
+      let levels: any = [];
 
-    for (let i = 0; i < stringIds.length; i++) {
-      let user = realm.objects(Users).filtered('userId == $0', stringIds[i]);
-      users.push(user[0].userId);
+      for (let i = 0; i < stringIds.length; i++) {
+        let user = realm.objects(Users).filtered('userId == $0', stringIds[i]);
+        users.push(user[0].userId);
 
-      let userStats = realm.objects(UserStatistics).filtered('userId == $0', stringIds[i]);
-      let level = userStats[0].lvl;
+        let userStats = realm.objects(UserStatistics).filtered('userId == $0', stringIds[i]);
+        let level = userStats[0].lvl;
 
-      levels.push(level);
-    }
+        levels.push(level);
+      }
 
-    setUsers(users);
-    setData(levels);
+      setUsers(users);
+      setData(levels);
 
-    setLoading(false);
-  };
+      setLoading(false);
+    },
+    [realm],
+  );
 
   useEffect(() => {
     getLevels(stringIds);
-  }, []);
+  }, [getLevels, stringIds]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {

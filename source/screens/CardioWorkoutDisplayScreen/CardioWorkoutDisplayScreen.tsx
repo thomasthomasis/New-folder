@@ -1,4 +1,4 @@
-import React, {Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {ScrollView, Text, View} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {colors} from '../../sharedStyling/Colors';
 import {BSON} from 'realm';
@@ -24,7 +24,6 @@ export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProp
   const allExercises = props.data[0].allExercises;
   const distance = props.data[0].distance;
   const time = props.data[0].time;
-  const exercise = props.data[0].exercise;
   const extraNotes = props.data[0].extraNotes;
 
   //console.log(JSON.parse(distance[0])[0])
@@ -40,8 +39,6 @@ export const CardioWorkoutDisplayScreen = (props: CardioWorkoutDisplayScreenProp
       return exercise[0].name ?? '';
     }
   };
-
-  const normalExercises = ['Treadmill', 'Elliptical', 'Indoor Bike', 'Jump Rope', 'Outdoor Bike', 'Swimming', 'Rowing Machine', 'Outdoor Run', 'Outdoor Walk', 'Stair Machine', 'Sprints'];
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {

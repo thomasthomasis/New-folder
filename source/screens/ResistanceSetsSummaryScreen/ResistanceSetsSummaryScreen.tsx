@@ -1,8 +1,8 @@
-import React, {useCallback, useState, useEffect, useRef} from 'react';
-import {Alert, StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView, Animated, FlatList, Dimensions, Keyboard} from 'react-native';
+import React, {useCallback, useState, useEffect} from 'react';
+import {Alert, Text, View, TouchableOpacity, TextInput, ScrollView, Keyboard} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
-import {BSON, index} from 'realm';
-import {useUser, useRealm, useQuery, useObject} from '@realm/react';
+import {BSON} from 'realm';
+import {useUser, useRealm, useQuery} from '@realm/react';
 import {ResistanceWorkout} from '../../schemas/ResistanceWorkoutSchema';
 import {Workouts} from '../../schemas/WorkoutSchema';
 import {UserStatistics} from '../../schemas/UserStatisticsSchema';
@@ -12,14 +12,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Storage from 'react-native-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Collapsible from 'react-native-collapsible';
-import {AddExerciseScreen} from '../AddExerciseScreen/AddExerciseScreen';
 import styles from './ResistanceSetsSummaryScreen.style';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
-import {RouteProp} from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import {Users} from '../../schemas/UsersSchema';
 import {common} from '../../sharedStyling/CommonStyle';
@@ -31,7 +28,6 @@ type ResistanceSetsSummaryScreenProps = {
 export const ResistanceSetsSummaryScreen = ({navigation}: ResistanceSetsSummaryScreenProps) => {
   const realm = useRealm();
   const user = useUser();
-  const isFocused = useIsFocused();
 
   const goBackHome = () => {
     navigation.navigate('LogWorkout');
@@ -141,16 +137,6 @@ export const ResistanceSetsSummaryScreen = ({navigation}: ResistanceSetsSummaryS
     setCollapsed(collapsedArray);
   };
 
-  const collapseAll = () => {
-    let newCollapsed = [...collapsed];
-
-    for (let i = 0; i < collapsed.length; i++) {
-      newCollapsed[i] = true;
-    }
-
-    setCollapsed(newCollapsed);
-  };
-
   const calculateTotalSets = (exerciseIndex: number) => {
     return currentWorkout[exerciseIndex].inputs.length.toString();
   };
@@ -197,7 +183,7 @@ export const ResistanceSetsSummaryScreen = ({navigation}: ResistanceSetsSummaryS
 
   useEffect(() => {
     loadCurrentWorkout();
-  }, []);
+  });
 
   const getExerciseName = (id: string) => {
     const exercise = realm.objects(ExtraExercises).filtered('exerciseId == $0', id);
@@ -672,7 +658,7 @@ export const ResistanceSetsSummaryScreen = ({navigation}: ResistanceSetsSummaryS
         });
       });
     },
-    [realm, user],
+    [realm, user?.id, userData],
   );
 
   const updateUserStatistics = useCallback(
@@ -701,7 +687,7 @@ export const ResistanceSetsSummaryScreen = ({navigation}: ResistanceSetsSummaryS
         (userStatistics[0].lvl = newLvl), (userStatistics[0].xp = newXp), (userStatistics[0].numWorkouts = numWorkouts + 1), (userStatistics[0].numResistanceWorkouts = numResistanceWorkouts + 1), (userStatistics[0].xpTarget = newXpTarget);
       });
     },
-    [realm, user],
+    [realm, userStatistics],
   );
 
   const updateUserTitles = useCallback(
@@ -799,7 +785,7 @@ export const ResistanceSetsSummaryScreen = ({navigation}: ResistanceSetsSummaryS
         userData[0].titles = newUnlockedTitles;
       });
     },
-    [realm, user],
+    [realm, userData],
   );
 
   const calculateLevel = (currLvl: number, currXp: number, xpGained: number) => {
@@ -905,7 +891,7 @@ export const ResistanceSetsSummaryScreen = ({navigation}: ResistanceSetsSummaryS
 
   useEffect(() => {
     addExtraExercisesToSection();
-  }, []);
+  });
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
@@ -915,7 +901,7 @@ export const ResistanceSetsSummaryScreen = ({navigation}: ResistanceSetsSummaryS
 
       mutableSubs.add(userStatistics);
     });
-  }, [realm, user]);
+  }, [extraExercises, realm, user, userData, userStatistics]);
 
   return (
     <>

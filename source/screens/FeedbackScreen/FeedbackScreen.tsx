@@ -1,6 +1,6 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {Alert, StyleSheet, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, TouchableWithoutFeedback, Keyboard, ScrollView, Pressable} from 'react-native';
-import {useQuery, useRealm, useUser} from '@realm/react';
+import React, {useState, useEffect} from 'react';
+import {Alert, Text, TextInput, View, TouchableOpacity, Keyboard, Pressable} from 'react-native';
+import {useRealm, useUser} from '@realm/react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {StackNavigationProp} from '@react-navigation/stack';

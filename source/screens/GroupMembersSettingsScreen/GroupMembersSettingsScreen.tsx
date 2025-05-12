@@ -158,7 +158,7 @@ export const GroupMembersSettingsScreen = ({navigation, route}: GroupMembersSett
       </View>
       <FlatList
         data={groupData[0].members}
-        renderItem={({item, index}) => (
+        renderItem={({item}) => (
           <>
             <View key={new BSON.ObjectID().toString()} style={styles.userInfoContainer}>
               <View style={styles.userData}>

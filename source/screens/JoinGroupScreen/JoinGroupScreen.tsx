@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Alert, Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Pressable, PanResponder, Animated} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {ScrollView, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import {colors} from '../../sharedStyling/Colors';
 import {useQuery, useRealm, useUser} from '@realm/react';
 import {Groups} from '../../schemas/GroupsSchema';

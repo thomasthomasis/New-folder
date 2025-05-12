@@ -1,9 +1,8 @@
-import {useCallback, useEffect, useState} from 'react';
-import {Alert, Button, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {useEffect, useState} from 'react';
+import {Alert, Text, TextInput, TouchableOpacity, View} from 'react-native';
 //import { colors } from "../Colors";
 import {useQuery, useRealm, useUser} from '@realm/react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Modal from 'react-native-modal';
 import React from 'react';
 import {Groups} from '../../schemas/GroupsSchema';
 import {shadow} from '../../sharedStyling/Shadow';

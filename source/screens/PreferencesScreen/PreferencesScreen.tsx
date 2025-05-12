@@ -1,5 +1,5 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, Image, TouchableOpacity} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Text, View, TouchableOpacity} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import styles from './PreferencesScreen.style';
 
@@ -25,6 +25,7 @@ export const PreferencesScreen = ({navigation}: PreferencesScreenProps) => {
   const [isKm, setIsKm] = useState<boolean>(true);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  console.log('loading: ', loading);
 
   const goBack = () => {
     navigation.goBack();
@@ -38,7 +39,7 @@ export const PreferencesScreen = ({navigation}: PreferencesScreenProps) => {
     if (userData.length > 0) {
       setLoading(false);
     }
-  }, [isFocused]);
+  }, [isFocused, realm, user.id]);
 
   const toggleKgOption = (value: boolean) => {
     if (value) {

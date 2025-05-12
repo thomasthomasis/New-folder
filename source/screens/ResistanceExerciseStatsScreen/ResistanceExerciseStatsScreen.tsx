@@ -1,25 +1,15 @@
-import React, {useCallback, useState, useEffect} from 'react';
-import {Alert, Text, View, Image, TouchableOpacity, ActivityIndicator, ScrollView, Dimensions} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Text, View, TouchableOpacity, ActivityIndicator, ScrollView, Dimensions} from 'react-native';
 import {useRealm, useUser} from '@realm/react';
-import {Users} from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {UserStatistics} from '../../schemas/UserStatisticsSchema';
 import {shadow} from '../../sharedStyling/Shadow';
 import styles from './ResistanceExerciseStatsScreen.style';
 
-import {CardStyleInterpolators, StackNavigationProp} from '@react-navigation/stack';
+import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navgiation/NavigationTypes'; // Replace with your navigation types file
 import {RouteProp} from '@react-navigation/native';
 import {colors} from '../../sharedStyling/Colors';
-import {useFocusEffect} from '@react-navigation/native';
-import {Workouts} from '../../schemas/WorkoutSchema';
-import {GeneralLineChartComponent} from '../../components/GeneralLineChartComponent/GeneralLineChartComponent';
-import {GeneralPieChart} from '../../components/GeneralPieChartComponent/GeneralPieChartComponent';
-import {StackedBarChartComponent} from '../../components/StackedBarChartComponent/StackedBarChartComponent';
 import {ResistanceWorkout} from '../../schemas/ResistanceWorkoutSchema';
-import {ResistanceLineChartComponent} from '../../components/ResistanceStatsComponents/ResistanceLineChartComponent/ResistanceLineChartComponent';
-import {ResistanceBarChartComponent} from '../../components/ResistanceStatsComponents/ResistanceBarChartComponent/ResistanceBarChartComponent';
-import {ResistancePieChartComponent} from '../../components/ResistanceStatsComponents/ResistancePieChartComponent/ResistancePieChartComponent';
 import {ExtraExercises} from '../../schemas/ExtraExercisesSchema';
 import {ExerciseLineChartComponent} from '../../components/ResistanceStatsComponents/ExerciseStatsComponents/ExerciseLineChartComponent/ExerciseLineChartComponent';
 import {ExerciseBarChartComponent} from '../../components/ResistanceStatsComponents/ExerciseStatsComponents/ExerciseBarChartComponent/ExerciseBarChartComponent';
@@ -30,7 +20,7 @@ type ResistanceStatsScreenProps = {
 };
 
 const screenHeight = Dimensions.get('window').height;
-const screenWidth = Dimensions.get('window').width;
+//const screenWidth = Dimensions.get('window').width;
 
 export const ResistanceExerciseStatsScreen = ({navigation, route}: ResistanceStatsScreenProps) => {
   const realm = useRealm();
@@ -42,8 +32,8 @@ export const ResistanceExerciseStatsScreen = ({navigation, route}: ResistanceSta
     navigation.goBack();
   };
 
-  const goToWorkoutView = (workoutId: string) => {
-    console.log('navigate to workout view screen');
+  const goToWorkoutView = (workoutIdVolume: any) => {
+    console.log('navigate to workout view screen: ', workoutIdVolume);
   };
 
   const sections = [
@@ -299,11 +289,11 @@ export const ResistanceExerciseStatsScreen = ({navigation, route}: ResistanceSta
 
   useEffect(() => {
     addExtraExercisesToSection();
-  }, []);
+  });
 
   const [loading, setLoading] = useState(true);
 
-  const [extraExercises, setExtraExercises] = useState<any>(realm.objects(ExtraExercises).filtered('userId == $0 && type == $1', user.id, 'Resistance'));
+  const [extraExercises] = useState<any>(realm.objects(ExtraExercises).filtered('userId == $0 && type == $1', user.id, 'Resistance'));
 
   const [activeFilter, setActiveFilter] = useState(0);
   const [workoutData, setWorkoutData] = useState<any>(null);
@@ -312,9 +302,159 @@ export const ResistanceExerciseStatsScreen = ({navigation, route}: ResistanceSta
   const [endDate, setEndDate] = useState<Date>(new Date());
 
   const [highestVolumeAndRepSet, setHighestVolumeAndRepSet] = useState<any>(null);
-  const [heaviestWeight, setHeaviestWeight] = useState<any>(null);
 
   useEffect(() => {
+    const getExerciseRelevantWorkouts = (data: any) => {
+      let newData = [];
+
+      for (let i = 0; i < data.length; i++) {
+        for (let j = 0; j < data[i].allExercises.length; j++) {
+          let exerciseIdValue = data[i].allExercises[j];
+          console.log('exercise id value: ', exerciseIdValue);
+
+          if (exerciseIdValue == exerciseId) {
+            console.log('pushed');
+            newData.push(data[i]);
+            break;
+          }
+        }
+      }
+
+      return newData;
+    };
+
+    const getDateRange = (filter: number) => {
+      const currentDate = new Date();
+      let startDate: Date;
+      let endDate: Date;
+
+      switch (filter) {
+        case 0:
+          startDate = new Date(0); // January 1, 1970 (Epoch time)
+          endDate = currentDate;
+          break;
+        case 1:
+          startDate = new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate());
+          endDate = currentDate;
+          break;
+        case 2:
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, currentDate.getDate());
+          endDate = currentDate;
+          break;
+        case 3:
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 3, currentDate.getDate());
+          endDate = currentDate;
+          break;
+        case 4:
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate());
+          endDate = currentDate;
+          break;
+        default:
+          startDate = new Date(0);
+          endDate = currentDate;
+          break;
+      }
+
+      startDate = setSpecificTime(startDate, 1, 0, 0, 0);
+      endDate = setSpecificTime(endDate, 24, 59, 59, 999);
+
+      console.log(startDate);
+      console.log(endDate);
+
+      return {startDate, endDate};
+    };
+
+    const getHighestVolumeAndRepSet = (data: any) => {
+      let largestVolume = 0;
+      let largestReps = 0;
+
+      let workoutIdVolume = '';
+      let workoutIdReps = '';
+      let dateVolume = new Date();
+      let dateReps = new Date();
+      let exerciseIdVolume = '';
+      let exerciseIdReps = '';
+
+      let heaviestWeight = 0;
+      let workoutIdWeight = '';
+      let dateWeight = new Date();
+      let exerciseIdWeight = '';
+
+      console.log('new -------------------------');
+
+      for (let i = 0; i < data.length; i++) {
+        //console.log(data[i].weights.length)
+        let numWeightsArray = data[i].weights.length;
+        for (let j = 0; j < numWeightsArray; j++) {
+          //console.log(data[i].weights[j])
+          let jsonDataVolumes = JSON.parse(data[i].weights[j]);
+          let jsonDataReps = JSON.parse(data[i].reps[j]);
+
+          let jsonDataExercises = JSON.parse(data[i].exercises[j]);
+
+          if (jsonDataExercises.value != exerciseId) {
+            continue;
+          }
+
+          console.log('______________________________');
+          console.log('Exercises: ', jsonDataExercises);
+          console.log('weights: ', jsonDataVolumes);
+          console.log('reps: ', jsonDataReps);
+
+          let weight = 0;
+          let reps = 0;
+
+          for (let k = 0; k < jsonDataVolumes.length; k++) {
+            weight = parseFloat(jsonDataVolumes[k].value);
+            reps = parseFloat(jsonDataReps[k].value);
+
+            let volume = weight * reps;
+            console.log('volume of set: ', volume);
+            if (volume > largestVolume) {
+              largestVolume = volume;
+              workoutIdVolume = data[i]._id;
+              dateVolume = data[i].dateCreated;
+              exerciseIdVolume = jsonDataExercises.value;
+            }
+
+            if (reps > largestReps) {
+              largestReps = reps;
+              workoutIdReps = data[i]._id;
+              dateReps = data[i].dateCreated;
+              exerciseIdReps = jsonDataExercises.value;
+            }
+
+            if (weight > heaviestWeight) {
+              heaviestWeight = weight;
+              workoutIdWeight = data[i]._id;
+              dateWeight = data[i].dateCreated;
+              exerciseIdWeight = jsonDataExercises.value;
+            }
+          }
+        }
+      }
+
+      let object = {
+        workoutIdVolume: workoutIdVolume,
+        workoutIdReps: workoutIdReps,
+        largestVolume: largestVolume,
+        largestReps: largestReps,
+        dateVolume: dateVolume,
+        dateReps: dateReps,
+        exerciseIdVolume: exerciseIdVolume,
+        exerciseIdReps: exerciseIdReps,
+
+        workoutIdWeight: workoutIdWeight,
+        heaviestWeight: heaviestWeight,
+        dateWeight: dateWeight,
+        exerciseIdWeight: exerciseIdWeight,
+      };
+
+      console.log(object);
+
+      return object;
+    };
+
     let {startDate, endDate} = getDateRange(activeFilter);
     setStartDate(startDate);
     setEndDate(endDate);
@@ -334,7 +474,7 @@ export const ResistanceExerciseStatsScreen = ({navigation, route}: ResistanceSta
     if (resistanceWorkouts) {
       setLoading(false);
     }
-  }, [activeFilter]);
+  }, [activeFilter, exerciseId, setHighestVolumeAndRepSet, realm, userId]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
@@ -342,163 +482,12 @@ export const ResistanceExerciseStatsScreen = ({navigation, route}: ResistanceSta
     });
   }, [realm, user]);
 
-  const getExerciseRelevantWorkouts = (data: any) => {
-    let newData = [];
-
-    for (let i = 0; i < data.length; i++) {
-      for (let j = 0; j < data[i].allExercises.length; j++) {
-        let exerciseIdValue = data[i].allExercises[j];
-        console.log('exercise id value: ', exerciseIdValue);
-
-        if (exerciseIdValue == exerciseId) {
-          console.log('pushed');
-          newData.push(data[i]);
-          break;
-        }
-      }
-    }
-
-    return newData;
-  };
-
   const setSpecificTime = (date: any, hours: any, minutes: any, seconds: any, milliseconds: any) => {
     date.setHours(hours);
     date.setMinutes(minutes);
     date.setSeconds(seconds);
     date.setMilliseconds(milliseconds);
     return date;
-  };
-
-  const getDateRange = (filter: number) => {
-    const currentDate = new Date();
-    let startDate: Date;
-    let endDate: Date;
-
-    switch (filter) {
-      case 0:
-        startDate = new Date(0); // January 1, 1970 (Epoch time)
-        endDate = currentDate;
-        break;
-      case 1:
-        startDate = new Date(currentDate.getFullYear() - 1, currentDate.getMonth(), currentDate.getDate());
-        endDate = currentDate;
-        break;
-      case 2:
-        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, currentDate.getDate());
-        endDate = currentDate;
-        break;
-      case 3:
-        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 3, currentDate.getDate());
-        endDate = currentDate;
-        break;
-      case 4:
-        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate());
-        endDate = currentDate;
-        break;
-      default:
-        startDate = new Date(0);
-        endDate = currentDate;
-        break;
-    }
-
-    startDate = setSpecificTime(startDate, 1, 0, 0, 0);
-    endDate = setSpecificTime(endDate, 24, 59, 59, 999);
-
-    console.log(startDate);
-    console.log(endDate);
-
-    return {startDate, endDate};
-  };
-
-  const getHighestVolumeAndRepSet = (data: any) => {
-    let largestVolume = 0;
-    let largestReps = 0;
-
-    let workoutIdVolume = '';
-    let workoutIdReps = '';
-    let dateVolume = new Date();
-    let dateReps = new Date();
-    let exerciseIdVolume = '';
-    let exerciseIdReps = '';
-
-    let heaviestWeight = 0;
-    let workoutIdWeight = '';
-    let dateWeight = new Date();
-    let exerciseIdWeight = '';
-
-    console.log('new -------------------------');
-
-    for (let i = 0; i < data.length; i++) {
-      //console.log(data[i].weights.length)
-      let numWeightsArray = data[i].weights.length;
-      for (let j = 0; j < numWeightsArray; j++) {
-        //console.log(data[i].weights[j])
-        let jsonDataVolumes = JSON.parse(data[i].weights[j]);
-        let jsonDataReps = JSON.parse(data[i].reps[j]);
-
-        let jsonDataExercises = JSON.parse(data[i].exercises[j]);
-
-        if (jsonDataExercises.value != exerciseId) {
-          continue;
-        }
-
-        console.log('______________________________');
-        console.log('Exercises: ', jsonDataExercises);
-        console.log('weights: ', jsonDataVolumes);
-        console.log('reps: ', jsonDataReps);
-
-        let weight = 0;
-        let reps = 0;
-
-        for (let k = 0; k < jsonDataVolumes.length; k++) {
-          weight = parseFloat(jsonDataVolumes[k].value);
-          reps = parseFloat(jsonDataReps[k].value);
-
-          let volume = weight * reps;
-          console.log('volume of set: ', volume);
-          if (volume > largestVolume) {
-            largestVolume = volume;
-            workoutIdVolume = data[i]._id;
-            dateVolume = data[i].dateCreated;
-            exerciseIdVolume = jsonDataExercises.value;
-          }
-
-          if (reps > largestReps) {
-            largestReps = reps;
-            workoutIdReps = data[i]._id;
-            dateReps = data[i].dateCreated;
-            exerciseIdReps = jsonDataExercises.value;
-          }
-
-          if (weight > heaviestWeight) {
-            heaviestWeight = weight;
-            workoutIdWeight = data[i]._id;
-            dateWeight = data[i].dateCreated;
-            exerciseIdWeight = jsonDataExercises.value;
-          }
-        }
-      }
-    }
-
-    let object = {
-      workoutIdVolume: workoutIdVolume,
-      workoutIdReps: workoutIdReps,
-      largestVolume: largestVolume,
-      largestReps: largestReps,
-      dateVolume: dateVolume,
-      dateReps: dateReps,
-      exerciseIdVolume: exerciseIdVolume,
-      exerciseIdReps: exerciseIdReps,
-
-      workoutIdWeight: workoutIdWeight,
-      heaviestWeight: heaviestWeight,
-      dateWeight: dateWeight,
-      exerciseIdWeight: exerciseIdWeight,
-    };
-
-    console.log(object);
-
-    return object;
   };
 
   const getExerciseName = (id: string) => {

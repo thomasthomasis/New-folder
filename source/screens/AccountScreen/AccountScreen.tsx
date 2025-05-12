@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import {Alert, StyleSheet, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, TouchableWithoutFeedback, Keyboard} from 'react-native';
-import {useQuery, useRealm, useUser} from '@realm/react';
+import {Alert, Text, TextInput, View, Image, TouchableOpacity, ActivityIndicator, TouchableWithoutFeedback, Keyboard} from 'react-native';
+import {useRealm, useUser} from '@realm/react';
 import {Users} from '../../schemas/UsersSchema';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {shadow} from '../../sharedStyling/Shadow';
@@ -55,7 +55,7 @@ export const AccountScreen = ({navigation}: AccountScreenProps) => {
     if (userData) {
       setLoading(false);
     }
-  }, []);
+  }, [realm, user.id, userData]);
 
   const closeModals = () => {
     setShowModal(false);
@@ -160,7 +160,7 @@ export const AccountScreen = ({navigation}: AccountScreenProps) => {
     } else if (userData[0].profilePicture?.includes('4')) {
       setImageSource(require('../../assets/4.png'));
     }
-  }, []);
+  }, [realm, user.id]);
 
   useEffect(() => {
     realm.subscriptions.update(mutableSubs => {
