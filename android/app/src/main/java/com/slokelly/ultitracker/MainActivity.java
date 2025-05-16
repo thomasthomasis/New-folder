@@ -1,4 +1,4 @@
-package com.ultitracker;
+package com.slokelly.ultitracker;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

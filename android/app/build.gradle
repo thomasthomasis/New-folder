@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
+apply plugin: 'com.google.gms.google-services'
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 /**
@@ -74,9 +75,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.ultitracker"
+    namespace "com.slokelly.ultitracker"
     defaultConfig {
-        applicationId "com.ultitracker"
+        applicationId "com.slokelly.ultitracker"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -121,6 +122,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         */
+
+        
     }
 }
 
@@ -138,6 +141,12 @@ dependencies {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
+    }
+}
+
+afterEvaluate {
+    tasks.named("lintAnalyzeDebug").configure {
+        dependsOn tasks.named("copyReactNativeVectorIconFonts")
     }
 }
 
