@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'org.jetbrains.kotlin.android'
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 /**
@@ -70,6 +71,11 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-source" << "17"
+    options.compilerArgs << "-target" << "17"
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -98,10 +104,33 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
             sourceCompatibility JavaVersion.VERSION_17 // Update this to your desired Java version
             targetCompatibility JavaVersion.VERSION_17
+            coreLibraryDesugaringEnabled true
         }
+
+    kotlinOptions {
+        jvmTarget = '17' // Update this to your desired Java version
+    }
+
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
+    }
+
+    kotlin {
+        jvmToolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
 
     buildTypes {
         debug {
@@ -125,11 +154,22 @@ android {
 
         
     }
+
+    buildFeatures {
+        buildConfig true
+    }
+
 }
+
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation platform('com.google.firebase:firebase-bom:32.8.0')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
@@ -147,6 +187,36 @@ dependencies {
 afterEvaluate {
     tasks.named("lintAnalyzeDebug").configure {
         dependsOn tasks.named("copyReactNativeVectorIconFonts")
+    }
+}
+
+
+subprojects {
+    afterEvaluate { subproject ->
+        if (subproject.hasProperty("android")) {
+            subproject.android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+
+        if (subproject.plugins.hasPlugin("org.jetbrains.kotlin.android")) {
+            subproject.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+                kotlinOptions {
+                    jvmTarget = "17"
+                }
+            }
+        }
+
+        subproject.plugins.withType(JavaPlugin) {
+            subproject.extensions.configure(JavaPluginExtension) {
+                toolchain {
+                    languageVersion.set(JavaLanguageVersion.of(17))
+                }
+            }
+        }
     }
 }
 
